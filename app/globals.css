@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* Rustig, leesbaar; licht en donker volgen het systeem. */
+:root {
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --surface-2: #f0f0ec;
+  --text: #1c1c1a;
+  --muted: #64645e;
+  --border: #deded8;
+  --accent: #2f6f62;
+  --accent-text: #ffffff;
+  --danger: #b3261e;
+  --again: #b3261e;
+  --hard: #9a6700;
+  --good: #2f6f62;
+  --easy: #2d5f9a;
+  --focus: #2d5f9a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121412;
+    --surface: #1b1e1b;
+    --surface-2: #232723;
+    --text: #e8e8e3;
+    --muted: #a0a19a;
+    --border: #343833;
+    --accent: #6fbfab;
+    --accent-text: #0d1a17;
+    --danger: #f2948e;
+    --again: #f2948e;
+    --hard: #e3b55b;
+    --good: #6fbfab;
+    --easy: #8db7ea;
+    --focus: #8db7ea;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-danger: var(--danger);
+  --color-again: var(--again);
+  --color-hard: var(--hard);
+  --color-good: var(--good);
+  --color-easy: var(--easy);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Tekst uit kaarten: regeleinden behouden. */
+.prose-card {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

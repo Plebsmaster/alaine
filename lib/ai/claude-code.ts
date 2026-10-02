@@ -30,13 +30,16 @@ function bin(): string {
 
 const defaultExec: ClaudeCodeExec = (args, stdin, timeoutMs) =>
   new Promise((resolve, reject) => {
-    const env = { ...process.env };
-    // Geen API-key doorgeven (dan zou de CLI die gebruiken) en niet als geneste sessie starten.
-    delete env.ANTHROPIC_API_KEY;
-    delete env.ANTHROPIC_BASE_URL;
-    delete env.CLAUDECODE;
-    delete env.CLAUDE_CODE_ENTRYPOINT;
-    const child = spawn(bin(), args, { cwd: tmpdir(), env, windowsHide: true });
+    // Schone omgeving: geen API-key (dan zou de CLI die gebruiken) en geen variabelen van een
+    // Claude-app of -sessie waaruit de server misschien is gestart (CLAUDECODE, CLAUDE_CODE_*),
+    // zodat de CLI zijn eigen login gebruikt. CLAUDE_CONFIG_DIR en CLAUDE_CODE_OAUTH_TOKEN blijven.
+    const env: Record<string, string | undefined> = {};
+    for (const [key, value] of Object.entries(process.env)) {
+      const keep = key === "CLAUDE_CONFIG_DIR" || key === "CLAUDE_CODE_OAUTH_TOKEN";
+      if (!keep && (/^ANTHROPIC_/.test(key) || /^CLAUDE/.test(key))) continue;
+      env[key] = value;
+    }
+    const child = spawn(bin(), args, { cwd: tmpdir(), env: env as NodeJS.ProcessEnv, windowsHide: true });
     let out = "";
     let err = "";
     const timer = setTimeout(() => {

@@ -1,6 +1,6 @@
 import http from "node:http";
 import { expect, test } from "@playwright/test";
-import { admin, importExample, LOCAL, login, resetExample } from "./helpers";
+import { admin, cardsLeft, importExample, LOCAL, login, resetExample } from "./helpers";
 
 // Fase 2 (AI): geplakte tekst levert concepten op die pas na goedkeuren in de herhaling
 // komen; AI-feedback is pas beschikbaar na het tonen van het antwoord.
@@ -160,9 +160,9 @@ test("draft_cards, controleren, nakijken met hint, ketenkaart, fouttype en stopc
 
   // Herhalen: beide kaarten, in willekeurige volgorde.
   await page.goto("/vandaag");
-  await expect(page.getByText("2 kaarten · ongeveer")).toBeVisible();
+  await expect.poll(() => cardsLeft(page)).toBe(2);
   const done = { chain: false, explain: false };
-  for (let round = 0; round < 6 && !(await page.getByText("Klaar voor vandaag").isVisible()); round++) {
+  for (let round = 0; round < 6 && !(await page.getByText(/Sessie klaar/).isVisible()); round++) {
     const front = (await page.locator("main p.prose-card").first().textContent()) ?? "";
     if (front.startsWith("ACE-remmer") && !done.chain) {
       await expect(page.getByText("Controleren", { exact: true })).toBeVisible(); // A7 bij herhalen
@@ -174,7 +174,7 @@ test("draft_cards, controleren, nakijken met hint, ketenkaart, fouttype en stopc
       await expect(box).toHaveValue("ACE-remming → minder aldosteron → lager serum-K⁺");
       // A3: nakijken; bij fout eerst hint en herstelvraag, het antwoord blijft verborgen.
       await page.getByRole("button", { name: "Nakijken" }).click();
-      await expect(page.getByText("Hint: Kijk naar de richting van kalium.")).toBeVisible();
+      await expect(page.getByText("Kijk naar de richting van kalium.")).toBeVisible();
       await expect(page.getByText("hoger serum-K⁺")).toHaveCount(0);
       await expect(page.getByText("ZOU-NIET-ZICHTBAAR-MOGEN-ZIJN")).toHaveCount(0);
       await page.getByRole("textbox", { name: "Stijgt of daalt het serumkalium als aldosteron daalt?" }).fill("Stijgt");
@@ -202,7 +202,7 @@ test("draft_cards, controleren, nakijken met hint, ketenkaart, fouttype en stopc
       await page.getByRole("button", { name: /^Makkelijk/ }).click();
     }
   }
-  await expect(page.getByText("Klaar voor vandaag")).toBeVisible();
+  await expect(page.getByText(/Sessie klaar/)).toBeVisible();
   expect(done).toEqual({ chain: true, explain: true });
 
   // Stopcheck: punt → eigen vraag → conceptkaart.

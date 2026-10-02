@@ -19,24 +19,25 @@ function serviceRole() {
 
 let token: Promise<string> | null = null;
 
-/** Sessie van de testgebruiker (maakt het account aan als het nog niet bestaat). */
+/**
+ * Sessie van de testgebruiker (maakt het account aan als het nog niet bestaat). Met een
+ * willekeurig wachtwoord per run in plaats van een inloglink: een link telt bij Supabase
+ * als verstuurde mail, en dan weigert de inlogcode in de browser vlak daarna (429).
+ */
 function testUserToken(): Promise<string> {
   token ??= (async () => {
     const service = serviceRole();
+    const password = `e2e-${crypto.randomUUID()}`;
     const { data: users } = await service.auth.admin.listUsers({ perPage: 1000 });
-    if (!users.users.some((u) => u.email?.toLowerCase() === EMAIL)) {
-      const { error } = await service.auth.admin.createUser({ email: EMAIL, email_confirm: true });
-      if (error) throw error;
-    }
-    const { data: link, error } = await service.auth.admin.generateLink({ type: "magiclink", email: EMAIL });
+    const existing = users.users.find((u) => u.email?.toLowerCase() === EMAIL);
+    const { error } = existing
+      ? await service.auth.admin.updateUserById(existing.id, { password })
+      : await service.auth.admin.createUser({ email: EMAIL, password, email_confirm: true });
     if (error) throw error;
     const anon = createClient(SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
-    const { data: session, error: verifyError } = await anon.auth.verifyOtp({
-      type: "magiclink",
-      token_hash: link.properties.hashed_token,
-    });
-    if (verifyError || !session.session) throw verifyError ?? new Error("Geen sessie voor de testgebruiker");
-    return session.session.access_token;
+    const { data, error: signInError } = await anon.auth.signInWithPassword({ email: EMAIL, password });
+    if (signInError || !data.session) throw signInError ?? new Error("Geen sessie voor de testgebruiker");
+    return data.session.access_token;
   })();
   return token;
 }
@@ -99,3 +100,13 @@ export async function importExample(page: Page, file = "content/voorbeeld-import
   await page.getByRole("button", { name: /^Importeer / }).click();
   await expect(page.getByText("Import klaar")).toBeVisible();
 }
+
+/** Herhaalscherm: kaarten gedaan en nog te doen, uit de voortgangsbalk (ontwerp 1f). */
+async function progress(page: Page) {
+  const bar = page.getByRole("progressbar", { name: "Voortgang van de sessie" });
+  const max = Number(await bar.getAttribute("aria-valuemax"));
+  const now = Number(await bar.getAttribute("aria-valuenow"));
+  return { done: now, left: max - now };
+}
+export const cardsLeft = async (page: Page) => (await progress(page)).left;
+export const cardsDone = async (page: Page) => (await progress(page)).done;

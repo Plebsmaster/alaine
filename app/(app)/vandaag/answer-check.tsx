@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Button, Field, Notice, Textarea } from "@/components/ui";
+import { Notice, Textarea } from "@/components/ui";
 import type { ExplainCheck } from "@/lib/ai/schemas";
-import { RATINGS } from "@/lib/fsrs";
 import { explainCheckAction } from "./actions";
 
 export type CheckStep = { stage: 1 | 2; answer: string; result: ExplainCheck };
@@ -45,57 +44,61 @@ export function useAnswerCheck(cardId: string) {
   return { steps, state, run, reset, last: steps.at(-1) ?? null };
 }
 
-/** Hint + herstelvraag (stap 1, niet correct), met een veld voor het herstelantwoord. */
+/**
+ * Hint + herstelvraag (stap 1, niet correct), met een veld voor het herstelantwoord.
+ * De knop "Nakijken" staat in de dock van het herhaalscherm.
+ */
 export function RecoveryPrompt({
   step,
-  loading,
-  onSubmit,
+  answer,
+  onChange,
 }: {
   step: CheckStep;
-  loading: boolean;
-  onSubmit: (answer: string) => void;
+  answer: string;
+  onChange: (value: string) => void;
 }) {
-  const [answer, setAnswer] = useState("");
   return (
-    <div className="space-y-2 rounded-lg bg-surface-2 p-3 text-sm" aria-live="polite">
-      <p className="font-medium">{step.result.verdict === "partial" ? "Deels goed." : "Nog niet goed."} Probeer het met een hint.</p>
+    <div className="flex flex-col gap-3 rounded-[14px] border border-border bg-surface p-4" aria-live="polite">
+      <p className="text-base font-bold">
+        {step.result.verdict === "partial" ? "Deels goed." : "Nog niet goed."} Probeer het met een hint.
+      </p>
       {step.result.hint ? (
-        <p>
-          <strong>Hint:</strong> {step.result.hint}
-        </p>
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[.07em] text-hard">Hint</p>
+          <p className="text-[15px] leading-normal">{step.result.hint}</p>
+        </div>
       ) : null}
       {step.result.recovery_question ? (
-        <Field label={step.result.recovery_question}>
-          <Textarea value={answer} onChange={(e) => setAnswer(e.target.value)} rows={3} />
-        </Field>
+        <label className="block space-y-1.5">
+          <span className="text-[15px] font-bold">{step.result.recovery_question}</span>
+          <Textarea value={answer} onChange={(e) => onChange(e.target.value)} className="min-h-[84px]" />
+        </label>
       ) : null}
-      <Button variant="primary" disabled={loading || !answer.trim()} onClick={() => onSubmit(answer)}>
-        {loading ? "Nakijken…" : "Nakijken"}
-      </Button>
     </div>
   );
 }
 
-/** Uitkomst na het tonen: bevestiging + vervolgvraag, of de volledige uitleg na stap 2. */
+/** AI-strook na het tonen: bevestiging of uitleg, plus een vervolgvraag. */
 export function CheckOutcome({ steps }: { steps: CheckStep[] }) {
   const last = steps.at(-1);
   if (!last) return null;
   const r = last.result;
   return (
-    <div className="space-y-1 rounded-lg bg-surface-2 p-3 text-sm" aria-live="polite">
-      <p className="text-xs font-medium text-muted">Nakijken door AI</p>
-      {last.stage === 1 && r.verdict === "correct" ? <p>Goed. {r.explanation ?? ""}</p> : null}
-      {last.stage === 2 ? (
-        <p>
-          <strong>{r.verdict === "correct" ? "Na de hint gelukt." : "Uitleg:"}</strong> {r.explanation}
-        </p>
-      ) : null}
-      {r.follow_up ? (
-        <p>
-          <strong>Denk verder:</strong> {r.follow_up}
-        </p>
-      ) : null}
-      <p className="text-xs text-muted">Voorstel: {RATINGS.find((x) => x.value === r.suggested_rating)?.label}. Je kiest zelf.</p>
+    <div className="flex gap-4 rounded-[14px] bg-accent-soft px-[18px] py-3.5 text-[15px] leading-normal" aria-live="polite">
+      <span className="pt-0.5 text-[11px] font-bold tracking-[.07em] text-accent-strong">AI</span>
+      <div className="space-y-1">
+        {last.stage === 1 && r.verdict === "correct" ? <p>Goed. {r.explanation ?? ""}</p> : null}
+        {last.stage === 2 ? (
+          <p>
+            <strong>{r.verdict === "correct" ? "Na de hint gelukt." : "Uitleg:"}</strong> {r.explanation}
+          </p>
+        ) : null}
+        {r.follow_up ? (
+          <p className="text-text-2">
+            <strong>Denk verder:</strong> {r.follow_up}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

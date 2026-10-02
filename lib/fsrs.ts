@@ -171,3 +171,27 @@ export function formatInterval(from: Date, to: Date): string {
   if (days < 365) return `${nl(days / 30)} mnd`;
   return `${nl(days / 365)} jr`;
 }
+
+/**
+ * Lange Nederlandse weergave voor de beoordelingsknoppen (ontwerp 1f): "10 min", "3 uur",
+ * "1 dag", "3 dagen", "2 maanden", "1,5 jaar".
+ */
+export function formatIntervalLong(from: Date, to: Date): string {
+  const minutes = (to.getTime() - from.getTime()) / 60_000;
+  const nl = (n: number) =>
+    n >= 10 ? String(Math.round(n)) : String(Math.round(n * 10) / 10).replace(".", ",");
+  if (minutes < 1) return "<1 min";
+  if (minutes < 60) return `${Math.round(minutes)} min`;
+  const hours = minutes / 60;
+  if (hours < 24) return `${Math.round(hours)} uur`;
+  const days = hours / 24;
+  if (days < 30) {
+    const d = Math.round(days);
+    return `${d} ${d === 1 ? "dag" : "dagen"}`;
+  }
+  if (days < 365) {
+    const m = nl(days / 30);
+    return `${m} ${m === "1" ? "maand" : "maanden"}`;
+  }
+  return `${nl(days / 365)} jaar`;
+}

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { admin, importExample, LOCAL, login, newPage, resetExample } from "./helpers";
+import { admin, cardsDone, cardsLeft, importExample, LOCAL, login, newPage, resetExample } from "./helpers";
 
 // Fase 0 + 1: inloggen (alleen ALLOWED_EMAIL), voorbeeld importeren, goedkeuren,
 // herhalen op de telefoon en direct zien op de laptop.
@@ -40,27 +40,27 @@ test("importeren, goedkeuren, herhalen op telefoon, zichtbaar op laptop", async 
 
   // Op de telefoon: drie kaarten, eentje beoordelen.
   await phone.goto("/vandaag");
-  await expect(phone.getByText("3 kaarten · ongeveer")).toBeVisible();
+  await expect.poll(() => cardsLeft(phone)).toBe(3);
   await phone.getByRole("button", { name: /Toon antwoord/ }).click();
   await expect(phone.getByRole("button", { name: /^Goed/ })).toBeVisible();
   await phone.getByRole("button", { name: /^Goed/ }).click();
-  await expect(phone.getByText(/1 gedaan/)).toBeVisible();
+  await expect.poll(() => cardsDone(phone)).toBe(1);
   await expect(phone.getByText("Opslaan…")).toHaveCount(0);
 
   // Op de laptop direct zichtbaar: twee nieuwe over, één in learning (komt over minuten terug).
   await laptop.goto("/vandaag");
-  await expect(laptop.getByText("3 kaarten · ongeveer")).toBeVisible();
-  await expect(laptop.getByText("2 nieuw")).toBeVisible();
+  await expect.poll(() => cardsLeft(laptop)).toBe(3);
+  await expect(laptop.getByText(/· Nieuw$/)).toBeVisible();
 
   // Laptop: sneltoetsen (spatie = omdraaien, 4 = Makkelijk) tot de sessie klaar is.
   for (let i = 0; i < 6; i++) {
-    if (await laptop.getByText(/Klaar voor vandaag|Even pauze/).isVisible()) break;
+    if (await laptop.getByText(/Sessie klaar|Even pauze/).isVisible()) break;
     await laptop.keyboard.press("Space");
     await laptop.keyboard.press("4");
   }
-  await expect(laptop.getByText("Klaar voor vandaag")).toBeVisible();
-  // "Morgen: …" wordt pas geteld als alle beoordelingen zijn opgeslagen.
-  await expect(laptop.getByText(/Morgen: \d+ herhalingen/)).toBeVisible();
+  await expect(laptop.getByText(/Sessie klaar/)).toBeVisible();
+  // "Morgen klaar" wordt pas geteld als alle beoordelingen zijn opgeslagen.
+  await expect(laptop.getByText(/herhalingen en tot \d+ nieuwe kaarten/)).toBeVisible();
 
   // Logboek in de database: telefoon (1) + laptop (2 nieuwe + de learning-kaart van de telefoon).
   const { count } = await admin().from("review_logs").select("id", { count: "exact", head: true });

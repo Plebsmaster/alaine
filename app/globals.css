@@ -169,3 +169,7 @@ body {
 body:has([data-focus]) [data-shell] {
   display: none;
 }
+body:has([data-focus]) [data-shell-main] {
+  max-width: none;
+  padding: 0;
+}

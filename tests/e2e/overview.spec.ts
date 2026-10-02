@@ -17,7 +17,8 @@ test("overzicht toont echte cijfers uit het logboek", async ({ page }) => {
   await page.goto("/vandaag");
   await page.getByRole("button", { name: /Toon antwoord/ }).click();
   await page.getByRole("button", { name: /^Goed/ }).click();
-  await expect(page.getByText(/Even pauze|Nog 1 kaart/)).toBeVisible();
+  // Wachten op de leerstap, of de kaart komt meteen terug (vooruit leren binnen 20 min).
+  await expect(page.getByText(/Even pauze|2 \/ 2/)).toBeVisible();
 
   // Lastige kaart nabootsen, pas als de beoordeling is opgeslagen (anders overschrijft die het).
   const db = admin();

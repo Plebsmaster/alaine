@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Badge, Button, Notice, Panel, Textarea } from "@/components/ui";
+import { Badge, Button, buttonClass, Eyebrow, Kbd, LinkButton, Notice, Panel, ProgressSegments, Textarea } from "@/components/ui";
 import type { ReviewCard } from "@/lib/data/review";
 import { CARD_TYPE_LABELS, ERROR_TYPES, VERIFY_TEXT, type ErrorType } from "@/lib/labels";
-import { preview, rate, RATINGS, STATE, type FsrsSettings, type RatingValue } from "@/lib/fsrs";
+import { formatIntervalLong, preview, rate, RATINGS, STATE, type FsrsSettings, type RatingValue } from "@/lib/fsrs";
 import { available as idbAvailable, loadSnapshot, outboxAdd, outboxAll, outboxRemove, saveSnapshot } from "@/lib/offline/idb";
 import { pickNext, requeue } from "@/lib/queue";
 import {
@@ -18,15 +19,21 @@ import {
 import { CheckError, CheckOutcome, RecoveryPrompt, useAnswerCheck } from "./answer-check";
 import { ChainCompare, ChainInput } from "./chain";
 import { ErrorChips } from "@/components/error-chips";
-import { FocusBar, FocusMarker } from "@/components/nav";
+import { FocusMarker, Icon } from "@/components/nav";
 import { Stopcheck } from "./stopcheck";
 
 const TYPED_ANSWER_TYPES = new Set(["explain", "chain", "illness_script", "compare"]);
-const RATING_STYLES: Record<RatingValue, string> = {
-  1: "border-again text-again",
-  2: "border-hard text-hard",
-  3: "border-good text-good",
-  4: "border-easy text-easy",
+const RATING_BORDER: Record<RatingValue, string> = {
+  1: "border-again",
+  2: "border-hard",
+  3: "border-good",
+  4: "border-easy",
+};
+const RATING_TEXT: Record<RatingValue, string> = {
+  1: "text-again",
+  2: "text-hard",
+  3: "text-good",
+  4: "text-easy",
 };
 const MAX_DURATION_MS = 5 * 60_000;
 const RETRY_DELAYS = [1_000, 3_000, 9_000];
@@ -74,8 +81,13 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
     const next = pickNext(initialQueue, initialPending, new Date());
     return next ? { card: next.item as ReviewCard, source: next.source } : null;
   });
+  const router = useRouter();
   const [revealedAt, setRevealedAt] = useState<Date | null>(null);
   const [answer, setAnswer] = useState("");
+  // A3: antwoord op de herstelvraag (de knop "Nakijken" staat in de dock).
+  const [recovery, setRecovery] = useState("");
+  // "Stoppen" met resultaten: naar het sessie-einde; de rest blijft voor later vandaag.
+  const [stopped, setStopped] = useState(false);
   const check = useAnswerCheck(current?.card.card_id ?? "");
   // A1: na Opnieuw/Moeilijk eerst het fouttype (één tik of overslaan), dan pas door.
   const [pendingRating, setPendingRating] = useState<{ rating: RatingValue; at: Date } | null>(null);
@@ -216,6 +228,7 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
     setCurrent(next ? { card: next.item as ReviewCard, source: next.source } : null);
     setRevealedAt(null);
     setAnswer("");
+    setRecovery("");
     resetCheck();
     setPendingRating(null);
     setMenu("closed");
@@ -241,6 +254,19 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
   const reveal = useCallback(() => {
     if (current && !revealedAt) setRevealedAt(new Date());
   }, [current, revealedAt]);
+
+  // A3: eerst nakijken (bij fout een hint en herstelvraag), pas daarna het antwoord.
+  const typedCard = !!current && TYPED_ANSWER_TYPES.has(current.card.type);
+  const inRecovery = !revealedAt && check.last?.stage === 1 && check.last.result.verdict !== "correct";
+  const canCheck = typedCard && aiEnabled && !!answer.trim() && check.steps.length === 0 && !revealedAt;
+  const runCheck = check.run;
+  const startCheck = useCallback(async () => {
+    const step = await runCheck(1, answer);
+    if (step?.result.verdict === "correct") reveal();
+  }, [runCheck, answer, reveal]);
+  const submitRecovery = useCallback(async () => {
+    if (recovery.trim() && (await runCheck(2, recovery))) reveal();
+  }, [runCheck, recovery, reveal]);
 
   const finalize = useCallback(
     (rating: RatingValue, at: Date, errorType: ErrorType | null) => {
@@ -306,9 +332,12 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
       const el = e.target as HTMLElement;
       const typing = el.tagName === "TEXTAREA" || el.tagName === "INPUT" || el.isContentEditable;
       if (typing) {
-        if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+        // ⌘/Ctrl+Enter: nakijken als dat kan, anders het antwoord tonen.
+        if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && check.state !== "loading") {
           e.preventDefault();
-          reveal();
+          if (inRecovery) void submitRecovery();
+          else if (canCheck) void startCheck();
+          else reveal();
         }
         return;
       }
@@ -334,231 +363,335 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [reveal, onRate, revealedAt, menu, pendingRating, pickError, suggestedError]);
+  }, [reveal, onRate, revealedAt, menu, pendingRating, pickError, suggestedError, inRecovery, canCheck, startCheck, submitRecovery, check.state]);
 
   const remaining = queue.length + pending.length;
   // Voorkant per kaart (voor de stopcheck zonder AI).
   const frontOf = new Map([...initialQueue, ...initialPending, ...queue, ...pending].map((c) => [c.card_id, c.front]));
+  // Voortgang: elke beoordeling is een segment; komt een kaart binnen de sessie terug, dan
+  // groeit het totaal (eerlijk: je ziet dat je meer doet dan gepland).
+  const total = results.length + remaining;
+  const status = <SaveStatus state={saveState} count={outboxCount} onRetry={retry} done={results.length} />;
 
   // Focusmodus zodra er kaarten of resultaten zijn; zonder kaarten blijft de gewone navigatie.
   const focus = !!current || results.length > 0 || pending.length > 0;
-  const chrome = (
-    <>
-      {focus ? (
-        <>
-          <FocusMarker />
-          <FocusBar />
-        </>
-      ) : null}
-      {header}
-    </>
-  );
 
-  if (!current) {
-    const waiting = pending.length > 0;
+  if (!focus) {
     return (
       <>
-        {chrome}
-        <SessionEnd results={results} startedAt={startedAt} waiting={waiting} pending={pending} saved={outboxCount === 0} offline={saveState === "offline"} />
-        {!waiting ? (
-          <Stopcheck
-            aiEnabled={aiEnabled && saveState !== "offline"}
-            items={results
-              .filter((r) => r.rating <= 2 && r.cardId)
-              .map((r) => ({
-                cardId: r.cardId!,
-                rating: r.rating,
-                errorType: r.errorType ?? null,
-                answer: r.answer ?? null,
-                front: frontOf.get(r.cardId!) ?? "",
-              }))}
-          />
-        ) : null}
-        <SaveStatus state={saveState} count={outboxCount} onRetry={retry} />
+        {header}
+        <Panel className="space-y-2 text-center">
+          <p className="font-serif text-2xl font-medium">Niets te herhalen vandaag</p>
+          <p className="text-sm text-muted">
+            Keur nieuwe kaarten goed in <Link className="underline" href="/goedkeuren">Goedkeuren</Link> of importeer studiestof via{" "}
+            <Link className="underline" href="/instellingen">Instellingen</Link>.
+          </p>
+        </Panel>
+        <div className="mt-3">{status}</div>
       </>
     );
   }
 
-  const card = current.card;
-  const typed = TYPED_ANSWER_TYPES.has(card.type);
+  const stop = () => {
+    if (results.length > 0) setStopped(true);
+    else router.push("/overzicht");
+  };
 
-  return (
-    <div className="space-y-4 pb-24 md:pb-0">
-      {chrome}
-      <div className="flex items-center justify-between text-sm text-muted">
-        <span>
-          Nog {remaining} {remaining === 1 ? "kaart" : "kaarten"}
-          {results.length > 0 ? ` · ${results.length} gedaan` : ""}
-        </span>
-        <SaveStatus state={saveState} count={outboxCount} onRetry={retry} compact />
-      </div>
-
-      {actionError ? <Notice tone="error">{actionError}</Notice> : null}
-
-      <Panel className="space-y-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex flex-wrap gap-2">
-            <Badge>{card.topic_name}</Badge>
-            <Badge>{CARD_TYPE_LABELS[card.type] ?? card.type}</Badge>
-            {card.schedule.state === STATE.New ? <Badge>Nieuw</Badge> : null}
-          </div>
-          <button
-            type="button"
-            aria-label="Kaartmenu"
-            aria-expanded={menu !== "closed"}
-            onClick={() => setMenu(menu === "closed" ? "open" : "closed")}
-            className="-mr-2 -mt-2 min-h-11 min-w-11 rounded-lg text-xl leading-none text-muted hover:bg-surface-2"
-          >
-            ⋯
-          </button>
-        </div>
-
-        {menu === "open" ? (
-          <div className="flex flex-wrap gap-2 rounded-lg bg-surface-2 p-2">
-            <Link className="rounded-md px-3 py-2 text-sm hover:bg-surface" href={`/kaart/${card.card_id}?terug=/vandaag`}>
-              Bewerken
-            </Link>
-            <button className="rounded-md px-3 py-2 text-sm hover:bg-surface" onClick={() => removeCurrent(() => suspendCardAction(card.card_id))}>
-              Schorsen
-            </button>
-            <button className="rounded-md px-3 py-2 text-sm text-danger hover:bg-surface" onClick={() => setMenu("flag")}>
-              Klopt niet
-            </button>
-          </div>
-        ) : null}
-        {menu === "flag" ? (
-          <div className="space-y-2 rounded-lg bg-surface-2 p-3">
-            <p className="text-sm">De kaart gaat terug naar de concepten. Wat klopt er niet?</p>
-            <Textarea value={flagNote} onChange={(e) => setFlagNote(e.target.value)} autoFocus />
-            <div className="flex gap-2">
-              <Button variant="danger" onClick={() => removeCurrent(() => flagCardAction(card.card_id, flagNote))}>
-                Terug naar concept
-              </Button>
-              <Button variant="ghost" onClick={() => setMenu("closed")}>
-                Annuleren
-              </Button>
-            </div>
-          </div>
-        ) : null}
-
-        <p className="prose-card text-lg font-medium">{card.front}</p>
-
-        {card.needs_verification ? (
-          <p className="text-xs text-muted">
-            <Badge>Controleren</Badge> {VERIFY_TEXT}
-          </p>
-        ) : null}
-
-        {typed && !revealedAt && check.steps.length === 0 ? (
-          card.type === "chain" ? (
-            <ChainInput value={answer} onChange={setAnswer} />
-          ) : (
-            <Textarea
-              aria-label="Typ je antwoord (optioneel)"
-              placeholder="Typ je antwoord (optioneel)"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              rows={4}
-            />
-          )
-        ) : null}
-
-        {/* A3: bij deels of fout eerst hint en herstelvraag; het antwoord blijft verborgen. */}
-        {!revealedAt && check.last && check.last.stage === 1 && check.last.result.verdict !== "correct" ? (
-          <>
-            <div className="rounded-lg bg-surface-2 p-3 text-sm">
-              <div className="mb-1 text-xs font-medium text-muted">Jouw antwoord</div>
-              <p className="prose-card">{answer}</p>
-            </div>
-            <RecoveryPrompt
-              step={check.last}
-              loading={check.state === "loading"}
-              onSubmit={async (recovery) => {
-                if (await check.run(2, recovery)) reveal();
-              }}
-            />
-          </>
-        ) : null}
-        <CheckError state={check.state} />
-
-        {revealedAt ? (
-          <div className="space-y-3 border-t border-border pt-4">
-            {answer.trim() && card.type === "chain" ? (
-              <ChainCompare answer={answer} back={card.back} />
-            ) : answer.trim() ? (
-              <div className="rounded-lg bg-surface-2 p-3 text-sm">
-                <div className="mb-1 text-xs font-medium text-muted">Jouw antwoord</div>
-                <p className="prose-card">{answer}</p>
-              </div>
-            ) : null}
-            {card.type === "chain" && answer.trim() ? null : <p className="prose-card text-base">{card.back}</p>}
-            {card.explanation ? <p className="prose-card text-sm text-muted">{card.explanation}</p> : null}
-            {card.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={card.image_url} alt="" className="max-h-80 rounded-lg border border-border" />
-            ) : null}
-            {card.source_label ? <p className="text-xs text-muted">Bron: {card.source_label}</p> : null}
-
-            <CheckOutcome steps={check.steps} />
-          </div>
-        ) : null}
-      </Panel>
-
-      {/* Telefoon: vast onderin boven de navigatie, binnen duimbereik. Laptop: onder de kaart. */}
-      <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 border-t border-border bg-bg/95 px-4 py-2 backdrop-blur md:static md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
-        {pendingRating ? (
-          <ErrorChips suggested={suggestedError} onPick={pickError} />
-        ) : !revealedAt ? (
-          typed && aiEnabled && answer.trim() && check.steps.length === 0 ? (
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="primary"
-                className="h-14 text-base"
-                disabled={check.state === "loading"}
-                onClick={async () => {
-                  const step = await check.run(1, answer);
-                  if (step?.result.verdict === "correct") reveal();
-                }}
-              >
-                {check.state === "loading" ? "Nakijken…" : "Nakijken"}
-              </Button>
-              <Button className="h-14 text-base" onClick={reveal}>
-                Toon antwoord
-              </Button>
-            </div>
-          ) : (
-            <Button variant="primary" className="h-14 w-full text-base" onClick={reveal}>
-              Toon antwoord <kbd className="hidden text-xs opacity-70 md:inline">spatie</kbd>
-            </Button>
-          )
+  if (!current || stopped) {
+    const waiting = !stopped && pending.length > 0;
+    const errors = results
+      .filter((r) => r.rating <= 2 && r.cardId)
+      .map((r) => ({
+        cardId: r.cardId!,
+        rating: r.rating,
+        errorType: r.errorType ?? null,
+        answer: r.answer ?? null,
+        front: frontOf.get(r.cardId!) ?? "",
+      }));
+    return (
+      <div className="flex min-h-dvh flex-col">
+        <FocusMarker />
+        <SessionHeader done={waiting ? results.length : total} total={total} status={status} onStop={waiting ? stop : undefined} />
+        {waiting ? (
+          <Waiting pending={pending} />
         ) : (
-          <div className="grid grid-cols-4 gap-2">
-            {check.last ? (
-              <span id="ai-voorstel" className="sr-only">
-                Voorstel van de AI
-              </span>
-            ) : null}
-            {RATINGS.map(({ value, label }) => {
-              const suggested = check.last?.result.suggested_rating === value;
-              return (
-                <button
-                  key={value}
-                  onClick={() => onRate(value)}
-                  aria-describedby={suggested ? "ai-voorstel" : undefined}
-                  className={`flex min-h-14 flex-col items-center justify-center rounded-lg border-2 bg-surface px-1 text-[0.8rem] font-semibold hover:bg-surface-2 sm:text-sm ${RATING_STYLES[value]} ${suggested ? "ring-2 ring-[var(--focus)] ring-offset-2 ring-offset-[var(--bg)]" : ""}`}
-                >
-                  <span>{label}</span>
-                  <span className="text-xs font-normal text-muted">
-                    {previews?.[value].label}
-                    <span className="hidden md:inline"> · {value}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <SessionEnd
+            results={results}
+            startedAt={startedAt}
+            saved={outboxCount === 0}
+            offline={saveState === "offline"}
+            stopcheck={<Stopcheck aiEnabled={aiEnabled && saveState !== "offline"} items={errors} />}
+          />
         )}
       </div>
+    );
+  }
+
+  const card = current.card;
+  const typed = typedCard;
+  const isNew = card.schedule.state === STATE.New;
+
+  return (
+    <div className="flex min-h-dvh flex-col">
+      <FocusMarker />
+      <SessionHeader done={results.length} total={total} status={status} onStop={stop} />
+
+      <div className="flex-1 px-5 pb-[calc(env(safe-area-inset-bottom)+230px)] md:px-7 md:pb-44">
+        <div className="mx-auto flex w-full max-w-[820px] flex-col gap-4 pt-3 md:gap-[22px] md:pt-7">
+          {actionError ? <Notice tone="error">{actionError}</Notice> : null}
+
+          <div className="flex items-start justify-between gap-3">
+            <Eyebrow className="pt-3 text-[11px] md:text-xs">
+              {card.topic_name} · {CARD_TYPE_LABELS[card.type] ?? card.type}
+              {isNew ? " · Nieuw" : ""}
+            </Eyebrow>
+            <button
+              type="button"
+              aria-label="Kaartmenu"
+              aria-expanded={menu !== "closed"}
+              onClick={() => setMenu(menu === "closed" ? "open" : "closed")}
+              className="-mr-2 min-h-11 min-w-11 rounded-[10px] text-xl leading-none text-muted transition-colors hover:bg-surface-2 motion-reduce:transition-none"
+            >
+              ⋯
+            </button>
+          </div>
+
+          {menu === "open" ? (
+            <div className="flex flex-wrap gap-1 rounded-xl border border-border bg-surface p-1.5">
+              <Link className={buttonClass("ghost", "min-h-10")} href={`/kaart/${card.card_id}?terug=/vandaag`}>
+                Bewerken
+              </Link>
+              <button className={buttonClass("ghost", "min-h-10")} onClick={() => removeCurrent(() => suspendCardAction(card.card_id))}>
+                Schorsen
+              </button>
+              <button className={buttonClass("danger", "min-h-10")} onClick={() => setMenu("flag")}>
+                Klopt niet
+              </button>
+            </div>
+          ) : null}
+          {menu === "flag" ? (
+            <div className="space-y-2 rounded-xl border border-border bg-surface p-4">
+              <p className="text-sm">De kaart gaat terug naar de concepten. Wat klopt er niet?</p>
+              <Textarea value={flagNote} onChange={(e) => setFlagNote(e.target.value)} autoFocus />
+              <div className="flex gap-2">
+                <Button variant="danger" onClick={() => removeCurrent(() => flagCardAction(card.card_id, flagNote))}>
+                  Terug naar concept
+                </Button>
+                <Button variant="ghost" onClick={() => setMenu("closed")}>
+                  Annuleren
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
+          <p className="prose-card font-serif text-[26px] font-medium leading-[1.25] [text-wrap:pretty] md:text-[38px] md:leading-[1.2]">
+            {card.front}
+          </p>
+
+          {card.needs_verification ? (
+            <p className="flex flex-wrap items-center gap-2 text-[13px] text-warn-text">
+              <Badge tone="warn">Controleren</Badge>
+              {VERIFY_TEXT}
+            </p>
+          ) : null}
+
+          {/* Eerst ophalen: het antwoord is pas zichtbaar na "Toon antwoord" of nakijken. */}
+          {typed && !revealedAt && check.steps.length === 0 ? (
+            <div className="space-y-1.5">
+              {card.type === "chain" ? (
+                <ChainInput value={answer} onChange={setAnswer} />
+              ) : (
+                <Textarea
+                  aria-label="Typ je antwoord (optioneel)"
+                  placeholder="Typ je antwoord"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  className="min-h-[120px] rounded-xl px-4 py-3.5 leading-[1.55]"
+                />
+              )}
+              <p className="text-[13px] text-muted">
+                {aiEnabled
+                  ? "Optioneel. Typen helpt ophalen; de AI kijkt na vóór je het antwoord ziet."
+                  : "Optioneel. Typen helpt ophalen."}
+              </p>
+            </div>
+          ) : null}
+
+          {/* A3: bij deels of fout eerst hint en herstelvraag; het antwoord blijft verborgen. */}
+          {inRecovery && check.last ? (
+            <>
+              <div className="rounded-xl bg-surface-2 px-3 py-2.5 md:rounded-[14px] md:px-5 md:py-[18px]">
+                <p className="text-[11px] font-bold uppercase tracking-[.07em] text-muted">Jouw antwoord</p>
+                <p className="prose-card mt-1 text-sm text-text-2 md:text-base">{answer}</p>
+              </div>
+              <RecoveryPrompt step={check.last} answer={recovery} onChange={setRecovery} />
+            </>
+          ) : null}
+          <CheckError state={check.state} />
+
+          {revealedAt ? (
+            <>
+              {card.type === "chain" && answer.trim() ? (
+                <ChainCompare answer={answer} back={card.back} />
+              ) : (
+                <div className={answer.trim() ? "grid gap-3.5 md:grid-cols-2" : ""}>
+                  {answer.trim() ? (
+                    <div className="rounded-[14px] bg-surface-2 px-5 py-[18px]">
+                      <p className="text-[11px] font-bold uppercase tracking-[.07em] text-muted">Jouw antwoord</p>
+                      <p className="prose-card mt-1.5 text-base leading-[1.55] text-text-2">{answer}</p>
+                    </div>
+                  ) : null}
+                  <div className="rounded-[14px] border border-border bg-surface px-5 py-[18px]">
+                    <p className="text-[11px] font-bold uppercase tracking-[.07em] text-accent-strong">Antwoord</p>
+                    <p className="prose-card mt-1.5 text-base leading-[1.55]">{card.back}</p>
+                    {card.source_label ? <p className="mt-3 text-xs text-muted">Bron: {card.source_label}</p> : null}
+                  </div>
+                </div>
+              )}
+              {card.type === "chain" && answer.trim() && card.source_label ? (
+                <p className="text-xs text-muted">Bron: {card.source_label}</p>
+              ) : null}
+              {card.explanation ? <p className="prose-card text-[15px] leading-normal text-muted">{card.explanation}</p> : null}
+              {card.image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={card.image_url} alt="" className="max-h-80 self-start rounded-xl border border-border" />
+              ) : null}
+              <CheckOutcome steps={check.steps} />
+            </>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Dock: vast onderin, binnen duimbereik. */}
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface-sunk px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4 md:px-7 md:pb-7">
+        <div className="mx-auto w-full max-w-[820px]">
+          {pendingRating ? (
+            <ErrorChips size="dock" suggested={suggestedError} onPick={pickError} />
+          ) : !revealedAt ? (
+            inRecovery || canCheck ? (
+              <div className="flex flex-col gap-1 md:grid md:grid-cols-2 md:gap-2.5">
+                <Button
+                  variant="primary"
+                  className="h-14 rounded-xl text-[17px] md:h-[54px] md:text-[15px]"
+                  disabled={check.state === "loading" || (inRecovery && !recovery.trim())}
+                  onClick={() => void (inRecovery ? submitRecovery() : startCheck())}
+                >
+                  {check.state === "loading" ? "Nakijken…" : "Nakijken"}
+                  <Kbd aria-hidden onPrimary className="hidden md:inline-flex">
+                    ⌘ ↵
+                  </Kbd>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="h-11 rounded-xl md:h-[54px] md:border md:border-border-strong md:bg-surface md:text-text"
+                  onClick={reveal}
+                >
+                  Toon antwoord
+                  <Kbd aria-hidden className="hidden md:inline-flex">
+                    spatie
+                  </Kbd>
+                </Button>
+              </div>
+            ) : (
+              <Button variant="primary" className="h-14 w-full rounded-xl text-[17px] md:h-[54px] md:text-[15px]" onClick={reveal}>
+                Toon antwoord
+                <Kbd aria-hidden onPrimary className="hidden md:inline-flex">
+                  spatie
+                </Kbd>
+              </Button>
+            )
+          ) : (
+            <div className="grid grid-cols-4 gap-1.5 md:gap-2.5">
+              {check.last ? (
+                <span id="ai-voorstel" className="sr-only">
+                  Voorstel van de AI
+                </span>
+              ) : null}
+              {RATINGS.map(({ value, label }) => {
+                const suggested = check.last?.result.suggested_rating === value;
+                const interval = previews && revealedAt ? formatIntervalLong(revealedAt, previews[value].due) : "";
+                return (
+                  <button
+                    key={value}
+                    onClick={() => onRate(value)}
+                    aria-describedby={suggested ? "ai-voorstel" : undefined}
+                    className={`relative flex h-[58px] flex-col items-center justify-center rounded-xl border-2 bg-surface px-1 transition-colors motion-reduce:transition-none md:h-[68px] md:flex-row md:justify-start md:gap-3 md:px-4 ${RATING_BORDER[value]} ${
+                      suggested
+                        ? "bg-accent-soft shadow-[0_0_0_2px_var(--bg),0_0_0_4px_var(--focus)] md:border-accent md:shadow-none"
+                        : "hover:bg-surface-2 md:border md:border-border-strong"
+                    }`}
+                  >
+                    <span
+                      aria-hidden
+                      className={`hidden h-6 w-6 shrink-0 items-center justify-center rounded-[5px] border text-xs md:flex ${
+                        suggested ? "border-accent bg-accent text-accent-text" : "border-border text-muted"
+                      }`}
+                    >
+                      {value}
+                    </span>
+                    <span className="flex flex-col items-center md:items-start">
+                      <span className={`text-sm font-bold md:text-[15px] ${RATING_TEXT[value]}`}>{label}</span>
+                      <span className="text-xs tabular-nums text-muted md:text-[13px]">{interval}</span>
+                    </span>
+                    {suggested ? (
+                      <span
+                        aria-hidden
+                        className="absolute -top-2.5 right-2.5 hidden rounded-full bg-accent px-[7px] py-0.5 text-[11px] font-bold text-accent-text md:block"
+                      >
+                        AI-voorstel
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
+  );
+}
+
+/** Kop van de focusmodus: Stoppen (of het merk op het sessie-einde), voortgang en opslaanstatus. */
+function SessionHeader({
+  done,
+  total,
+  status,
+  onStop,
+}: {
+  done: number;
+  total: number;
+  status: ReactNode;
+  /** Zonder onStop: sessie-einde, met het merk als link naar het overzicht. */
+  onStop?: () => void;
+}) {
+  const shown = Math.min(onStop ? done + 1 : done, total);
+  return (
+    <header className="flex min-h-16 flex-wrap items-center gap-x-3 gap-y-1 px-5 py-2.5 md:flex-nowrap md:gap-7 md:px-7">
+      {onStop ? (
+        <button
+          type="button"
+          onClick={onStop}
+          aria-label="Stoppen"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center gap-1.5 rounded-[10px] border border-border bg-surface text-sm text-text-2 transition-colors hover:bg-surface-2 motion-reduce:transition-none md:h-10 md:w-auto md:px-3"
+        >
+          <Icon d="M6 6l12 12M18 6L6 18" size={16} />
+          <span className="hidden md:inline">Stoppen</span>
+        </button>
+      ) : (
+        <Link href="/overzicht" className="flex shrink-0 items-center gap-2.5">
+          <span className="flex h-[30px] w-[30px] items-center justify-center rounded-lg bg-accent text-[11px] font-bold text-accent-text">PA</span>
+          <span className="hidden text-[15px] font-bold md:inline">PA Studie</span>
+        </Link>
+      )}
+      <div className="mx-auto flex min-w-0 max-w-[640px] flex-1 items-center gap-3 md:gap-3.5">
+        <ProgressSegments done={done} total={total} label="Voortgang van de sessie" />
+        <span className="shrink-0 text-[13px] font-bold tabular-nums md:text-sm">
+          {shown} / {total}
+        </span>
+      </div>
+      <div className="order-last basis-full text-center md:order-none md:min-w-[150px] md:basis-auto md:text-right">{status}</div>
+    </header>
   );
 }
 
@@ -566,23 +699,23 @@ function SaveStatus({
   state,
   count,
   onRetry,
-  compact = false,
+  done,
 }: {
   state: SaveState;
   count: number;
   onRetry: () => void;
-  compact?: boolean;
+  done: number;
 }) {
   if (state === "offline" && count > 0) {
     return (
-      <span role="status" className="text-sm">
+      <span role="status" className="text-[13px] text-text-2">
         Offline · {count} {count === 1 ? "beoordeling wacht" : "beoordelingen wachten"} op verbinding
       </span>
     );
   }
   if (state === "error") {
     return (
-      <span role="alert" className="text-sm text-danger">
+      <span role="alert" className="text-[13px] text-danger">
         {count} niet opgeslagen ·{" "}
         <button className="underline" onClick={onRetry}>
           opnieuw proberen
@@ -590,93 +723,159 @@ function SaveStatus({
       </span>
     );
   }
-  if (compact) return <span aria-live="polite">{count > 0 ? "Opslaan…" : ""}</span>;
+  if (count > 0) {
+    return (
+      <span aria-live="polite" className="hidden text-[13px] text-muted md:inline">
+        Opslaan…
+      </span>
+    );
+  }
+  if (done > 0) {
+    return (
+      <span className="hidden items-center justify-end gap-1.5 text-[13px] text-muted md:inline-flex">
+        <Icon d="M4 12l5 5L20 6" size={14} strokeWidth={2.2} className="text-accent" />
+        Opgeslagen
+      </span>
+    );
+  }
   return null;
 }
+
+function Waiting({ pending }: { pending: ReviewCard[] }) {
+  const next = new Date(pending[0].schedule.due);
+  const inMin = Math.max(1, Math.round((next.getTime() - Date.now()) / 60_000));
+  return (
+    <div className="flex flex-1 items-center justify-center px-5 pb-24">
+      <div className="max-w-md space-y-2 text-center">
+        <p className="font-serif text-[32px] font-medium leading-[1.1]">Even pauze</p>
+        <p className="text-[15px] text-text-2">
+          Over ongeveer {inMin} min {pending.length === 1 ? "komt er nog een kaart" : `komen er nog ${pending.length} kaarten`} terug. Laat deze pagina open of kom later terug.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+const DAY_FORMAT = new Intl.DateTimeFormat("nl-NL", { weekday: "long", day: "numeric", month: "long" });
 
 function SessionEnd({
   results,
   startedAt,
-  waiting,
-  pending,
   saved,
   offline,
+  stopcheck,
 }: {
   results: Result[];
   startedAt: number;
-  waiting: boolean;
-  pending: ReviewCard[];
   saved: boolean;
   offline: boolean;
+  stopcheck: ReactNode;
 }) {
   const [tomorrow, setTomorrow] = useState<{ due: number; fresh: number } | null>(null);
   const [endedAt] = useState(() => Date.now());
   useEffect(() => {
     // Pas tellen als alle beoordelingen zijn opgeslagen.
-    if (!waiting && saved) tomorrowAction().then(setTomorrow).catch(() => setTomorrow(null));
-  }, [waiting, saved]);
+    if (saved) tomorrowAction().then(setTomorrow).catch(() => setTomorrow(null));
+  }, [saved]);
 
   const reviews = results.filter((r) => r.wasReview);
-  const retention = reviews.length
-    ? Math.round((reviews.filter((r) => r.rating !== 1).length / reviews.length) * 100)
-    : null;
+  const kept = reviews.filter((r) => r.rating !== 1).length;
+  const retention = reviews.length ? Math.round((kept / reviews.length) * 100) : null;
   const minutes = Math.max(1, Math.round((endedAt - startedAt) / 60_000));
-
-  if (waiting) {
-    const next = new Date(pending[0].schedule.due);
-    const inMin = Math.max(1, Math.round((next.getTime() - Date.now()) / 60_000));
-    return (
-      <Panel className="space-y-2 text-center">
-        <p className="text-lg font-medium">Even pauze</p>
-        <p className="text-sm text-muted">
-          Over ongeveer {inMin} min {pending.length === 1 ? "komt er nog een kaart" : `komen er nog ${pending.length} kaarten`} terug. Laat deze pagina open of kom later terug.
-        </p>
-      </Panel>
-    );
-  }
-
-  if (results.length === 0) {
-    return (
-      <Panel className="space-y-2 text-center">
-        <p className="text-lg font-medium">Niets te herhalen vandaag</p>
-        <p className="text-sm text-muted">
-          Keur nieuwe kaarten goed in <Link className="underline" href="/goedkeuren">Goedkeuren</Link> of importeer studiestof via{" "}
-          <Link className="underline" href="/instellingen">Instellingen</Link>.
-        </p>
-      </Panel>
-    );
-  }
+  const perRating = RATINGS.map((r) => ({ ...r, count: results.filter((x) => x.rating === r.value).length }));
+  const perError = ERROR_TYPES.map((t) => ({ ...t, count: results.filter((x) => x.errorType === t.value).length }));
+  const n = results.length;
+  const SWATCH: Record<RatingValue, string> = { 1: "bg-again", 2: "bg-hard", 3: "bg-good", 4: "bg-easy" };
 
   return (
-    <Panel className="space-y-4">
-      <p className="text-lg font-medium">Klaar voor vandaag</p>
-      <dl className="grid grid-cols-3 gap-3 text-center">
-        <Stat label="Kaarten" value={String(results.length)} />
-        <Stat label="Minuten" value={String(minutes)} />
-        <Stat label="Retentie" value={retention === null ? "–" : `${retention}%`} />
-      </dl>
-      <p className="text-sm text-muted">
-        {retention === null
-          ? "Retentie telt alleen kaarten die al in herhaling waren."
-          : `Retentie: aandeel herhalingen dat je niet met "Opnieuw" beoordeelde (${reviews.length} herhalingen).`}
-      </p>
-      <p className="text-sm">
-        Morgen:{" "}
-        {tomorrow
-          ? `${tomorrow.due} herhalingen en tot ${tomorrow.fresh} nieuwe kaarten`
-          : offline
-            ? "wordt geteld zodra je weer online bent"
-            : "bezig met tellen…"}
-      </p>
-    </Panel>
+    <div className="flex-1 px-5 pb-[calc(env(safe-area-inset-bottom)+110px)] md:px-7 md:pb-16">
+      <div className="mx-auto grid w-full max-w-[1080px] gap-8 pt-4 md:grid-cols-[1fr_440px] md:gap-14 md:pt-9">
+        <div className="flex flex-col gap-6 md:gap-7">
+          <div className="space-y-3">
+            <Eyebrow>{DAY_FORMAT.format(endedAt)} · Sessie klaar</Eyebrow>
+            <h1 className="font-serif text-[36px] font-medium leading-[1.08] md:text-[52px] md:leading-[1.05]">
+              {n} {n === 1 ? "kaart" : "kaarten"} in {minutes} {minutes === 1 ? "minuut" : "minuten"}.
+            </h1>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex h-3.5 gap-0.5 overflow-hidden rounded-[7px]" aria-hidden>
+              {perRating
+                .filter((r) => r.count > 0)
+                .map((r) => (
+                  <span key={r.value} className={SWATCH[r.value]} style={{ flexGrow: r.count }} />
+                ))}
+            </div>
+            <ul className="grid grid-cols-2 gap-x-5 gap-y-1 text-sm tabular-nums md:flex md:flex-wrap" aria-label="Verdeling van je beoordelingen">
+              {perRating.map((r) => (
+                <li key={r.value} className="flex items-center gap-2">
+                  <span aria-hidden className={`h-2.5 w-2.5 rounded-[3px] ${SWATCH[r.value]}`} />
+                  {r.label} {r.count}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <dl className="grid grid-cols-2 gap-2 md:gap-3">
+            <EndStat
+              label="Retentie deze sessie"
+              value={retention === null ? "–" : `${retention}%`}
+              note={
+                retention === null
+                  ? "Retentie telt alleen kaarten die al in herhaling waren."
+                  : `${kept} van ${reviews.length} herhalingen niet met Opnieuw`
+              }
+            />
+            <EndStat
+              label="Morgen klaar"
+              value={tomorrow ? String(tomorrow.due) : "…"}
+              note={
+                tomorrow
+                  ? `herhalingen en tot ${tomorrow.fresh} nieuwe kaarten`
+                  : offline
+                    ? "wordt geteld zodra je weer online bent"
+                    : "bezig met tellen…"
+              }
+            />
+          </dl>
+
+          {perError.some((e) => e.count > 0) ? (
+            <div className="space-y-2">
+              <p className="text-[13px] font-bold text-text-2">Wat ging er mis bij Opnieuw en Moeilijk</p>
+              <ul className="flex flex-wrap gap-2">
+                {perError.map((e) => (
+                  <li key={e.value} className="rounded-full border border-border bg-surface px-3 py-1.5 text-sm tabular-nums">
+                    {e.label} · {e.count}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+
+        <aside className="flex flex-col gap-4 self-start rounded-2xl border border-border bg-surface p-6">
+          {stopcheck}
+          <LinkButton href="/overzicht" variant="primary" className="hidden h-[52px] w-full rounded-xl md:flex">
+            Klaar
+          </LinkButton>
+        </aside>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface-sunk px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-3 md:hidden">
+        <LinkButton href="/overzicht" variant="primary" className="h-14 w-full rounded-xl text-[17px]">
+          Klaar
+        </LinkButton>
+      </div>
+    </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function EndStat({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className="rounded-lg bg-surface-2 p-3">
-      <dt className="text-xs text-muted">{label}</dt>
-      <dd className="text-2xl font-semibold">{value}</dd>
+    <div className="rounded-[14px] border border-border bg-surface px-4 py-4 md:px-5 md:py-[18px]">
+      <dt className="text-[13px] text-muted">{label}</dt>
+      <dd className="text-[26px] font-bold tabular-nums md:text-[32px]">{value}</dd>
+      <dd className="text-[13px] text-muted">{note}</dd>
     </div>
   );
 }

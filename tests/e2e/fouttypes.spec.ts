@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { admin, importExample, LOCAL, login, resetExample } from "./helpers";
+import { admin, cardsLeft, importExample, LOCAL, login, resetExample } from "./helpers";
 
 // Aanvulling 01 zonder AI: fouttype na Opnieuw/Moeilijk (A1), stopcheck zonder AI,
 // en de verdeling van fouttypes op het overzicht.
@@ -15,7 +15,7 @@ test("fouttype vastleggen, stopcheck en verdeling op het overzicht", async ({ pa
   await expect(page.getByRole("textbox", { name: "Voorkant" })).toHaveCount(2);
 
   await page.goto("/vandaag");
-  await expect(page.getByText("1 kaart · ongeveer")).toBeVisible();
+  await expect.poll(() => cardsLeft(page)).toBe(1);
   await page.keyboard.press("Space");
   await page.keyboard.press("1"); // Opnieuw
   // Fouttype: niets voorgeselecteerd zonder AI; met het toetsenbord kiezen.
@@ -24,11 +24,11 @@ test("fouttype vastleggen, stopcheck en verdeling op het overzicht", async ({ pa
   await page.keyboard.press("1"); // Wist ik niet
 
   // De kaart komt terug (learning); nu goed, en de sessie is klaar.
-  for (let i = 0; i < 4 && !(await page.getByText("Klaar voor vandaag").isVisible()); i++) {
+  for (let i = 0; i < 4 && !(await page.getByText(/Sessie klaar/).isVisible()); i++) {
     await page.keyboard.press("Space");
     await page.keyboard.press("4");
   }
-  await expect(page.getByText("Klaar voor vandaag")).toBeVisible();
+  await expect(page.getByText(/Sessie klaar/)).toBeVisible();
   // Stopcheck zonder AI: de kaarten die fout gingen.
   await expect(page.getByText("Om te onthouden")).toBeVisible();
   await expect(page.getByRole("listitem").filter({ hasText: "Hoe bereken je de ejectiefractie (EF)?" })).toBeVisible();

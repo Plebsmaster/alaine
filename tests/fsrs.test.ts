@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatInterval, newSchedule, preview, rate, STATE, type Schedule } from "@/lib/fsrs";
+import { formatInterval, formatIntervalLong, newSchedule, preview, rate, STATE, type Schedule } from "@/lib/fsrs";
 
 const settings = { desired_retention: 0.9 };
 const t0 = new Date("2026-10-01T08:00:00Z");
@@ -68,6 +68,19 @@ describe("lib/fsrs", () => {
     const { schedule } = reviewCard();
     const at = days(20);
     expect(rate(schedule, 3, at, settings)).toEqual(rate(schedule, 3, at, settings));
+  });
+
+  it("formatIntervalLong schrijft de intervallen voluit", () => {
+    const from = new Date("2026-10-02T10:00:00Z");
+    const plus = (ms: number) => new Date(from.getTime() + ms);
+    expect(formatIntervalLong(from, plus(30_000))).toBe("<1 min");
+    expect(formatIntervalLong(from, plus(10 * 60_000))).toBe("10 min");
+    expect(formatIntervalLong(from, plus(3 * 3_600_000))).toBe("3 uur");
+    expect(formatIntervalLong(from, plus(86_400_000))).toBe("1 dag");
+    expect(formatIntervalLong(from, plus(4 * 86_400_000))).toBe("4 dagen");
+    expect(formatIntervalLong(from, plus(30 * 86_400_000))).toBe("1 maand");
+    expect(formatIntervalLong(from, plus(45 * 86_400_000))).toBe("1,5 maanden");
+    expect(formatIntervalLong(from, plus(800 * 86_400_000))).toBe("2,2 jaar");
   });
 
   it("formatInterval geeft korte Nederlandse labels", () => {

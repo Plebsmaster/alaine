@@ -1,5 +1,5 @@
 import { expect, test, type BrowserContext } from "@playwright/test";
-import { admin, importExample, LOCAL, login, resetExample } from "./helpers";
+import { admin, cardsLeft, importExample, LOCAL, login, resetExample } from "./helpers";
 
 // Fase 6: herhalen in vliegtuigmodus werkt en na herverbinden staan alle
 // beoordelingen in de database. Vraagt een productiebuild (service worker).
@@ -41,7 +41,7 @@ test("offline herhalen en synchroniseren", async ({ page, context }) => {
   // Vliegtuigmodus: de pagina opent uit de cache en herhalen werkt.
   await offline(context);
   await page.reload();
-  await expect(page.getByText("3 kaarten · ongeveer")).toBeVisible();
+  await expect.poll(() => cardsLeft(page)).toBe(3);
   for (let i = 0; i < 2; i++) {
     await page.getByRole("button", { name: /Toon antwoord/ }).click();
     await page.getByRole("button", { name: /^Makkelijk/ }).click();
@@ -50,7 +50,7 @@ test("offline herhalen en synchroniseren", async ({ page, context }) => {
 
   // Opnieuw openen, nog steeds offline: voortgang en uitgaande rij zijn bewaard.
   await page.reload();
-  await expect(page.getByText("Nog 1 kaart")).toBeVisible();
+  await expect.poll(() => cardsLeft(page)).toBe(1);
   await expect(page.getByText("Offline · 2 beoordelingen wachten op verbinding")).toBeVisible();
 
   // Andere pagina's tonen offline een melding.
@@ -69,9 +69,9 @@ test("offline herhalen en synchroniseren", async ({ page, context }) => {
 
   // De laatste kaart online beoordelen en de sessie afronden.
   await page.reload();
-  await expect(page.getByText("Nog 1 kaart")).toBeVisible();
+  await expect.poll(() => cardsLeft(page)).toBe(1);
   await page.getByRole("button", { name: /Toon antwoord/ }).click();
   await page.getByRole("button", { name: /^Makkelijk/ }).click();
-  await expect(page.getByText(/Morgen: \d+ herhalingen/)).toBeVisible();
+  await expect(page.getByText(/herhalingen en tot \d+ nieuwe kaarten/)).toBeVisible();
   expect(await count()).toBe(3);
 });

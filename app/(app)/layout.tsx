@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
     <div className="min-h-dvh">
       <TopBar today={shell.today} exam={shell.exam} />
       <SubNav drafts={shell.drafts} />
-      <main className="mx-auto w-full max-w-[1120px] px-4 pb-28 pt-5 md:px-6 md:pb-12 md:pt-8">
+      <main data-shell-main className="mx-auto w-full max-w-[1120px] px-4 pb-28 pt-5 md:px-6 md:pb-12 md:pt-8">
         <MobileWorkspaceSwitch drafts={shell.drafts} />
         {children}
       </main>

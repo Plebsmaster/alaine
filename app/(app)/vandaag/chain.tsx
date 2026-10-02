@@ -31,12 +31,12 @@ export function ChainInput({ value, onChange }: { value: string; onChange: (v: s
       <Textarea
         ref={ref}
         aria-label="Typ de keten (optioneel)"
-        placeholder="Typ de keten, stap voor stap (optioneel)"
+        placeholder="Typ de keten, stap voor stap"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        rows={4}
+        className="min-h-[120px] rounded-xl px-4 py-3.5 leading-[1.55]"
       />
-      <Button type="button" onClick={insertArrow} aria-label="Pijl invoegen">
+      <Button type="button" onClick={insertArrow} aria-label="Pijl invoegen" className="min-h-10">
         → invoegen
       </Button>
     </div>
@@ -49,21 +49,21 @@ export function ChainCompare({ answer, back }: { answer: string; back: string })
   const correct = chainSteps(back);
   const rows = Math.max(mine.length, correct.length);
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full table-fixed text-sm">
-        <thead className="text-xs text-muted">
+    <div className="overflow-x-auto rounded-[14px] border border-border bg-surface px-5 py-[18px]">
+      <table className="w-full table-fixed text-[15px]">
+        <thead className="text-[11px] uppercase tracking-[.07em] text-muted">
           <tr>
-            <th className="w-8 py-1 text-left font-medium">#</th>
-            <th className="py-1 text-left font-medium">Jouw keten</th>
-            <th className="py-1 text-left font-medium">Juiste keten</th>
+            <th className="w-8 py-1 text-left font-bold">#</th>
+            <th className="py-1 text-left font-bold">Jouw keten</th>
+            <th className="py-1 text-left font-bold text-accent-strong">Juiste keten</th>
           </tr>
         </thead>
         <tbody>
           {Array.from({ length: rows }, (_, i) => (
-            <tr key={i} className="border-t border-border align-top">
-              <td className="py-1 tabular-nums text-muted">{i + 1}</td>
-              <td className="py-1 pr-2">{mine[i] ?? <span className="text-muted">–</span>}</td>
-              <td className="py-1">{correct[i] ?? <span className="text-muted">–</span>}</td>
+            <tr key={i} className="border-t border-border-subtle align-top">
+              <td className="py-1.5 tabular-nums text-muted">{i + 1}</td>
+              <td className="py-1.5 pr-3 text-text-2">{mine[i] ?? <span className="text-muted">–</span>}</td>
+              <td className="py-1.5">{correct[i] ?? <span className="text-muted">–</span>}</td>
             </tr>
           ))}
         </tbody>

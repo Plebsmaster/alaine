@@ -215,24 +215,22 @@ export function Segmented({
 }
 
 /**
- * Voortgang als één segment per kaart: gedaan, huidig, nog te doen.
+ * Voortgang als één segment per kaart: gedaan, huidig, nog te doen. Telefoon iets dunner.
  * Boven 40 segmenten één doorlopende balk.
  */
 export function ProgressSegments({
   done,
   total,
   label = "Voortgang",
-  compact = false,
   className = "",
 }: {
   done: number;
   total: number;
   label?: string;
-  compact?: boolean;
   className?: string;
 }) {
   const now = Math.max(0, Math.min(done, total));
-  const height = compact ? "h-[5px]" : "h-1.5";
+  const height = "h-[5px] md:h-1.5";
   return (
     <div
       role="progressbar"
@@ -240,7 +238,7 @@ export function ProgressSegments({
       aria-valuemin={0}
       aria-valuemax={total}
       aria-valuenow={now}
-      className={`flex flex-1 ${compact ? "gap-0.5" : "gap-[3px]"} ${className}`}
+      className={`flex flex-1 gap-0.5 md:gap-[3px] ${className}`}
     >
       {total > 40 ? (
         <div className={`${height} w-full overflow-hidden rounded bg-border`}>

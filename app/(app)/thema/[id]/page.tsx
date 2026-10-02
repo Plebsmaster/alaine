@@ -32,6 +32,7 @@ export default async function TopicPage({ params, searchParams }: PageProps<"/th
       .eq("topic_id", id)
       .eq("status", status)
       .order("created_at")
+    .order("external_id", { nullsFirst: false })
       .limit(500),
   ]);
   if (!topic) notFound();

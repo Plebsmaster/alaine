@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button, Notice, PageHeader, Panel } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { approveCases } from "../casussen/actions";
+import { approveQuestions } from "../oefentoets/actions";
 import { DraftCard, type Draft } from "./draft-card";
 
 export const metadata: Metadata = { title: "Goedkeuren" };
@@ -22,6 +23,7 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
     .select("id, topic_id, type, front, back, explanation, origin, flag_note, source_locator, topics(name, sort_order), sources(title, chapter), card_objectives(learning_objectives(code, sort_order))")
     .eq("status", "draft")
     .order("created_at")
+    .order("external_id", { nullsFirst: false })
     .limit(LIMIT);
   if (topicFilter) draftsQuery = draftsQuery.eq("topic_id", topicFilter);
 
@@ -38,10 +40,20 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
     .select("id, title, correct_diagnosis, origin, topics(name)")
     .eq("status", "draft")
     .order("created_at")
+    .order("external_id", { nullsFirst: false })
     .limit(100);
   if (topicFilter) casesQuery = casesQuery.eq("topic_id", topicFilter);
 
-  const [cards, scripts, cases, questions, { data: drafts, error }, { data: counts }, { data: draftScripts }, { data: draftCases }] = await Promise.all([
+  let questionsQuery = supabase
+    .from("questions")
+    .select("id, kind, format, stem, origin, topics(name)")
+    .eq("status", "draft")
+    .order("created_at")
+    .order("external_id", { nullsFirst: false })
+    .limit(200);
+  if (topicFilter) questionsQuery = questionsQuery.eq("topic_id", topicFilter);
+
+  const [cards, scripts, cases, questions, { data: drafts, error }, { data: counts }, { data: draftScripts }, { data: draftCases }, { data: draftQuestions }] = await Promise.all([
     count("cards"),
     count("illness_scripts"),
     count("cases"),
@@ -50,6 +62,7 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
     supabase.from("topic_card_counts").select("topic_id, draft").gt("draft", 0),
     scriptsQuery,
     casesQuery,
+    questionsQuery,
   ]);
   if (error) throw new Error(error.message);
 
@@ -151,6 +164,30 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
               ))}
             </ul>
             <Button>Geselecteerde casussen goedkeuren</Button>
+          </form>
+        </section>
+      ) : null}
+
+      {(draftQuestions ?? []).length > 0 ? (
+        <section className="mb-8 space-y-2">
+          <h2 className="text-lg font-semibold">Vragen</h2>
+          <p className="text-sm text-muted">Open een vraag om hem te controleren, of keur er meerdere tegelijk goed.</p>
+          <form action={approveQuestions} className="space-y-2">
+            <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
+              {(draftQuestions ?? []).map((q) => (
+                <li key={q.id} className="flex min-h-12 items-center gap-3 px-4 py-2">
+                  <input type="checkbox" name="id" value={q.id} aria-label={`Vraag goedkeuren: ${q.stem.slice(0, 60)}`} className="h-5 w-5 shrink-0" />
+                  <Link href={`/oefentoets/vraag/${q.id}`} className="line-clamp-2 flex-1 text-sm hover:underline">
+                    {q.stem}
+                  </Link>
+                  <span className="shrink-0 text-xs text-muted">
+                    {q.kind === "pretest" ? "pretest" : "toets"} · {q.format === "mcq" ? "MC" : "open"}
+                    {q.origin === "ai" ? " · AI" : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <Button>Geselecteerde vragen goedkeuren</Button>
           </form>
         </section>
       ) : null}

@@ -45,7 +45,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="nl" className={`${sans.variable} ${serif.variable} h-full antialiased`}>
-      <body className="min-h-full">
+      {/* Browserextensies (bijv. ColorZilla: cz-shortcut-listen) zetten attributen op <body> vóór React laadt.
+          Dit onderdrukt alleen dat verschil op <body> zelf, niet in de inhoud. */}
+      <body className="min-h-full" suppressHydrationWarning>
         {children}
         <ServiceWorkerRegister />
       </body>

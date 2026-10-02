@@ -9,6 +9,7 @@ import { CARD_TYPE_LABELS, ERROR_TYPES, VERIFY_TEXT, type ErrorType } from "@/li
 import { formatIntervalLong, preview, rate, RATINGS, STATE, type FsrsSettings, type RatingValue } from "@/lib/fsrs";
 import { available as idbAvailable, loadSnapshot, outboxAdd, outboxAll, outboxRemove, saveSnapshot } from "@/lib/offline/idb";
 import { pickNext, requeue } from "@/lib/queue";
+import { uuid } from "@/lib/uuid";
 import {
   flagCardAction,
   rateCardAction,
@@ -74,7 +75,7 @@ type Props = {
 type Current = { card: ReviewCard; source: "queue" | "pending" } | null;
 
 export function ReviewSession({ initialQueue, initialPending, settings, endOfDay, userId, generatedAt, aiEnabled, header }: Props) {
-  const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
+  const [sessionId, setSessionId] = useState(() => uuid());
   const [queue, setQueue] = useState(initialQueue);
   const [pending, setPending] = useState(initialPending);
   const [current, setCurrent] = useState<Current>(() => {

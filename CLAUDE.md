@@ -39,6 +39,7 @@ Dit zijn de regels uit het leeronderzoek. Een feature die ze breekt, bouw je nie
 - Mobile first: duimvriendelijke knoppen onderin, minimaal 44 px hoog. Op laptop sneltoetsen: spatie = omdraaien, 1–4 = beoordelen.
 - Beoordelingsknoppen: Opnieuw, Moeilijk, Goed, Makkelijk, elk met het volgende interval eronder (via `fsrs.repeat`).
 - Rustig, leesbaar ontwerp; lichte en donkere modus.
+- Ontwerp: volg docs/design/README.md (variant b · Herzien). Tokens in app/globals.css; geen losse hexkleuren in componenten.
 
 ## Privacy en beveiliging
 

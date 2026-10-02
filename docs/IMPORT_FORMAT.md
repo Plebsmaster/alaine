@@ -70,7 +70,7 @@ Kleine letters, cijfers en koppeltekens. Opbouw: `<module>-<thema>-<type>-<numme
     {
       "external_id": "m1-ritme-k-001",
       "topic": "m1-ritme",
-      "type": "fact",                 // fact | explain | illness_script | compare | image | skill | communication
+      "type": "fact",                 // fact | explain | chain | illness_script | compare | image | skill | communication
       "front": "<vraag>",
       "back": "<kort antwoord>",
       "explanation": "<waarom; optioneel>",
@@ -120,6 +120,11 @@ Kleine letters, cijfers en koppeltekens. Opbouw: `<module>-<thema>-<type>-<numme
 ```
 
 Alle lijsten zijn optioneel; een bestand met alleen `cards` is geldig zolang de verwezen thema's al bestaan.
+
+## Aanvulling 01
+
+- `cards[].type` mag ook `"chain"` zijn (ketenkaart). Voorkant: begin en eind van de keten; achterkant: de stappen gescheiden door ` → `.
+- Optioneel `"needs_verification": true` bij `cards`, `illness_scripts`, `cases` en `questions` (standaard `false`). Gebruik het voor alles wat niet aantoonbaar uit de bron komt, en altijd bij doseringen, contra-indicaties en richtlijnadviezen. In de app verschijnt dan het label "Controleren".
 
 ## Validatie (zod)
 

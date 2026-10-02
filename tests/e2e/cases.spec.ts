@@ -52,6 +52,7 @@ test("casussessie van drie casussen uit drie thema's", async ({ page }) => {
     await page.getByRole("button", { name: "Verder" }).click();
 
     await page.getByRole("button", { name: "Nee" }).click();
+    if (i === 0) await page.getByRole("button", { name: /^Slordig of moe/ }).click(); // A1
     await page.getByRole("button", { name: "4", exact: true }).click();
     await page.getByRole("button", { name: "Opslaan" }).click();
 
@@ -70,6 +71,8 @@ test("casussessie van drie casussen uit drie thema's", async ({ page }) => {
   const db = admin();
   const { count: attempts } = await db.from("case_attempts").select("id", { count: "exact", head: true });
   expect(attempts).toBe(3);
+  const { data: typed } = await db.from("case_attempts").select("error_type").not("error_type", "is", null);
+  expect(typed).toEqual([{ error_type: "slip" }]);
   const { data: card } = await db.from("cards").select("status, tags, front").contains("tags", ["casus"]).single();
   expect(card).toMatchObject({ status: "draft", front: "Welke bevinding wijst op deze diagnose?" });
 

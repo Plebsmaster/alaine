@@ -107,7 +107,9 @@ Maak {n} {kind}-vragen voor het thema "{topic}".
 Geef JSON: {"questions": [...]}
 ```
 
-## explain_feedback
+> **Aanvulling 01:** `explain_feedback` is vervangen door `explain_check` (hint en herstelvraag vóór de uitleg), BASE_RULES heeft vier extra regels, en er is een `stopcheck`. De actuele prompts staan in `docs/AANVULLING_01_COACH.md` en in `lib/ai/prompts.ts`.
+
+## explain_feedback (vervangen door explain_check)
 
 **Wanneer:** alleen nadat de gebruiker een antwoord heeft getypt en het juiste antwoord al heeft gezien.
 **Invoer:** kaart (voorkant, achterkant, uitleg), bronfragment indien beschikbaar, antwoord van de gebruiker.

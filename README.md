@@ -13,6 +13,7 @@ Dit pakket is alles wat Claude Code nodig heeft om je studie-app te bouwen: een 
 | 4 | Casusmodus: sessies, reflectietabel, hints, expert-vergelijking, stagecasussen, `case_hint`, `case_feedback`, `draft_cases` | Gebouwd |
 | 5 | Pretest en proeftoets: resultaat per leerdoel, foute antwoorden als kaart, `draft_questions` | Gebouwd |
 | 6 | Overzicht, export en offline herhalen | Gebouwd |
+| Aanvulling 01 | Fouttypes, ketenkaarten, hint en herstelvraag, controleren tegenover de bron, stopcheck | Gebouwd; coachmodus, varianten, vermoeidheid, stoplicht en gesprekken nog niet (zie `docs/AANVULLING_01_COACH.md`) |
 
 Getest met een lokale Supabase: 61 unit tests (FSRS, wachtrij, importer, casusselectie, toetsselectie en score per leerdoel, overzichtscijfers, AI-laag met een nagebootste API) en rooktests in de browser voor alle fases, waaronder herhalen in vliegtuigmodus. Alle AI-functies zijn end-to-end getest tegen een nagebootste Anthropic-API (`tests/e2e/ai.spec.ts`), nog niet tegen de echte. De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
 
@@ -26,6 +27,7 @@ Getest met een lokale Supabase: 61 unit tests (FSRS, wachtrij, importer, casusse
 | `docs/IMPORT_FORMAT.md` | Het JSON-formaat waarmee studiestof in de app komt |
 | `docs/AI_PROMPTS.md` | De AI-functies, hun prompts en de vangrails |
 | `docs/CONTENT_PIPELINE.md` | Hoe Claude Code van jouw pdf's en leerdoelen importbestanden maakt |
+| `docs/AANVULLING_01_COACH.md` | Coachprincipes: fouttypes, ketenkaarten, hint vóór uitleg, controleren; met status per onderdeel |
 | `supabase/migrations/` | Databaseschema met beveiliging per gebruiker, plus functies voor import en herhalen |
 | `supabase/templates/` | E-mailsjablonen met inlogcode, om in Supabase te plakken |
 | `app/`, `components/`, `lib/` | De app zelf |
@@ -107,7 +109,13 @@ Maak het importbestand en laat me de samenvatting zien voordat je importeert.
 
 **Fase 2: AI-concepten en AI-feedback**: gebouwd. Test zelf (met `ANTHROPIC_API_KEY`):
 1. Op een themapagina: **Kaarten laten maken uit brontekst (AI)**. De kaarten komen als concept op Goedkeuren.
-2. Op Vandaag bij een uitlegkaart: typ je antwoord, kies **Toon antwoord** en daarna **Feedback van AI**. De voorgestelde beoordeling is gemarkeerd; je kiest zelf.
+2. Op Vandaag bij een uitleg- of ketenkaart: typ je antwoord en kies **Nakijken**. Klopt het, dan zie je het antwoord met een vervolgvraag; klopt het niet, dan eerst een hint en een herstelvraag, en pas daarna de uitleg. De voorgestelde beoordeling is gemarkeerd; je kiest zelf.
+
+**Aanvulling 01**: test zelf:
+1. Na **Opnieuw** of **Moeilijk** vraagt de app wat er misging (Wist ik niet, Redenering fout, Slordig of moe). Overslaan mag. Het overzicht toont de verdeling per thema.
+2. Een **ketenkaart** maak je met type "Keten"; bij herhalen typ je de stappen met de pijlknop en zie je daarna jouw keten naast de juiste.
+3. AI-concepten die niet uit de bron komen (of een dosering bevatten) krijgen het label **Controleren**; filter erop in Goedkeuren.
+4. Aan het eind van een herhaalsessie met fouten: **Stopcheck**.
 
 **Volgende stap**: studiestof omzetten met `docs/CONTENT_PIPELINE.md` zodra je de stof hebt.
 

@@ -18,10 +18,11 @@ function reply(user: string): unknown {
     const v1 = objectives.find((o) => o.code === "V.1")!.id;
     return {
       cards: [
-        { type: "fact", front: "Wat is het slagvolume?", back: "EDV min ESV.", explanation: "", objectives: [v1], source_locator: "p. 12" },
-        { type: "explain", front: "Waarom stijgt het hartminuutvolume bij inspanning?", back: "Hogere frequentie en slagvolume.", explanation: "Sympathicus.", objectives: [v1], source_locator: "" },
+        { type: "fact", front: "Wat is het slagvolume?", back: "EDV min ESV.", explanation: "", objectives: [v1], source_locator: "p. 12", needs_verification: false },
+        // Ketenkaart met een dosering: altijd te controleren.
+        { type: "chain", front: "ACE-remmer → serumkalium: leg de keten uit.", back: "ACE-remming → minder angiotensine II → minder aldosteron → minder K⁺-uitscheiding → hoger serum-K⁺", explanation: "Start met 2,5 mg.", objectives: [v1], source_locator: "", needs_verification: true },
         // Zonder leerdoel: moet worden overgeslagen.
-        { type: "fact", front: "Losse kaart", back: "x", explanation: "", objectives: ["onbekend"], source_locator: "" },
+        { type: "fact", front: "Losse kaart", back: "x", explanation: "", objectives: ["onbekend"], source_locator: "", needs_verification: false },
       ],
     };
   }
@@ -37,20 +38,21 @@ function reply(user: string): unknown {
         management: "",
         key_discriminators: hf ? "Oedeem, orthopneu." : "Piepen, geen oedeem.",
         similar_conditions: [hf ? "COPD" : "Hartfalen"],
+        needs_verification: false,
       },
     };
   }
   if (user.startsWith("Maak één vergelijkingskaart")) {
-    return { card: { front: "Hoe onderscheid je hartfalen van COPD?", back: "Hartfalen: oedeem, orthopneu. COPD: piepen, verlengd expirium.", explanation: "" } };
+    return { card: { front: "Hoe onderscheid je hartfalen van COPD?", back: "Hartfalen: oedeem, orthopneu. COPD: piepen, verlengd expirium.", explanation: "", needs_verification: false } };
   }
   if (/^Maak \d+ casusvignetten/.test(user)) {
     const row = (diagnosis: string, rank: number) => ({ diagnosis, supporting: "past", against: "", missing: "", rank });
     return {
       cases: [
-        { title: "Kortademige man", vignette: "Man, 75 jaar, enkeloedeem.", correct_diagnosis: "Hartfalen", expert_reflection: [row("Hartfalen", 1), row("COPD", 2)], teaching_points: "Let op oedeem.", difficulty: 2, objectives: [] },
-        { title: "Hoestende vrouw", vignette: "Vrouw, 60 jaar, rookt.", correct_diagnosis: "COPD", expert_reflection: [row("COPD", 1), row("Hartfalen", 2)], teaching_points: "Rookanamnese.", difficulty: 1, objectives: [] },
+        { title: "Kortademige man", vignette: "Man, 75 jaar, enkeloedeem.", correct_diagnosis: "Hartfalen", expert_reflection: [row("Hartfalen", 1), row("COPD", 2)], teaching_points: "Let op oedeem.", difficulty: 2, objectives: [], needs_verification: false },
+        { title: "Hoestende vrouw", vignette: "Vrouw, 60 jaar, rookt.", correct_diagnosis: "COPD", expert_reflection: [row("COPD", 1), row("Hartfalen", 2)], teaching_points: "Rookanamnese.", difficulty: 1, objectives: [], needs_verification: false },
         // Ongeldig (rank 1 is niet de juiste diagnose): moet worden overgeslagen.
-        { title: "Fout", vignette: "x", correct_diagnosis: "Astma", expert_reflection: [row("COPD", 1), row("Astma", 2)], teaching_points: "", difficulty: 2, objectives: [] },
+        { title: "Fout", vignette: "x", correct_diagnosis: "Astma", expert_reflection: [row("COPD", 1), row("Astma", 2)], teaching_points: "", difficulty: 2, objectives: [], needs_verification: false },
       ],
     };
   }
@@ -67,21 +69,27 @@ function reply(user: string): unknown {
   if (/^Maak \d+ (pretest|exam)-vragen/.test(user)) {
     return {
       questions: [
-        { format: "mcq", stem: "Welk symptoom past het best bij hartfalen?", options: ["Piepen", "Enkeloedeem", "Koorts", "Jeuk"], correct_option: 1, model_answer: "", explanation: "Vochtretentie.", objectives: [] },
-        { format: "open", stem: "Noem twee bevindingen bij hartfalen.", options: [], correct_option: -1, model_answer: "Crepitaties en enkeloedeem.", explanation: "", objectives: [] },
+        { format: "mcq", stem: "Welk symptoom past het best bij hartfalen?", options: ["Piepen", "Enkeloedeem", "Koorts", "Jeuk"], correct_option: 1, model_answer: "", explanation: "Vochtretentie.", objectives: [], needs_verification: false },
+        { format: "open", stem: "Noem twee bevindingen bij hartfalen.", options: [], correct_option: -1, model_answer: "Crepitaties en enkeloedeem.", explanation: "", objectives: [], needs_verification: false },
         // Ongeldig (correct_option buiten bereik): overslaan.
-        { format: "mcq", stem: "Fout", options: ["a", "b", "c", "d"], correct_option: 7, model_answer: "", explanation: "", objectives: [] },
+        { format: "mcq", stem: "Fout", options: ["a", "b", "c", "d"], correct_option: 7, model_answer: "", explanation: "", objectives: [], needs_verification: false },
       ],
     };
   }
-  if (user.startsWith("Beoordeel het antwoord")) {
-    return {
-      correct: "Je noemt het Frank-Starling-mechanisme.",
-      missing: "Dat rek van de vezels de kracht verhoogt.",
-      misconception: null,
-      follow_up: "Wat gebeurt er bij een overvuld hart?",
-      suggested_rating: 2,
-    };
+  if (user.startsWith("Je kijkt het antwoord van de student na")) {
+    const stage = Number(user.match(/STAP = (\d)/)![1]);
+    const chain = user.includes('"type":"chain"');
+    if (stage === 1 && chain) {
+      return { verdict: "incorrect", error_type: "reasoning_error", hint: "Kijk naar de richting van kalium.", recovery_question: "Stijgt of daalt het serumkalium als aldosteron daalt?", explanation: "ZOU-NIET-ZICHTBAAR-MOGEN-ZIJN", follow_up: null, suggested_rating: 1 };
+    }
+    if (stage === 1) {
+      return { verdict: "correct", error_type: null, hint: null, recovery_question: null, explanation: "Klopt: Frank-Starling.", follow_up: "Wat gebeurt er bij een overvuld hart?", suggested_rating: 3 };
+    }
+    return { verdict: "correct", error_type: null, hint: null, recovery_question: null, explanation: "Minder aldosteron betekent minder kaliumuitscheiding: kalium stijgt. Je had de richting omgedraaid.", follow_up: null, suggested_rating: 2 };
+  }
+  if (user.startsWith("Vat in maximaal vijf punten samen")) {
+    const items = JSON.parse(user.match(/FOUTEN VANDAAG: (\[.*\])/)![1]) as { item_ref: string }[];
+    return { points: [{ text: "ACE-remming verhoogt het serumkalium via minder aldosteron.", item_ref: items[0].item_ref }] };
   }
   throw new Error(`Onverwacht verzoek: ${user.slice(0, 60)}`);
 }
@@ -115,7 +123,7 @@ test.beforeAll(async () => {
 
 test.afterAll(() => new Promise<void>((r) => server.close(() => r())));
 
-test("draft_cards en explain_feedback", async ({ page }) => {
+test("draft_cards, controleren, nakijken met hint, ketenkaart, fouttype en stopcheck", async ({ page }) => {
   const usage = async () => (await admin().from("ai_usage").select("id", { count: "exact", head: true })).count ?? 0;
   const usageBefore = await usage();
   await login(page);
@@ -125,55 +133,98 @@ test("draft_cards en explain_feedback", async ({ page }) => {
   await page.goto("/themas");
   await page.getByRole("link", { name: /Voorbeeld: hart en longen/ }).click();
   await page.getByText("Kaarten laten maken uit brontekst (AI)").click();
-  await page.getByRole("textbox", { name: /^Brontekst/ }).fill("Het slagvolume is EDV min ESV. Bij inspanning stijgt ...");
+  await page.getByRole("textbox", { name: /^Brontekst/ }).fill("Het slagvolume is EDV min ESV. ACE-remmers ...");
   await page.getByRole("button", { name: "Maak conceptkaarten" }).click();
   await expect(page).toHaveURL(/\/goedkeuren\?thema=/);
-  await expect(page.getByRole("textbox", { name: "Voorkant" })).toHaveCount(5); // 3 geïmporteerd + 2 AI
-  await expect(page.getByText("AI-concept")).toHaveCount(2);
-
-  const db = admin();
-  const { data: aiCards } = await db.from("cards").select("status, origin, source_locator, card_objectives(objective_id)").eq("origin", "ai");
-  expect(aiCards).toHaveLength(2);
-  expect(aiCards!.every((c) => c.status === "draft" && c.card_objectives.length === 1)).toBe(true);
-  expect(requests[0].system.startsWith("Je bent een studiecoach")).toBe(true);
-  expect(requests[0].user).toContain("BRONTEKST");
-
-  // Concepten staan nog niet in de herhaling.
-  await page.goto("/vandaag");
-  await expect(page.getByText("Niets te herhalen vandaag")).toBeVisible();
-
-  // Alleen de uitlegkaart over Frank-Starling goedkeuren.
-  await page.goto("/goedkeuren");
   const fronts = page.getByRole("textbox", { name: "Voorkant" });
-  for (let i = 0; i < 5; i++) {
+  await expect(fronts).toHaveCount(5); // 3 geïmporteerd + 2 AI (kaart zonder leerdoel overgeslagen)
+  expect(requests[0].system).toContain("Farmacotherapeutisch Kompas");
+
+  // A7: de ketenkaart met dosering is te controleren en filterbaar.
+  await page.getByRole("link", { name: "Te controleren (1)" }).click();
+  await expect(fronts).toHaveCount(1);
+  await expect(fronts.first()).toHaveValue("ACE-remmer → serumkalium: leg de keten uit.");
+  await expect(page.getByText("Controleren", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Goedkeuren", exact: true }).click(); // zonder "gecontroleerd"
+  await expect(fronts).toHaveCount(0);
+
+  // Ook de uitlegkaart over Frank-Starling goedkeuren.
+  await page.goto("/goedkeuren");
+  for (let i = 0; i < 4; i++) {
     if ((await fronts.nth(i).inputValue()).startsWith("Waarom neemt het slagvolume toe")) {
       await page.getByRole("button", { name: "Goedkeuren", exact: true }).nth(i).click();
       break;
     }
   }
-  await expect(fronts).toHaveCount(4);
+  await expect(fronts).toHaveCount(3);
 
-  // explain_feedback: de knop verschijnt pas na "Toon antwoord".
+  // Herhalen: beide kaarten, in willekeurige volgorde.
   await page.goto("/vandaag");
-  await expect(page.getByText("1 kaart · ongeveer")).toBeVisible();
-  await page.getByRole("textbox", { name: "Typ je antwoord (optioneel)" }).fill("Door het Frank-Starling-mechanisme.");
-  await expect(page.getByRole("button", { name: "Feedback van AI" })).toHaveCount(0);
-  await page.getByRole("button", { name: /Toon antwoord/ }).click();
-  await page.getByRole("button", { name: "Feedback van AI" }).click();
-  await expect(page.getByText("Je noemt het Frank-Starling-mechanisme.")).toBeVisible();
-  await expect(page.getByText("Voorstel: Moeilijk. Je kiest zelf.")).toBeVisible();
-  expect(requests.at(-1)!.model).toBe("claude-haiku-4-5"); // snel model voor feedback
-  expect(requests.at(-1)!.user).toContain("Door het Frank-Starling-mechanisme.");
+  await expect(page.getByText("2 kaarten · ongeveer")).toBeVisible();
+  const done = { chain: false, explain: false };
+  for (let round = 0; round < 6 && !(await page.getByText("Klaar voor vandaag").isVisible()); round++) {
+    const front = (await page.locator("main p.prose-card").first().textContent()) ?? "";
+    if (front.startsWith("ACE-remmer") && !done.chain) {
+      await expect(page.getByText("Controleren", { exact: true })).toBeVisible(); // A7 bij herhalen
+      // A2: keten typen met de pijlknop; verkeerde richting.
+      const box = page.getByRole("textbox", { name: "Typ de keten (optioneel)" });
+      await box.fill("ACE-remming");
+      await page.getByRole("button", { name: "Pijl invoegen" }).click();
+      await box.pressSequentially("minder aldosteron → lager serum-K⁺");
+      await expect(box).toHaveValue("ACE-remming → minder aldosteron → lager serum-K⁺");
+      // A3: nakijken; bij fout eerst hint en herstelvraag, het antwoord blijft verborgen.
+      await page.getByRole("button", { name: "Nakijken" }).click();
+      await expect(page.getByText("Hint: Kijk naar de richting van kalium.")).toBeVisible();
+      await expect(page.getByText("hoger serum-K⁺")).toHaveCount(0);
+      await expect(page.getByText("ZOU-NIET-ZICHTBAAR-MOGEN-ZIJN")).toHaveCount(0);
+      await page.getByRole("textbox", { name: "Stijgt of daalt het serumkalium als aldosteron daalt?" }).fill("Stijgt");
+      await page.getByRole("button", { name: "Nakijken" }).click();
+      await expect(page.getByText("Je had de richting omgedraaid.")).toBeVisible();
+      // Keten naast elkaar.
+      await expect(page.getByRole("columnheader", { name: "Jouw keten" })).toBeVisible();
+      await expect(page.getByRole("cell", { name: "lager serum-K⁺" })).toBeVisible();
+      await expect(page.getByRole("cell", { name: "hoger serum-K⁺" })).toBeVisible();
+      // Suggestie Moeilijk; de student kiest Opnieuw. Daarna het fouttype, met de AI-suggestie voorgeselecteerd.
+      await page.getByRole("button", { name: /^Opnieuw/ }).click();
+      await expect(page.getByRole("button", { name: /^Redenering fout/ })).toHaveAttribute("aria-pressed", "true");
+      await page.getByRole("button", { name: /^Redenering fout/ }).click();
+      done.chain = true;
+    } else if (front.startsWith("Waarom neemt het slagvolume toe") && !done.explain) {
+      await page.getByRole("textbox", { name: "Typ je antwoord (optioneel)" }).fill("Door het Frank-Starling-mechanisme.");
+      await page.getByRole("button", { name: "Nakijken" }).click();
+      await expect(page.getByText("Goed. Klopt: Frank-Starling.")).toBeVisible(); // correct: direct tonen
+      await expect(page.getByText("Denk verder: Wat gebeurt er bij een overvuld hart?")).toBeVisible();
+      await page.getByRole("button", { name: /^Goed/ }).click();
+      done.explain = true;
+    } else {
+      // Terugkerende learning-kaart.
+      await page.getByRole("button", { name: /Toon antwoord/ }).click();
+      await page.getByRole("button", { name: /^Makkelijk/ }).click();
+    }
+  }
+  await expect(page.getByText("Klaar voor vandaag")).toBeVisible();
+  expect(done).toEqual({ chain: true, explain: true });
 
-  // De student kiest zelf (hier Goed, niet het voorstel); feedback komt in het logboek.
-  await page.getByRole("button", { name: /^Goed/ }).click();
-  await expect.poll(async () => (await db.from("review_logs").select("rating, ai_feedback, answer_text")).data).toEqual([
-    expect.objectContaining({ rating: 3, answer_text: "Door het Frank-Starling-mechanisme." }),
-  ]);
-  const { data: log } = await db.from("review_logs").select("ai_feedback").single();
-  expect(JSON.parse(log!.ai_feedback!)).toMatchObject({ suggested_rating: 2 });
-  // Elke AI-aanroep is gelogd (kosten zichtbaar).
-  expect((await usage()) - usageBefore).toBe(2);
+  // Stopcheck: punt → eigen vraag → conceptkaart.
+  await page.getByRole("button", { name: "Wat moet ik onthouden?" }).click();
+  await expect(page.getByText("ACE-remming verhoogt het serumkalium via minder aldosteron.")).toBeVisible();
+  await page.getByRole("button", { name: "Maak kaart" }).click();
+  await page.getByRole("textbox", { name: /^Vraag \(voorkant\)/ }).fill("Wat doet een ACE-remmer met het serumkalium?");
+  await page.getByRole("button", { name: "Opslaan als concept" }).click();
+  await expect(page.getByText("Conceptkaart gemaakt; staat op Goedkeuren.")).toBeVisible();
+
+  const db = admin();
+  const { data: chainCard } = await db.from("cards").select("id").eq("type", "chain").single();
+  const { data: chainLogs } = await expect
+    .poll(async () => (await db.from("review_logs").select("rating, error_type").eq("card_id", chainCard!.id).order("review")).data?.length ?? 0)
+    .toBeGreaterThan(0)
+    .then(async () => db.from("review_logs").select("rating, error_type, ai_feedback").eq("card_id", chainCard!.id).order("review"));
+  expect(chainLogs![0]).toMatchObject({ rating: 1, error_type: "reasoning_error" });
+  expect(JSON.parse(chainLogs![0].ai_feedback!)).toHaveLength(2); // stap 1 + stap 2
+  const { data: stop } = await db.from("cards").select("status, back").contains("tags", ["stopcheck"]).single();
+  expect(stop).toEqual({ status: "draft", back: "ACE-remming verhoogt het serumkalium via minder aldosteron." });
+  // 1× draft_cards, 3× explain_check, 1× stopcheck
+  expect((await usage()) - usageBefore).toBe(5);
 });
 
 test("draft_script, draft_compare, draft_cases, case_hint, case_feedback, draft_questions", async ({ page }) => {

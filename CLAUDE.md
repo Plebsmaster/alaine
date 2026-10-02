@@ -28,6 +28,10 @@ Dit zijn de regels uit het leeronderzoek. Een feature die ze breekt, bouw je nie
 5. **AI geeft hints en feedback, geen kant-en-klare antwoorden** vóór de gebruiker heeft geantwoord. Zie `docs/AI_PROMPTS.md`.
 6. **AI werkt vanuit de bron.** Elke AI-aanroep krijgt de relevante brontekst of uitwerking mee.
 7. **Echte cijfers boven gevoel.** Toon retentie en zwakke plekken uit het logboek, geen motiverende schattingen.
+8. **Fouttype is analyse, geen planning.** FSRS krijgt altijd de eerlijke beoordeling, ook bij een slordigheidsfout.
+9. **Het geheugen zit in de database, niet in de chat.** AI-functies krijgen bij elke beurt de relevante fouten en items uit de database mee.
+10. **Bron of extern.** De AI markeert alles wat niet uit de bron komt (`needs_verification`). Doseringen, contra-indicaties en richtlijnadviezen alleen uit de bron, en dan ook altijd gemarkeerd.
+11. **Bij een fout eerst een hint en een herstelvraag**, pas daarna de volledige uitleg (`explain_check`).
 
 ## Taal en UI
 
@@ -78,7 +82,7 @@ supabase/migrations/
 
 ## Stand en afspraken in de code
 
-- Alle fases (0–6) uit SPEC zijn gebouwd. `explain_feedback` schrijft de feedback mee in `review_logs.ai_feedback` via `rate_card` (migratie 0004).
+- Alle fases (0–6) uit SPEC zijn gebouwd. Uit `docs/AANVULLING_01_COACH.md` zijn A1, A2, A3, A7 en de stopcheck gebouwd (zie de statustabel bovenin dat document); A4, A5, A6, coachmodus en B1 nog niet. `explain_check` (A3) schrijft de nakijkstappen mee in `review_logs.ai_feedback`, en het fouttype in `review_logs.error_type`, via `rate_card` (migraties 0004 en 0005).
 - AI-functies end-to-end testen kan zonder echte key: `tests/e2e/ai.spec.ts` start een nagebootste Messages-API (zie docs/SETUP.md).
 - Offline (fase 6): `public/sw.js` bewaart app-bestanden en `/vandaag`; `lib/offline/idb.ts` houdt de wachtrij van vandaag en een uitgaande rij beoordelingen in IndexedDB. Zolang de rij niet leeg is, wint de lokale stand van de wachtrij van de server. Uitloggen wist beide. In Playwright omzeilt de service worker `setOffline`; de offline-test blokkeert daarom ook via `context.route`.
 - Overzicht: rekenwerk in `lib/dashboard.ts` (puur, getest), data in `lib/data/dashboard.ts`. Grafiekkleur `--chart` is gevalideerd met de dataviz-validator.

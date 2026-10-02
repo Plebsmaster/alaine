@@ -185,3 +185,13 @@ body:has([data-wide]) [data-shell-main] {
     display: none;
   }
 }
+
+/* Focusscherm met een eigen kop (casussessie, 1r): geen standaard focusbalk en de inhoud
+   over de volle breedte. */
+body:has([data-own-header]) [data-focus-bar] {
+  display: none;
+}
+body:has([data-own-header]) [data-focus-main] {
+  max-width: none;
+  padding: 0;
+}

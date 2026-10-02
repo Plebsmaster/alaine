@@ -20,13 +20,16 @@ export function ErrorChips({
   onPick,
   skipLabel = "Overslaan",
   size = "md",
+  shortcuts = true,
 }: {
   suggested: ErrorType | null;
   onPick: (type: ErrorType | null) => void;
   skipLabel?: string;
   size?: keyof typeof SIZES;
+  /** Sneltoetsen tonen; alleen waar de pagina ze ook afhandelt. */
+  shortcuts?: boolean;
 }) {
-  const keys = size !== "sm";
+  const keys = size !== "sm" && shortcuts;
   const base = `${SIZES[size]} transition-colors motion-reduce:transition-none`;
   return (
     <div className="space-y-2" role="group" aria-label="Wat ging er mis?">

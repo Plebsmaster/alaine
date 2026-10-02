@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkExpertReflection, selectCases, type CaseCandidate } from "@/lib/cases";
+import { checkExpertReflection, moveItem, sameDiagnosis, selectCases, type CaseCandidate } from "@/lib/cases";
 
 const now = new Date("2026-10-02T12:00:00Z");
 const daysAgo = (n: number) => new Date(now.getTime() - n * 86_400_000).toISOString();
@@ -52,5 +52,36 @@ describe("checkExpertReflection", () => {
     expect(checkExpertReflection("Hartfalen", [row("Hartfalen", 1)])).toMatch(/minstens twee/);
     expect(checkExpertReflection("Hartfalen", [row("Hartfalen", 1), row("COPD", 1)])).toMatch(/Precies één/);
     expect(checkExpertReflection("Hartfalen", [row("COPD", 1), row("Hartfalen", 2)])).toMatch(/juiste diagnose/);
+  });
+});
+
+describe("sameDiagnosis", () => {
+  it("negeert hoofdletters, accenten en leestekens", () => {
+    expect(sameDiagnosis("  psoriasis ", "Psoriasis")).toBe(true);
+    expect(sameDiagnosis("Seborroisch eczeem", "Seborroïsch eczeem")).toBe(true);
+  });
+
+  it("een preciezere of kortere schrijfwijze telt mee, een ander woord niet", () => {
+    expect(sameDiagnosis("Psoriasis", "Psoriasis vulgaris")).toBe(true);
+    expect(sameDiagnosis("Hartfalen met verminderde ejectiefractie", "Hartfalen")).toBe(true);
+    expect(sameDiagnosis("Eczeem", "Seborroïsch eczeem")).toBe(true);
+    expect(sameDiagnosis("COPD", "Astma")).toBe(false);
+    expect(sameDiagnosis("Psoriasis", "Psoriasisartritis")).toBe(false);
+    expect(sameDiagnosis("", "Astma")).toBe(false);
+  });
+});
+
+describe("moveItem", () => {
+  it("verplaatst omhoog en omlaag zonder de lijst zelf te wijzigen", () => {
+    const list = ["a", "b", "c"];
+    expect(moveItem(list, 2, 0)).toEqual(["c", "a", "b"]);
+    expect(moveItem(list, 0, 1)).toEqual(["b", "a", "c"]);
+    expect(list).toEqual(["a", "b", "c"]);
+  });
+
+  it("buiten de grenzen: niets of tot aan de rand", () => {
+    const list = ["a", "b"];
+    expect(moveItem(list, 5, 0)).toBe(list);
+    expect(moveItem(list, 0, 9)).toEqual(["b", "a"]);
   });
 });

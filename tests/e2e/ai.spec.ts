@@ -290,10 +290,9 @@ test("draft_script, draft_compare, draft_cases, case_hint, case_feedback, draft_
   await page.getByRole("button", { name: /^Hint/ }).click();
   await expect(page.getByText("Hint 1: Kijk nog eens naar de enkels.")).toBeVisible();
   await page.getByRole("button", { name: "Volgende" }).click();
-  await page.getByRole("button", { name: "Volgende" }).click();
+  await page.getByRole("textbox", { name: "Wat past erbij? (COPD)" }).fill("Kortademig");
   await page.getByRole("button", { name: "Toon mogelijke alternatieven" }).click();
-  await page.locator("button.rounded-full", { hasText: "Hartfalen" }).click(); // COPD is al de werkdiagnose
-  await page.getByRole("button", { name: "Volgende" }).click();
+  await page.getByRole("group", { name: "Mogelijke diagnoses" }).getByRole("button", { name: "Hartfalen" }).click(); // COPD is al de werkdiagnose
   await page.getByRole("button", { name: "Vergelijk met de expert" }).click();
   await page.getByRole("button", { name: "Feedback van AI op je redenering" }).click();
   await expect(page.getByText("Doorslaggevend: Enkeloedeem")).toBeVisible();

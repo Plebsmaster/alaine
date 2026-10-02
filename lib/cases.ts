@@ -69,3 +69,33 @@ export function checkExpertReflection(correct: string, rows: ExpertReflection[])
   }
   return null;
 }
+
+function normalizeDiagnosis(text: string): string {
+  return text
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/**
+ * Komt het eindantwoord overeen met de juiste diagnose? Ruim: hoofdletters, accenten en
+ * leestekens tellen niet, en een preciezere of kortere schrijfwijze ook niet
+ * ("Psoriasis" en "Psoriasis vulgaris"). Alleen voor de weergave; de student scoort zelf.
+ */
+export function sameDiagnosis(answer: string, correct: string): boolean {
+  const a = normalizeDiagnosis(answer);
+  const b = normalizeDiagnosis(correct);
+  if (!a || !b) return false;
+  return a === b || ` ${b} `.includes(` ${a} `) || ` ${a} `.includes(` ${b} `);
+}
+
+/** Verplaats één element (rangschikken met slepen of ↑/↓). */
+export function moveItem<T>(list: T[], from: number, to: number): T[] {
+  if (from === to || from < 0 || from >= list.length) return list;
+  const out = [...list];
+  const [x] = out.splice(from, 1);
+  out.splice(Math.max(0, Math.min(to, out.length)), 0, x);
+  return out;
+}

@@ -34,10 +34,6 @@ export default async function CaseSessionPage({ searchParams }: PageProps<"/casu
     );
   }
 
-  return (
-    <>
-      <PageHeader title="Casussessie" settings={false} />
-      <CaseSession cases={cases} sessionId={crypto.randomUUID()} aiEnabled={aiConfigured()} />
-    </>
-  );
+  // Eigen kop met stappen (ontwerp 1r); de focusbalk van de layout verdwijnt dan.
+  return <CaseSession cases={cases} sessionId={crypto.randomUUID()} aiEnabled={aiConfigured()} />;
 }

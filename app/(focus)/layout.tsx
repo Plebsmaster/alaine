@@ -7,10 +7,12 @@ export default async function FocusLayout({ children }: LayoutProps<"/">) {
   await requireUser();
   return (
     <div className="min-h-dvh">
-      <div className="mx-auto w-full max-w-[1120px] px-4 md:px-7">
+      <div data-focus-bar className="mx-auto w-full max-w-[1120px] px-4 md:px-7">
         <FocusBar />
       </div>
-      <main className="mx-auto w-full max-w-[820px] px-4 pb-12 pt-2 md:px-6">{children}</main>
+      <main data-focus-main className="mx-auto w-full max-w-[820px] px-4 pb-12 pt-2 md:px-6">
+        {children}
+      </main>
     </div>
   );
 }

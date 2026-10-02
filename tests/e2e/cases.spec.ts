@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { admin, importExample, LOCAL, login, resetExample } from "./helpers";
 
-// Fase 4: een sessie van 3 casussen uit verschillende thema's is af te ronden; de
-// expert-uitwerking is pas zichtbaar na stap 4; "Maak kaart van wat ik miste" werkt.
+// Fase 4 en ontwerp 1r: een sessie van 3 casussen uit verschillende thema's is af te ronden,
+// op laptop (reflectietabel) en telefoon (stapsgewijs); de expert-uitwerking is pas zichtbaar
+// na het rangschikken; "Maak kaart van wat ik miste" werkt.
 test.skip(!LOCAL, "De rooktest wist testdata en draait alleen tegen de lokale Supabase (supabase start).");
 
 test.beforeAll(resetExample);
@@ -29,26 +30,59 @@ test("casussessie van drie casussen uit drie thema's", async ({ page }) => {
 
   const topics = new Set<string>();
   for (let i = 0; i < 3; i++) {
-    await expect(page.getByText(`Casus ${i + 1} van 3`)).toBeVisible();
-    topics.add((await page.locator("main span.rounded-full").first().textContent()) ?? "");
+    // Casus 1 en 2 op de laptop (reflectietabel), casus 3 op de telefoon (stapsgewijs).
+    const phone = i === 2;
+    if (phone) await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.getByText(phone ? `${i + 1} / 3` : `Casus ${i + 1} van 3`)).toBeVisible();
+    topics.add(((await page.getByText(/ · Vignet$/).textContent()) ?? "").replace(/ · Vignet$/, ""));
 
     await page.getByRole("textbox", { name: "Je werkdiagnose" }).fill("Mijn werkdiagnose");
     await page.getByRole("button", { name: "Volgende" }).click();
-    await page.getByRole("textbox", { name: "Wat past erbij?" }).fill("Passende bevindingen");
-    await page.getByRole("button", { name: "Volgende" }).click();
 
-    await page.getByRole("button", { name: "Toon mogelijke alternatieven" }).click();
-    const chips = page.locator("button.rounded-full");
+    // De differentiaal pas na eigen denkwerk: minstens één kolom bij de werkdiagnose.
+    const reveal = page.getByRole("button", { name: "Toon mogelijke alternatieven" });
+    const chips = page.getByRole("group", { name: "Mogelijke diagnoses" }).getByRole("button");
+    if (!phone) {
+      await expect(reveal).toBeDisabled();
+      await page.getByRole("textbox", { name: "Wat past erbij? (Mijn werkdiagnose)" }).fill("Passende bevindingen");
+      await reveal.click();
+    } else {
+      await page.getByRole("textbox", { name: "Wat past erbij?" }).fill("Passende bevindingen");
+      await page.getByRole("button", { name: "Volgende" }).click();
+      await reveal.click();
+    }
     await expect(chips).toHaveCount(2);
+    const alt = (await chips.first().textContent())!;
     await chips.first().click();
     await expect(page.getByText(/EXPERT-/)).toHaveCount(0);
-    await page.getByRole("button", { name: "Volgende" }).click();
 
-    await expect(page.getByText("Zet de diagnoses in volgorde")).toBeVisible();
+    // Rangschikken: het alternatief naar boven, met het toetsenbord, door te slepen of op de telefoon.
+    const workingUp = page.getByRole("button", { name: "Mijn werkdiagnose omhoog" });
+    if (i === 0) {
+      await page.getByRole("button", { name: `${alt} omhoog` }).focus();
+      await page.keyboard.press("Enter");
+    } else if (i === 1) {
+      const grip = (await page.locator("li[data-row]").nth(1).locator("[data-grip]").boundingBox())!;
+      const top = (await page.locator("li[data-row]").first().boundingBox())!;
+      await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(grip.x + grip.width / 2, top.y + 4, { steps: 8 });
+      await page.mouse.up();
+    } else {
+      await page.getByRole("button", { name: "Volgende" }).click();
+      await expect(page.getByText("Zet de diagnoses in volgorde")).toBeVisible();
+      await page.getByRole("button", { name: `${alt} omhoog` }).click();
+    }
+    await expect(workingUp).toBeEnabled();
+
     await expect(page.getByText(/EXPERT-/)).toHaveCount(0);
     await page.getByRole("button", { name: "Vergelijk met de expert" }).click();
-    await expect(page.getByText(/EXPERT-/)).toBeVisible();
     await expect(page.getByText("Juiste diagnose")).toBeVisible();
+    await expect(page.getByText(`Jouw eindantwoord: ${alt}`)).toBeVisible();
+    // Alleen de juiste diagnose staat open; de rest op verzoek.
+    await expect(page.getByText(/EXPERT-/)).toHaveCount(0);
+    await page.getByRole("button", { name: /^2\. .+Toon$/ }).click();
+    await expect(page.getByText(/EXPERT-/)).toBeVisible();
     await page.getByRole("button", { name: "Verder" }).click();
 
     await page.getByRole("button", { name: "Nee" }).click();
@@ -71,6 +105,13 @@ test("casussessie van drie casussen uit drie thema's", async ({ page }) => {
   const db = admin();
   const { count: attempts } = await db.from("case_attempts").select("id", { count: "exact", head: true });
   expect(attempts).toBe(3);
+  // Rijvolgorde = eindrangschikking; de reflectie gaat mee; de differentiaal was opgevraagd.
+  const { data: ranked } = await db.from("case_attempts").select("final_ranking, reflection, cued");
+  for (const a of ranked ?? []) {
+    expect(a.final_ranking[1]).toBe("Mijn werkdiagnose");
+    expect(a.reflection).toContainEqual(expect.objectContaining({ diagnosis: "Mijn werkdiagnose", supporting: "Passende bevindingen" }));
+    expect(a.cued).toBe(true);
+  }
   const { data: typed } = await db.from("case_attempts").select("error_type").not("error_type", "is", null);
   expect(typed).toEqual([{ error_type: "slip" }]);
   const { data: card } = await db.from("cards").select("status, tags, front").contains("tags", ["casus"]).single();

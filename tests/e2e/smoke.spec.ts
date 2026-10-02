@@ -33,7 +33,7 @@ test("importeren, goedkeuren, herhalen op telefoon, zichtbaar op laptop", async 
   await first.fill("Wat is de formule voor de ejectiefractie?");
   // Na elke goedkeuring ververst de lijst; de goedgekeurde kaart verdwijnt eruit.
   for (let left = 2; left >= 0; left--) {
-    await laptop.getByRole("button", { name: "Goedkeuren" }).first().click();
+    await laptop.getByRole("button", { name: "Goedkeuren", exact: true }).first().click();
     await expect(laptop.getByRole("textbox", { name: "Voorkant" })).toHaveCount(left);
   }
   await expect(laptop.getByText("Geen kaartconcepten om na te kijken.")).toBeVisible();

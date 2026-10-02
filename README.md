@@ -8,12 +8,13 @@ Dit pakket is alles wat Claude Code nodig heeft om je studie-app te bouwen: een 
 | --- | --- | --- |
 | 0 | Fundament: Next.js, Supabase, inloggen met code (alleen `ALLOWED_EMAIL`), PWA | Gebouwd |
 | 1 | Herhalen: beheer, import, FSRS, dagelijkse wachtrij, herhaalscherm, sneltoetsen | Gebouwd |
-| 2 | Goedkeuren met AI-concepten en AI-feedback | Goedkeuren van kaarten, scripts en casussen staat er al; `draft_cards` en `explain_feedback` volgen |
+| 2 | Goedkeuren met AI-concepten en AI-feedback | Goedkeuren van kaarten, scripts, casussen en vragen staat er al; `draft_cards` en `explain_feedback` volgen |
 | 3 | Illness scripts: scriptkaarten bij goedkeuren, naast elkaar vergelijken, `draft_script`, `draft_compare` | Gebouwd (AI getest zonder echte API-aanroep) |
 | 4 | Casusmodus: sessies, reflectietabel, hints, expert-vergelijking, stagecasussen, `case_hint`, `case_feedback`, `draft_cases` | Gebouwd (AI getest zonder echte API-aanroep) |
-| 5–6 | Oefentoets, overzicht en offline | Nog te bouwen |
+| 5 | Pretest en proeftoets: resultaat per leerdoel, foute antwoorden als kaart, `draft_questions` | Gebouwd (AI getest zonder echte API-aanroep) |
+| 6 | Overzicht, export en offline | Export staat er al; overzicht en offline nog te bouwen |
 
-Getest met een lokale Supabase: 52 unit tests (FSRS, wachtrij, importer, casusselectie, AI-laag met een nagebootste API) en rooktests in de browser voor fase 0–1 (inloggen, importeren, goedkeuren, herhalen op telefoon en laptop), fase 3 (scriptkaarten, vergelijken) en fase 4 (casussessie, stagecasus). De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
+Getest met een lokale Supabase: 56 unit tests (FSRS, wachtrij, importer, casusselectie, toetsselectie en score per leerdoel, AI-laag met een nagebootste API) en rooktests in de browser voor fase 0–1, 3, 4 en 5. De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
 
 ## Wat er in deze repo zit
 
@@ -94,7 +95,12 @@ Maak het importbestand en laat me de samenvatting zien voordat je importeert.
 2. **Casussen → Start sessie**: werkdiagnose, reflectie, alternatieven, rangschikken, vergelijken met de expert, zelfscore, en een kaart van wat je miste.
 3. **Nieuwe casus uit stage**: geanonimiseerd, en direct actief.
 
-**Fase 5 en 6**
+**Fase 5: pretest en proeftoets**: gebouwd. Test zelf:
+1. Zet vragen klaar (importeren, door AI laten maken, of zelf schrijven via **Oefentoets → Nieuwe vraag**) en keur ze goed op **Goedkeuren**.
+2. **Pretest** bij een thema dat je nog moet bestuderen: na elke vraag het modelantwoord, geen score.
+3. **Proeftoets**: kies thema's en het aantal vragen, lever in, kijk open vragen zelf na en bekijk de score per leerdoel. Van een fout antwoord maak je met één klik een conceptkaart.
+
+**Fase 6**
 ```
 Bouw fase <n> uit docs/SPEC.md.
 ```

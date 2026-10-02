@@ -1,0 +1,315 @@
+{
+  "format": "pa-studie-import",
+  "version": 1,
+  "modules": [
+    {
+      "external_id": "voorbeeld",
+      "name": "VOORBEELD - verwijderen na testen",
+      "study_year": 1,
+      "sort_order": 99,
+      "exam_date": null
+    }
+  ],
+  "topics": [
+    {
+      "external_id": "voorbeeld-ritme",
+      "module": "voorbeeld",
+      "name": "Voorbeeld: ritme",
+      "sort_order": 1
+    },
+    {
+      "external_id": "voorbeeld-kno",
+      "module": "voorbeeld",
+      "name": "Voorbeeld: KNO",
+      "sort_order": 2
+    }
+  ],
+  "objectives": [
+    {
+      "external_id": "voorbeeld-ritme-ld-01",
+      "topic": "voorbeeld-ritme",
+      "code": "R.1",
+      "description": "Leerdoel Voorbeeld: ritme",
+      "sort_order": 1
+    },
+    {
+      "external_id": "voorbeeld-kno-ld-01",
+      "topic": "voorbeeld-kno",
+      "code": "K.1",
+      "description": "Leerdoel Voorbeeld: KNO",
+      "sort_order": 1
+    }
+  ],
+  "questions": [
+    {
+      "external_id": "voorbeeld-ritme-pt-01",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "pretest",
+      "format": "open",
+      "stem": "Pretestvraag 1 over ritme?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "MODEL-PRETEST-1",
+      "explanation": null,
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-pt-02",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "pretest",
+      "format": "open",
+      "stem": "Pretestvraag 2 over ritme?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "MODEL-PRETEST-2",
+      "explanation": null,
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-pt-03",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "pretest",
+      "format": "open",
+      "stem": "Pretestvraag 3 over ritme?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "MODEL-PRETEST-3",
+      "explanation": null,
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-pt-04",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "pretest",
+      "format": "open",
+      "stem": "Pretestvraag 4 over ritme?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "MODEL-PRETEST-4",
+      "explanation": null,
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-pt-05",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "pretest",
+      "format": "open",
+      "stem": "Pretestvraag 5 over ritme?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "MODEL-PRETEST-5",
+      "explanation": null,
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-pt-06",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "pretest",
+      "format": "open",
+      "stem": "Pretestvraag 6 over ritme?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "MODEL-PRETEST-6",
+      "explanation": null,
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-pt-07",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "pretest",
+      "format": "open",
+      "stem": "Pretestvraag 7 over ritme?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "MODEL-PRETEST-7",
+      "explanation": null,
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-pt-08",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "pretest",
+      "format": "open",
+      "stem": "Pretestvraag 8 over ritme?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "MODEL-PRETEST-8",
+      "explanation": null,
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-tv-01",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "exam",
+      "format": "mcq",
+      "stem": "Toetsvraag R1?",
+      "options": [
+        "Optie een",
+        "Optie twee",
+        "Optie drie",
+        "Optie vier"
+      ],
+      "correct_option": 0,
+      "model_answer": null,
+      "explanation": "UITLEG-R1",
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-tv-02",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "exam",
+      "format": "mcq",
+      "stem": "Toetsvraag R2?",
+      "options": [
+        "Optie een",
+        "Optie twee",
+        "Optie drie",
+        "Optie vier"
+      ],
+      "correct_option": 0,
+      "model_answer": null,
+      "explanation": "UITLEG-R2",
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-tv-03",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "exam",
+      "format": "mcq",
+      "stem": "Toetsvraag R3?",
+      "options": [
+        "Optie een",
+        "Optie twee",
+        "Optie drie",
+        "Optie vier"
+      ],
+      "correct_option": 0,
+      "model_answer": null,
+      "explanation": "UITLEG-R3",
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-ritme-tv-04",
+      "topic": "voorbeeld-ritme",
+      "source": null,
+      "kind": "exam",
+      "format": "open",
+      "stem": "Open toetsvraag R?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "MODEL-OPEN-R",
+      "explanation": null,
+      "objectives": [
+        "voorbeeld-ritme-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-kno-tv-01",
+      "topic": "voorbeeld-kno",
+      "source": null,
+      "kind": "exam",
+      "format": "mcq",
+      "stem": "Toetsvraag K1?",
+      "options": [
+        "Optie een",
+        "Optie twee",
+        "Optie drie",
+        "Optie vier"
+      ],
+      "correct_option": 1,
+      "model_answer": null,
+      "explanation": "UITLEG-K1",
+      "objectives": [
+        "voorbeeld-kno-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-kno-tv-02",
+      "topic": "voorbeeld-kno",
+      "source": null,
+      "kind": "exam",
+      "format": "mcq",
+      "stem": "Toetsvraag K2?",
+      "options": [
+        "Optie een",
+        "Optie twee",
+        "Optie drie",
+        "Optie vier"
+      ],
+      "correct_option": 1,
+      "model_answer": null,
+      "explanation": "UITLEG-K2",
+      "objectives": [
+        "voorbeeld-kno-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-kno-tv-03",
+      "topic": "voorbeeld-kno",
+      "source": null,
+      "kind": "exam",
+      "format": "mcq",
+      "stem": "Toetsvraag K3?",
+      "options": [
+        "Optie een",
+        "Optie twee",
+        "Optie drie",
+        "Optie vier"
+      ],
+      "correct_option": 1,
+      "model_answer": null,
+      "explanation": "UITLEG-K3",
+      "objectives": [
+        "voorbeeld-kno-ld-01"
+      ]
+    },
+    {
+      "external_id": "voorbeeld-kno-tv-04",
+      "topic": "voorbeeld-kno",
+      "source": null,
+      "kind": "exam",
+      "format": "open",
+      "stem": "Open toetsvraag K?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "MODEL-OPEN-K",
+      "explanation": null,
+      "objectives": [
+        "voorbeeld-kno-ld-01"
+      ]
+    }
+  ]
+}

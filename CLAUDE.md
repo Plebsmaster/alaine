@@ -78,7 +78,9 @@ supabase/migrations/
 
 ## Stand en afspraken in de code
 
-- Fase 0, 1, 3 en 4 zijn gebouwd. Van fase 2 bestaat `/goedkeuren` (kaarten, conceptscripts, casussen met bulk-goedkeuren) en de leerdoelendekking op `/thema/[id]`; `draft_cards` en `explain_feedback` nog niet. Fase 5–6 zijn plaatshouders.
+- Fase 0, 1, 3, 4 en 5 zijn gebouwd. Van fase 2 bestaat `/goedkeuren` (kaarten, conceptscripts, casussen en vragen met bulk-goedkeuren) en de leerdoelendekking op `/thema/[id]`; `draft_cards` en `explain_feedback` nog niet. Fase 6: export bestaat (`/api/export`), `/overzicht` en offline nog niet.
+- Oefentoets: selectie en score per leerdoel in `lib/exam.ts` (puur, getest). Pretest en proeftoets sturen geen modelantwoorden of juiste opties naar de browser vóór antwoorden of inleveren (`pretestAnswerAction`, `submitExamAction`).
+- Import gebeurt in één transactie, dus geïmporteerde rijen hebben dezelfde `created_at`: sorteer daarna op `external_id` om de volgorde uit het bestand te houden.
 - Casussen: selectie in `lib/cases.ts` (puur, getest). De sessiepagina stuurt alleen titel, vignet en vraag naar de browser; differentiaal en expert-uitwerking komen pas via server actions (`revealAlternativesAction` in stap 3, `revealExpertAction` na stap 4).
 - AI: `lib/ai/client.ts` (`runJson`: structured output met zod, één herkansing, logging in `ai_usage`), prompts in `lib/ai/prompts.ts`, schema's in `lib/ai/schemas.ts`. Modellen via `ANTHROPIC_MODEL` en `ANTHROPIC_MODEL_FAST`. Zonder key tonen de schermen een melding in plaats van een knop die faalt.
 - Illness scripts: `approve_illness_script` (migratie 0003) zet het script actief en maakt per gevuld veld één conceptkaart (`cards.script_field`), idempotent.

@@ -15,3 +15,8 @@ coverage/
 .vercel/
 *.tsbuildinfo
 .DS_Store
+next-env.d.ts
+
+# Tests
+test-results/
+playwright-report/

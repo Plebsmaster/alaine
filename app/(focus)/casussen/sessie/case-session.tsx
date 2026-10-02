@@ -538,7 +538,7 @@ function ReflectionTable(props: Shared & { canCompare: boolean; onCompare: () =>
                       onChange={(e) => updateRow(r.key, { diagnosis: e.target.value })}
                       aria-label={`Diagnose ${i + 1}`}
                       placeholder="Diagnose"
-                      className="w-full bg-transparent text-sm font-bold placeholder:font-normal placeholder:text-faint"
+                      className="w-full bg-transparent text-sm font-bold placeholder:font-normal placeholder:text-muted"
                     />
                   )}
                   <div className="flex items-center justify-between gap-2">
@@ -567,7 +567,7 @@ function ReflectionTable(props: Shared & { canCompare: boolean; onCompare: () =>
                       onChange={(e) => updateRow(r.key, { [col.key]: e.target.value })}
                       aria-label={`${col.long} (${name})`}
                       placeholder={col.label}
-                      className="block w-full resize-none bg-transparent p-3 placeholder:text-faint"
+                      className="block w-full resize-none bg-transparent p-3 placeholder:text-muted"
                     />
                   </div>
                 ))}

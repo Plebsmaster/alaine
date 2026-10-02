@@ -140,7 +140,7 @@ export function Kbd({ onPrimary = false, className = "", ...props }: ComponentPr
   return (
     <kbd
       className={`inline-flex items-center rounded-[5px] border px-1.5 font-sans text-[11px] leading-[18px] ${
-        onPrimary ? "border-accent-text/40 text-accent-text/80" : "border-border text-muted"
+        onPrimary ? "border-accent-text/40 text-accent-text/90" : "border-border text-muted"
       } ${className}`}
       {...props}
     />

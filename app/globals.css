@@ -3,8 +3,9 @@
 /*
  * Rustig, leesbaar; licht en donker volgen het systeem.
  * Herontwerp oktober 2026 (variant b · Herzien). Vervangt app/globals.css.
- * Lichte waarden zijn ontworpen. Donkere waarden zijn afgeleid van de bestaande
- * donkere set en nog niet visueel ontworpen: controleer contrast (4,5:1 voor tekst).
+ * Lichte waarden zijn ontworpen. Donkere waarden zijn afgeleid en gecontroleerd (ontwerpstap 10):
+ * alle tekstparen halen 4,5:1, gemeten per token en op alle schermen. --faint is geen tekstkleur
+ * (alleen iconen en sleepgrepen; 4,1:1 op surface).
  */
 :root {
   --bg: #f5f4ef;
@@ -83,7 +84,8 @@
     --warn-text: #e3b55b;
     --warn-text-strong: #f0d49a;
     --danger: #f2948e;
-    --danger-soft: #3b1f1d;
+    /* Lichter dan afgeleid, zodat "fout" in de leerdoelblokjes zichtbaar is; --danger erop: 5,1:1. */
+    --danger-soft: #5c2b28;
 
     --again: #f2948e;
     --hard: #e3b55b;

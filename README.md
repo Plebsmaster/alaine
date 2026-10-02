@@ -14,8 +14,9 @@ Dit pakket is alles wat Claude Code nodig heeft om je studie-app te bouwen: een 
 | 5 | Pretest en proeftoets: resultaat per leerdoel, foute antwoorden als kaart, `draft_questions` | Gebouwd |
 | 6 | Overzicht, export en offline herhalen | Gebouwd |
 | Aanvulling 01 | Fouttypes, ketenkaarten, hint en herstelvraag, controleren tegenover de bron, stopcheck | Gebouwd; coachmodus, varianten, vermoeidheid, stoplicht en gesprekken nog niet (zie `docs/AANVULLING_01_COACH.md`) |
+| Herontwerp | Ontwerp variant b (`docs/design/`): shell met vier werkruimtes, alle schermen, donkere modus gecontroleerd | Gebouwd (stap 0–10) |
 
-Getest met een lokale Supabase: 61 unit tests (FSRS, wachtrij, importer, casusselectie, toetsselectie en score per leerdoel, overzichtscijfers, AI-laag met een nagebootste API) en rooktests in de browser voor alle fases, waaronder herhalen in vliegtuigmodus. Alle AI-functies zijn end-to-end getest tegen een nagebootste Anthropic-API (`tests/e2e/ai.spec.ts`), nog niet tegen de echte. De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
+Getest met een lokale Supabase: 90 unit tests (FSRS, wachtrij, importer, casusselectie, toetsselectie en score per leerdoel, overzichtscijfers, brondeel bij AI-kaarten, vergelijken, AI-laag met een nagebootste API) en rooktests in de browser voor alle fases, waaronder herhalen in vliegtuigmodus. Alle AI-functies zijn end-to-end getest tegen een nagebootste Anthropic-API (`tests/e2e/ai.spec.ts`), nog niet tegen de echte. De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
 
 ## Wat er in deze repo zit
 
@@ -28,6 +29,7 @@ Getest met een lokale Supabase: 61 unit tests (FSRS, wachtrij, importer, casusse
 | `docs/AI_PROMPTS.md` | De AI-functies, hun prompts en de vangrails |
 | `docs/CONTENT_PIPELINE.md` | Hoe Claude Code van jouw pdf's en leerdoelen importbestanden maakt |
 | `docs/AANVULLING_01_COACH.md` | Coachprincipes: fouttypes, ketenkaarten, hint vóór uitleg, controleren; met status per onderdeel |
+| `docs/design/` | Het ontwerp: tokens, schermen en gedrag (`README.md`), de ontwerpbestanden en de bouwprompts |
 | `supabase/migrations/` | Databaseschema met beveiliging per gebruiker, plus functies voor import en herhalen |
 | `supabase/templates/` | E-mailsjablonen met inlogcode, om in Supabase te plakken |
 | `app/`, `components/`, `lib/` | De app zelf |
@@ -35,6 +37,14 @@ Getest met een lokale Supabase: 61 unit tests (FSRS, wachtrij, importer, casusse
 | `tests/` | Unit tests en de rooktest |
 | `content/README.md` | Waar je je studiestof neerzet |
 | `content/voorbeeld-import.json` | Een klein voorbeeldbestand om de import mee te testen |
+
+## Ontwerp
+
+Het ontwerp staat in [`docs/design/README.md`](docs/design/README.md) (variant b · Herzien): de design tokens, de basiscomponenten en per scherm de laptop- en telefoonversie. De tokens staan in `app/globals.css` als Tailwind-klassen (`bg-surface`, `text-muted`, `bg-accent-soft`); gebruik die, geen losse hexkleuren. Lettertypes: Atkinson Hyperlegible Next (tekst) en Newsreader (koppen en kaarttekst).
+
+- Vier werkruimtes: Vandaag, Leren, Studiestof, Inzicht. Herhalen, casussessie, proeftoets en pretest draaien in een focusmodus zonder navigatie.
+- Licht en donker volgen de systeeminstelling. De lichte kleuren zijn ontworpen; de donkere zijn afgeleid en gecontroleerd op contrast (alle tekst minstens 4,5:1).
+- Nieuwe schermen of onderdelen: volg eerst `docs/design/README.md`; daar staat ook wat elk scherm níet mag tonen (zoals antwoorden vóór het ophalen).
 
 ## Stap 1: regel dit zelf
 

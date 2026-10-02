@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Notice, PageHeader, Panel } from "@/components/ui";
+import { Button, Notice, PageHeader, Panel } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
+import { approveCases } from "../casussen/actions";
 import { DraftCard, type Draft } from "./draft-card";
 
 export const metadata: Metadata = { title: "Goedkeuren" };
@@ -32,7 +33,15 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
     .limit(100);
   if (topicFilter) scriptsQuery = scriptsQuery.eq("topic_id", topicFilter);
 
-  const [cards, scripts, cases, questions, { data: drafts, error }, { data: counts }, { data: draftScripts }] = await Promise.all([
+  let casesQuery = supabase
+    .from("cases")
+    .select("id, title, correct_diagnosis, origin, topics(name)")
+    .eq("status", "draft")
+    .order("created_at")
+    .limit(100);
+  if (topicFilter) casesQuery = casesQuery.eq("topic_id", topicFilter);
+
+  const [cards, scripts, cases, questions, { data: drafts, error }, { data: counts }, { data: draftScripts }, { data: draftCases }] = await Promise.all([
     count("cards"),
     count("illness_scripts"),
     count("cases"),
@@ -40,6 +49,7 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
     draftsQuery,
     supabase.from("topic_card_counts").select("topic_id, draft").gt("draft", 0),
     scriptsQuery,
+    casesQuery,
   ]);
   if (error) throw new Error(error.message);
 
@@ -118,6 +128,30 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
               </li>
             ))}
           </ul>
+        </section>
+      ) : null}
+
+      {(draftCases ?? []).length > 0 ? (
+        <section className="mb-8 space-y-2">
+          <h2 className="text-lg font-semibold">Casussen</h2>
+          <p className="text-sm text-muted">Open een casus om hem te controleren, of keur er meerdere tegelijk goed.</p>
+          <form action={approveCases} className="space-y-2">
+            <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
+              {(draftCases ?? []).map((c) => (
+                <li key={c.id} className="flex min-h-12 items-center gap-3 px-4 py-2">
+                  <input type="checkbox" name="id" value={c.id} aria-label={`${c.title} goedkeuren`} className="h-5 w-5 shrink-0" />
+                  <Link href={`/casussen/${c.id}`} className="flex-1 hover:underline">
+                    {c.title}
+                  </Link>
+                  <span className="shrink-0 text-xs text-muted">
+                    {c.topics?.name}
+                    {c.origin === "ai" ? " · AI" : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <Button>Geselecteerde casussen goedkeuren</Button>
+          </form>
         </section>
       ) : null}
 

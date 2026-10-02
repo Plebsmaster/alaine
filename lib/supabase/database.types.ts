@@ -34,6 +34,42 @@ export type Database = {
   };
   public: {
     Tables: {
+      ai_usage: {
+        Row: {
+          created_at: string;
+          duration_ms: number | null;
+          function: string;
+          id: number;
+          input_tokens: number;
+          model: string;
+          ok: boolean;
+          output_tokens: number;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          duration_ms?: number | null;
+          function: string;
+          id?: never;
+          input_tokens?: number;
+          model: string;
+          ok?: boolean;
+          output_tokens?: number;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          duration_ms?: number | null;
+          function?: string;
+          id?: never;
+          input_tokens?: number;
+          model?: string;
+          ok?: boolean;
+          output_tokens?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       card_objectives: {
         Row: {
           card_id: string;
@@ -154,6 +190,7 @@ export type Database = {
           image_path: string | null;
           origin: string;
           rewritten: boolean;
+          script_field: string | null;
           source_id: string | null;
           source_locator: string | null;
           status: string;
@@ -175,6 +212,7 @@ export type Database = {
           image_path?: string | null;
           origin?: string;
           rewritten?: boolean;
+          script_field?: string | null;
           source_id?: string | null;
           source_locator?: string | null;
           status?: string;
@@ -196,6 +234,7 @@ export type Database = {
           image_path?: string | null;
           origin?: string;
           rewritten?: boolean;
+          script_field?: string | null;
           source_id?: string | null;
           source_locator?: string | null;
           status?: string;
@@ -1025,6 +1064,10 @@ export type Database = {
           p_schedule: Json;
         };
         Returns: undefined;
+      };
+      approve_illness_script: {
+        Args: { p_script_id: string };
+        Returns: number;
       };
       import_bundle: {
         Args: { p_payload: Json; p_user_id?: string };

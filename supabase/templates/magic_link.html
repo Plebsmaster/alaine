@@ -1,0 +1,7 @@
+<h2>Inloggen bij PA Studie</h2>
+<p>Je inlogcode is:</p>
+<p style="font-size: 28px; font-weight: bold; letter-spacing: 4px">{{ .Token }}</p>
+<p>Typ deze code in de app. Dat werkt ook in de app op je beginscherm.</p>
+<p>Of open deze link in dezelfde browser waarin je de code aanvroeg:<br />
+<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/vandaag">Inloggen</a></p>
+<p>Heb je dit niet aangevraagd? Dan kun je deze mail negeren.</p>

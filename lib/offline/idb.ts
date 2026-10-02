@@ -17,6 +17,7 @@ export type OutboxItem = {
     durationMs: number | null;
     answerText: string | null;
     sessionId: string;
+    aiFeedback?: string | null;
   };
 };
 

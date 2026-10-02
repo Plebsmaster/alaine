@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge, Button, Notice, Panel, Textarea } from "@/components/ui";
 import type { ReviewCard } from "@/lib/data/review";
+import type { ExplainFeedback } from "@/lib/ai/schemas";
 import { CARD_TYPE_LABELS } from "@/lib/labels";
 import { preview, rate, RATINGS, STATE, type FsrsSettings, type RatingValue } from "@/lib/fsrs";
 import { available as idbAvailable, loadSnapshot, outboxAdd, outboxAll, outboxRemove, saveSnapshot } from "@/lib/offline/idb";
 import { pickNext, requeue } from "@/lib/queue";
 import {
+  explainFeedbackAction,
   flagCardAction,
   rateCardAction,
   suspendCardAction,
@@ -48,11 +50,12 @@ type Props = {
   userId: string;
   /** Moment waarop de server deze wachtrij maakte; een nieuwere lokale stand wint. */
   generatedAt: number;
+  aiEnabled: boolean;
 };
 
 type Current = { card: ReviewCard; source: "queue" | "pending" } | null;
 
-export function ReviewSession({ initialQueue, initialPending, settings, endOfDay, userId, generatedAt }: Props) {
+export function ReviewSession({ initialQueue, initialPending, settings, endOfDay, userId, generatedAt, aiEnabled }: Props) {
   const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
   const [queue, setQueue] = useState(initialQueue);
   const [pending, setPending] = useState(initialPending);
@@ -62,6 +65,8 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
   });
   const [revealedAt, setRevealedAt] = useState<Date | null>(null);
   const [answer, setAnswer] = useState("");
+  const [feedback, setFeedback] = useState<ExplainFeedback | null>(null);
+  const [feedbackState, setFeedbackState] = useState<"idle" | "loading" | string>("idle");
   const shownAt = useRef(0);
   const [startedAt] = useState(() => Date.now());
   const [results, setResults] = useState<Result[]>([]);
@@ -196,6 +201,8 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
     setCurrent(next ? { card: next.item as ReviewCard, source: next.source } : null);
     setRevealedAt(null);
     setAnswer("");
+    setFeedback(null);
+    setFeedbackState("idle");
     setMenu("closed");
     setFlagNote("");
   }, []);
@@ -234,12 +241,13 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
         durationMs: Math.min(MAX_DURATION_MS, now.getTime() - shownAt.current),
         answerText: answer.trim() || null,
         sessionId,
+        aiFeedback: feedback ? JSON.stringify(feedback) : null,
       });
       const nextQueue = current.source === "queue" ? queue.slice(1) : queue;
       const nextPending = requeue(pending, card, schedule, new Date(endOfDay)) as ReviewCard[];
       advance(nextQueue, nextPending);
     },
-    [current, revealedAt, settings, answer, sessionId, queue, pending, endOfDay, advance, enqueue],
+    [current, revealedAt, settings, answer, feedback, sessionId, queue, pending, endOfDay, advance, enqueue],
   );
 
   const removeCurrent = useCallback(
@@ -381,6 +389,41 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
               <img src={card.image_url} alt="" className="max-h-80 rounded-lg border border-border" />
             ) : null}
             {card.source_label ? <p className="text-xs text-muted">Bron: {card.source_label}</p> : null}
+
+            {/* explain_feedback: pas na het tonen van het antwoord, en alleen op een getypt antwoord. */}
+            {answer.trim() && aiEnabled ? (
+              feedback ? (
+                <div className="space-y-1 rounded-lg bg-surface-2 p-3 text-sm" aria-live="polite">
+                  <p className="text-xs font-medium text-muted">Feedback van AI</p>
+                  {feedback.correct ? <p><strong>Klopt:</strong> {feedback.correct}</p> : null}
+                  {feedback.missing ? <p><strong>Ontbreekt:</strong> {feedback.missing}</p> : null}
+                  {feedback.misconception ? <p><strong>Misvatting:</strong> {feedback.misconception}</p> : null}
+                  {feedback.follow_up ? <p><strong>Denk verder:</strong> {feedback.follow_up}</p> : null}
+                  <p className="text-xs text-muted">
+                    Voorstel: {RATINGS.find((r) => r.value === feedback.suggested_rating)?.label}. Je kiest zelf.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <Button
+                    disabled={feedbackState === "loading"}
+                    onClick={async () => {
+                      setFeedbackState("loading");
+                      const res = await explainFeedbackAction(card.card_id, answer).catch(() => null);
+                      if (res?.ok) {
+                        setFeedback(res.feedback);
+                        setFeedbackState("idle");
+                      } else setFeedbackState(res?.error ?? "Geen verbinding. Probeer het opnieuw.");
+                    }}
+                  >
+                    {feedbackState === "loading" ? "AI leest je antwoord…" : "Feedback van AI"}
+                  </Button>
+                  {feedbackState !== "idle" && feedbackState !== "loading" ? (
+                    <p className="text-sm text-danger">{feedbackState}</p>
+                  ) : null}
+                </div>
+              )
+            ) : null}
           </div>
         ) : null}
       </Panel>
@@ -393,11 +436,17 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
           </Button>
         ) : (
           <div className="grid grid-cols-4 gap-2">
+            {feedback ? (
+              <span id="ai-voorstel" className="sr-only">
+                Voorstel van de AI
+              </span>
+            ) : null}
             {RATINGS.map(({ value, label }) => (
               <button
                 key={value}
                 onClick={() => onRate(value)}
-                className={`flex min-h-14 flex-col items-center justify-center rounded-lg border-2 bg-surface px-1 text-[0.8rem] font-semibold hover:bg-surface-2 sm:text-sm ${RATING_STYLES[value]}`}
+                aria-describedby={feedback?.suggested_rating === value ? "ai-voorstel" : undefined}
+                className={`flex min-h-14 flex-col items-center justify-center rounded-lg border-2 bg-surface px-1 text-[0.8rem] font-semibold hover:bg-surface-2 sm:text-sm ${RATING_STYLES[value]} ${feedback?.suggested_rating === value ? "ring-2 ring-offset-2 ring-[var(--focus)] ring-offset-[var(--bg)]" : ""}`}
               >
                 <span>{label}</span>
                 <span className="text-xs font-normal text-muted">

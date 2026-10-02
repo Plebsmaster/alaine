@@ -71,3 +71,28 @@ export const draftQuestionsOutput = z.object({
     )
     .min(1),
 });
+
+export const draftCardsOutput = z.object({
+  cards: z
+    .array(
+      z.object({
+        type: z.enum(["fact", "explain", "skill", "communication"]),
+        front: z.string().min(1).max(2000),
+        back: z.string().min(1).max(2000),
+        explanation: z.string(),
+        objectives: z.array(z.string()),
+        source_locator: z.string(),
+      }),
+    )
+    .min(1),
+});
+
+export const explainFeedbackOutput = z.object({
+  correct: z.string(),
+  missing: z.string(),
+  misconception: z.string().nullable(),
+  follow_up: z.string(),
+  suggested_rating: z.number().int().min(1).max(4),
+});
+
+export type ExplainFeedback = z.infer<typeof explainFeedbackOutput>;

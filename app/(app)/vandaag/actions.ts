@@ -5,6 +5,9 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { countDueTomorrow } from "@/lib/data/review";
 import { getSettings } from "@/lib/data/settings";
+import { AiError, runJson } from "@/lib/ai/client";
+import { explainFeedbackPrompt } from "@/lib/ai/prompts";
+import { explainFeedbackOutput, type ExplainFeedback } from "@/lib/ai/schemas";
 import { rate, type Schedule } from "@/lib/fsrs";
 
 const rateInput = z.object({
@@ -14,6 +17,7 @@ const rateInput = z.object({
   durationMs: z.number().int().min(0).max(3_600_000).nullable(),
   answerText: z.string().max(5000).nullable(),
   sessionId: z.uuid(),
+  aiFeedback: z.string().max(10_000).nullable().optional(),
 });
 
 export type RateInput = z.infer<typeof rateInput>;
@@ -26,7 +30,7 @@ export type ActionResult = { ok: true } | { ok: false; error: string };
 export async function rateCardAction(input: RateInput): Promise<ActionResult> {
   const parsed = rateInput.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Ongeldige invoer" };
-  const { cardId, rating, reviewedAt, durationMs, answerText, sessionId } = parsed.data;
+  const { cardId, rating, reviewedAt, durationMs, answerText, sessionId, aiFeedback } = parsed.data;
   const { supabase } = await requireUser();
 
   const [{ data: row, error }, settings] = await Promise.all([
@@ -50,6 +54,7 @@ export async function rateCardAction(input: RateInput): Promise<ActionResult> {
     p_duration_ms: durationMs ?? undefined,
     p_answer_text: answerText ?? undefined,
     p_session_id: sessionId,
+    p_ai_feedback: aiFeedback ?? undefined,
   });
   if (rpcError) return { ok: false, error: rpcError.message };
   return { ok: true };
@@ -82,4 +87,45 @@ export async function tomorrowAction(): Promise<{ due: number; fresh: number }> 
     supabase.from("review_queue").select("card_id", { count: "exact", head: true }).eq("state", 0).eq("reps", 0),
   ]);
   return { due, fresh: Math.min(settings.max_new_per_day, count ?? 0) };
+}
+
+/**
+ * explain_feedback: feedback op een getypt antwoord. De knop staat pas in beeld nadat
+ * de student het antwoord heeft getoond; de student kiest daarna zelf de beoordeling.
+ */
+export async function explainFeedbackAction(cardId: string, answer: string) {
+  const parsed = z.object({ cardId: z.uuid(), answer: z.string().trim().min(1).max(5000) }).safeParse({ cardId, answer });
+  if (!parsed.success) return { ok: false as const, error: "Typ eerst een antwoord." };
+  const { supabase } = await requireUser();
+  const { data: card, error } = await supabase
+    .from("cards")
+    .select("front, back, explanation, source_locator, sources(title, chapter, notes)")
+    .eq("id", parsed.data.cardId)
+    .single();
+  if (error) return { ok: false as const, error: "Kaart niet gevonden" };
+  // De app bewaart geen boektekst; de "bron" is de uitwerking op de kaart plus de bronvermelding.
+  const sourceExcerpt = [
+    card.explanation,
+    card.sources ? `Bron: ${card.sources.title}${card.sources.chapter ? `, h. ${card.sources.chapter}` : ""}` : null,
+    card.source_locator,
+  ]
+    .filter(Boolean)
+    .join("\n");
+  try {
+    const feedback: ExplainFeedback = await runJson({
+      fn: "explain_feedback",
+      ...explainFeedbackPrompt({
+        card: { front: card.front, back: card.back, explanation: card.explanation },
+        sourceExcerpt: sourceExcerpt || "Geen bronfragment; gebruik de achterkant van de kaart.",
+        answer: parsed.data.answer,
+      }),
+      schema: explainFeedbackOutput,
+      supabase,
+      maxTokens: 4000,
+    });
+    return { ok: true as const, feedback };
+  } catch (e) {
+    if (e instanceof AiError) return { ok: false as const, error: e.message };
+    return { ok: false as const, error: "Geen verbinding met de AI. Probeer het opnieuw." };
+  }
 }

@@ -140,3 +140,52 @@ LEERDOELEN: ${JSON.stringify(input.objectives)}
 Geef JSON: {"questions": [...]}`,
   };
 }
+
+export const DRAFT_CARD_TYPES = ["fact", "explain", "skill", "communication"] as const;
+export type DraftCardType = (typeof DRAFT_CARD_TYPES)[number];
+
+export function draftCardsPrompt(input: {
+  topic: string;
+  objectives: { id: string; code: string | null; description: string }[];
+  sourceText: string;
+  types: DraftCardType[];
+  max: number;
+}) {
+  return {
+    system: BASE_RULES,
+    user: `Maak flashcards uit de BRONTEKST voor het thema "${input.topic}".
+Regels voor goede kaarten:
+- Eén idee per kaart. Een opsomming van meer dan drie punten splits je op.
+- De voorkant dwingt tot ophalen: geen ja/nee-vragen, geen vragen waarvan het antwoord in de vraag staat.
+- De achterkant is kort: één tot drie zinnen.
+- Zet bij "explanation" het waarom, als de bron dat geeft.
+- Koppel elke kaart aan de leerdoelen die hij afdekt (gebruik de gegeven ids). Kaarten die bij geen enkel leerdoel passen maak je niet.
+- Geef bij elke kaart "source_locator" (pagina of paragraaf) als die in de tekst staat.
+- Typen: fact = feit of definitie; explain = mechanisme of waarom-vraag; skill = stappen van een handeling; communication = gespreksvoering.
+- Gebruik alleen deze typen: ${input.types.join(", ")}. Maak maximaal ${input.max} kaarten.
+LEERDOELEN: ${JSON.stringify(input.objectives)}
+BRONTEKST: """${input.sourceText}"""
+Geef JSON: {"cards": [{"type","front","back","explanation","objectives","source_locator"}]}`,
+  };
+}
+
+export function explainFeedbackPrompt(input: {
+  card: { front: string; back: string; explanation: string | null };
+  sourceExcerpt: string;
+  answer: string;
+}) {
+  return {
+    system: BASE_RULES,
+    user: `Beoordeel het antwoord van de student op de kaart.
+- Begin met wat klopt.
+- Noem daarna wat ontbreekt of niet klopt, met de juiste formulering uit de achterkant of bron.
+- Benoem een misvatting expliciet als je die ziet.
+- Sluit af met één vervolgvraag die het begrip verdiept.
+- Maximaal 120 woorden.
+- Geef een suggestie voor de beoordeling: 1 (fout), 2 (deels), 3 (goed), 4 (goed en volledig). De student kiest zelf.
+KAART: ${JSON.stringify(input.card)}
+BRON: """${input.sourceExcerpt}"""
+ANTWOORD STUDENT: """${input.answer}"""
+Geef JSON: {"correct": "...", "missing": "...", "misconception": "..." | null, "follow_up": "...", "suggested_rating": 1-4}`,
+  };
+}

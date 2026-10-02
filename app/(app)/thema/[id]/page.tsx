@@ -4,10 +4,12 @@ import { notFound } from "next/navigation";
 import { CardFields } from "@/components/card-form";
 import { ConfirmButton } from "@/components/confirm-button";
 import { Badge, Button, Field, Input, PageHeader, Panel, Textarea } from "@/components/ui";
+import { aiConfigured } from "@/lib/ai/client";
 import { requireUser } from "@/lib/auth";
 import { createCard } from "../../kaart/actions";
 import { deleteTopic, updateTopic } from "../../themas/actions";
 import { createObjective, deleteObjective, updateObjective } from "./actions";
+import { AiCardsForm } from "./ai-cards-form";
 
 export const metadata: Metadata = { title: "Thema" };
 
@@ -21,7 +23,7 @@ export default async function TopicPage({ params, searchParams }: PageProps<"/th
   const status = typeof statusParam === "string" && statusParam in STATUS_LABELS ? statusParam : "active";
   const { supabase } = await requireUser();
 
-  const [{ data: topic }, { data: objectives }, { data: coverage }, { data: counts }, { data: cards }] = await Promise.all([
+  const [{ data: topic }, { data: objectives }, { data: coverage }, { data: counts }, { data: cards }, { data: sources }] = await Promise.all([
     supabase.from("topics").select("id, name, sort_order, modules(name)").eq("id", id).maybeSingle(),
     supabase.from("learning_objectives").select("id, code, description, sort_order").eq("topic_id", id).order("sort_order"),
     supabase.from("objective_coverage").select("*").eq("topic_id", id),
@@ -34,6 +36,7 @@ export default async function TopicPage({ params, searchParams }: PageProps<"/th
       .order("created_at")
     .order("external_id", { nullsFirst: false })
       .limit(500),
+    supabase.from("sources").select("id, title, author, chapter").order("title"),
   ]);
   if (!topic) notFound();
   const cov = new Map((coverage ?? []).map((c) => [c.objective_id, c]));
@@ -144,6 +147,21 @@ export default async function TopicPage({ params, searchParams }: PageProps<"/th
           ))}
         </ul>
       </section>
+
+      <details className="mb-8 rounded-xl border border-border bg-surface p-4">
+        <summary className="cursor-pointer font-semibold">Kaarten laten maken uit brontekst (AI)</summary>
+        <div className="mt-3">
+          <AiCardsForm
+            topicId={id}
+            sources={(sources ?? []).map((s) => ({
+              id: s.id,
+              label: [s.author, s.title, s.chapter ? `h. ${s.chapter}` : null].filter(Boolean).join(", "),
+            }))}
+            enabled={aiConfigured()}
+            hasObjectives={(objectives ?? []).length > 0}
+          />
+        </div>
+      </details>
 
       <Panel className="mb-8">
         <h2 className="mb-3 font-semibold">Eigen kaart toevoegen</h2>

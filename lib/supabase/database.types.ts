@@ -1075,6 +1075,7 @@ export type Database = {
       };
       rate_card: {
         Args: {
+          p_ai_feedback?: string;
           p_answer_text?: string;
           p_card_id: string;
           p_duration_ms?: number;

@@ -4,6 +4,9 @@ import { defineConfig, devices } from "@playwright/test";
 // Chromium-pad overschrijven kan met PW_CHROMIUM_PATH.
 const executablePath = process.env.PW_CHROMIUM_PATH || undefined;
 
+// Laat context.route ook verzoeken van de service worker onderscheppen (offline-test).
+process.env.PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS = "1";
+
 export default defineConfig({
   testDir: "tests/e2e",
   timeout: 90_000,

@@ -12,9 +12,9 @@ Dit pakket is alles wat Claude Code nodig heeft om je studie-app te bouwen: een 
 | 3 | Illness scripts: scriptkaarten bij goedkeuren, naast elkaar vergelijken, `draft_script`, `draft_compare` | Gebouwd (AI getest zonder echte API-aanroep) |
 | 4 | Casusmodus: sessies, reflectietabel, hints, expert-vergelijking, stagecasussen, `case_hint`, `case_feedback`, `draft_cases` | Gebouwd (AI getest zonder echte API-aanroep) |
 | 5 | Pretest en proeftoets: resultaat per leerdoel, foute antwoorden als kaart, `draft_questions` | Gebouwd (AI getest zonder echte API-aanroep) |
-| 6 | Overzicht, export en offline | Export staat er al; overzicht en offline nog te bouwen |
+| 6 | Overzicht, export en offline herhalen | Gebouwd |
 
-Getest met een lokale Supabase: 56 unit tests (FSRS, wachtrij, importer, casusselectie, toetsselectie en score per leerdoel, AI-laag met een nagebootste API) en rooktests in de browser voor fase 0–1, 3, 4 en 5. De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
+Getest met een lokale Supabase: 61 unit tests (FSRS, wachtrij, importer, casusselectie, toetsselectie en score per leerdoel, overzichtscijfers, AI-laag met een nagebootste API) en rooktests in de browser voor fase 0–1 en 3–6, waaronder herhalen in vliegtuigmodus. De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
 
 ## Wat er in deze repo zit
 
@@ -100,10 +100,14 @@ Maak het importbestand en laat me de samenvatting zien voordat je importeert.
 2. **Pretest** bij een thema dat je nog moet bestuderen: na elke vraag het modelantwoord, geen score.
 3. **Proeftoets**: kies thema's en het aantal vragen, lever in, kijk open vragen zelf na en bekijk de score per leerdoel. Van een fout antwoord maak je met één klik een conceptkaart.
 
-**Fase 6**
-```
-Bouw fase <n> uit docs/SPEC.md.
-```
+**Fase 6: overzicht, export en offline**: gebouwd. Test zelf:
+1. **Overzicht**: per thema actieve kaarten, concepten, vandaag te doen, retentie over 30 dagen en de laatste casusscore; leerdoelen zonder dekking; werklast voor 14 dagen; dagen tot de toets; lastige kaarten; streak en minuten per dag.
+2. **Offline**: open Vandaag één keer met verbinding, zet je telefoon in vliegtuigmodus en herhaal. Na herverbinden worden je beoordelingen vanzelf opgeslagen. De rest van de app vraagt verbinding.
+3. **Export**: Instellingen → Download export.
+
+**Volgende stappen**
+- Rest van fase 2: `draft_cards` (AI-kaarten uit brontekst) en `explain_feedback` (AI-feedback op je getypte antwoord).
+- Studiestof omzetten met `docs/CONTENT_PIPELINE.md` zodra je de stof hebt.
 
 ## Wat je níet deelt
 

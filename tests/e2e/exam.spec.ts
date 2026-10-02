@@ -42,7 +42,9 @@ test("pretest en proeftoets", async ({ page }) => {
   await page.getByRole("checkbox", { name: "Voorbeeld: ritme in proeftoets" }).check();
   await page.getByRole("checkbox", { name: "Voorbeeld: KNO in proeftoets" }).check();
   await page.getByRole("button", { name: "Start proeftoets" }).click();
-  await expect(page.getByText("8 vragen")).toBeVisible();
+  await expect(page).toHaveURL(/\/oefentoets\/proeftoets\?ids=/);
+  await expect(page.getByRole("heading", { name: "Proeftoets" })).toBeVisible();
+  await expect(page.getByText("8 vragen", { exact: true })).toBeVisible();
   const html = await page.content();
   expect(html).not.toMatch(/UITLEG-|MODEL-OPEN/);
 

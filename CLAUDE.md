@@ -78,7 +78,9 @@ supabase/migrations/
 
 ## Stand en afspraken in de code
 
-- Fase 0, 1, 3, 4 en 5 zijn gebouwd. Van fase 2 bestaat `/goedkeuren` (kaarten, conceptscripts, casussen en vragen met bulk-goedkeuren) en de leerdoelendekking op `/thema/[id]`; `draft_cards` en `explain_feedback` nog niet. Fase 6: export bestaat (`/api/export`), `/overzicht` en offline nog niet.
+- Fase 0, 1 en 3–6 zijn gebouwd. Van fase 2 bestaat `/goedkeuren` (kaarten, conceptscripts, casussen en vragen met bulk-goedkeuren) en de leerdoelendekking op `/thema/[id]`; `draft_cards` en `explain_feedback` nog niet.
+- Offline (fase 6): `public/sw.js` bewaart app-bestanden en `/vandaag`; `lib/offline/idb.ts` houdt de wachtrij van vandaag en een uitgaande rij beoordelingen in IndexedDB. Zolang de rij niet leeg is, wint de lokale stand van de wachtrij van de server. Uitloggen wist beide. In Playwright omzeilt de service worker `setOffline`; de offline-test blokkeert daarom ook via `context.route`.
+- Overzicht: rekenwerk in `lib/dashboard.ts` (puur, getest), data in `lib/data/dashboard.ts`. Grafiekkleur `--chart` is gevalideerd met de dataviz-validator.
 - Oefentoets: selectie en score per leerdoel in `lib/exam.ts` (puur, getest). Pretest en proeftoets sturen geen modelantwoorden of juiste opties naar de browser vóór antwoorden of inleveren (`pretestAnswerAction`, `submitExamAction`).
 - Import gebeurt in één transactie, dus geïmporteerde rijen hebben dezelfde `created_at`: sorteer daarna op `external_id` om de volgorde uit het bestand te houden.
 - Casussen: selectie in `lib/cases.ts` (puur, getest). De sessiepagina stuurt alleen titel, vignet en vraag naar de browser; differentiaal en expert-uitwerking komen pas via server actions (`revealAlternativesAction` in stap 3, `revealExpertAction` na stap 4).

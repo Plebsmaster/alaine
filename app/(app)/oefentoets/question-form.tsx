@@ -8,6 +8,7 @@ type QuestionValues = {
   correct_option: number | null;
   model_answer: string | null;
   explanation: string | null;
+  needs_verification?: boolean;
 };
 
 export function QuestionFields({ value }: { value?: QuestionValues }) {
@@ -60,6 +61,10 @@ export function QuestionFields({ value }: { value?: QuestionValues }) {
       <Field label="Uitleg">
         <Textarea name="explanation" defaultValue={value?.explanation ?? ""} rows={2} />
       </Field>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="needs_verification" defaultChecked={value?.needs_verification ?? false} className="h-4 w-4" />
+        Te controleren (komt niet aantoonbaar uit de bron)
+      </label>
     </div>
   );
 }

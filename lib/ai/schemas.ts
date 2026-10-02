@@ -11,6 +11,7 @@ export const draftScriptOutput = z.object({
     management: z.string(),
     key_discriminators: z.string(),
     similar_conditions: z.array(z.string()),
+    needs_verification: z.boolean(),
   }),
 });
 
@@ -19,6 +20,7 @@ export const draftCompareOutput = z.object({
     front: z.string().min(1).max(2000),
     back: z.string().min(1).max(2000),
     explanation: z.string(),
+    needs_verification: z.boolean(),
   }),
 });
 
@@ -52,6 +54,7 @@ const aiCase = z.object({
   teaching_points: z.string(),
   difficulty: z.number().int(),
   objectives: z.array(z.string()),
+  needs_verification: z.boolean(),
 });
 
 export const draftCasesOutput = z.object({ cases: z.array(aiCase).min(1) });
@@ -67,6 +70,7 @@ export const draftQuestionsOutput = z.object({
         model_answer: z.string(),
         explanation: z.string(),
         objectives: z.array(z.string()),
+        needs_verification: z.boolean(),
       }),
     )
     .min(1),
@@ -76,23 +80,32 @@ export const draftCardsOutput = z.object({
   cards: z
     .array(
       z.object({
-        type: z.enum(["fact", "explain", "skill", "communication"]),
+        type: z.enum(["fact", "explain", "chain", "skill", "communication"]),
         front: z.string().min(1).max(2000),
         back: z.string().min(1).max(2000),
         explanation: z.string(),
         objectives: z.array(z.string()),
         source_locator: z.string(),
+        needs_verification: z.boolean(),
       }),
     )
     .min(1),
 });
 
-export const explainFeedbackOutput = z.object({
-  correct: z.string(),
-  missing: z.string(),
-  misconception: z.string().nullable(),
-  follow_up: z.string(),
+const errorType = z.enum(["knowledge_gap", "reasoning_error", "slip"]);
+
+export const explainCheckOutput = z.object({
+  verdict: z.enum(["correct", "partial", "incorrect"]),
+  error_type: errorType.nullable(),
+  hint: z.string().nullable(),
+  recovery_question: z.string().nullable(),
+  explanation: z.string().nullable(),
+  follow_up: z.string().nullable(),
   suggested_rating: z.number().int().min(1).max(4),
 });
 
-export type ExplainFeedback = z.infer<typeof explainFeedbackOutput>;
+export type ExplainCheck = z.infer<typeof explainCheckOutput>;
+
+export const stopcheckOutput = z.object({
+  points: z.array(z.object({ text: z.string().min(1), item_ref: z.string() })).max(5),
+});

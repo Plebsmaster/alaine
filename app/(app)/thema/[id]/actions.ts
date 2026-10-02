@@ -94,6 +94,7 @@ export async function draftCardsAction(_prev: DraftCardsState, fd: FormData): Pr
         back: c.back.trim(),
         explanation: c.explanation.trim() || null,
         source_locator: c.source_locator.trim() || locator,
+        needs_verification: c.needs_verification,
         status: "draft",
         origin: "ai",
       })

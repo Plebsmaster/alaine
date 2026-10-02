@@ -89,6 +89,10 @@ export default async function ScriptPage({ params, searchParams }: PageProps<"/s
               <Input name="source_locator" defaultValue={script.source_locator ?? ""} />
             </Field>
           </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="needs_verification" defaultChecked={script.needs_verification} className="h-4 w-4" />
+            Te controleren (komt niet aantoonbaar uit de bron)
+          </label>
           <p className="text-xs text-muted">
             Bij goedkeuren komt er per gevuld veld (presentatie, pathofysiologie, bevindingen, beleid) één conceptkaart bij.
           </p>

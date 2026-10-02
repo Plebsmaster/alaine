@@ -10,6 +10,7 @@ type CaseValues = {
   teaching_points: string | null;
   difficulty: number | null;
   expert_reflection: ExpertReflection[];
+  needs_verification?: boolean;
 };
 
 /** Velden van een casus. Rij 1 van de differentiaal is de juiste diagnose. */
@@ -56,6 +57,10 @@ export function CaseFields({ value }: { value?: CaseValues }) {
       <Field label="Lessen van deze casus" hint="De twee of drie belangrijkste lessen">
         <Textarea name="teaching_points" defaultValue={value?.teaching_points ?? ""} rows={3} />
       </Field>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="needs_verification" defaultChecked={value?.needs_verification ?? false} className="h-4 w-4" />
+        Te controleren (komt niet aantoonbaar uit de bron)
+      </label>
       <Field label="Moeilijkheid">
         <Select name="difficulty" defaultValue={String(value?.difficulty ?? 2)}>
           <option value="1">1 · makkelijk</option>

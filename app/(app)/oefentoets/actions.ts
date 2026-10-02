@@ -128,6 +128,17 @@ export async function markOpenAction(attemptId: string, correct: boolean) {
   return error ? { ok: false as const, error: error.message } : { ok: true as const };
 }
 
+/** A1: fouttype bij een fout antwoord (analyse; verandert de score niet). */
+export async function setQuestionErrorAction(attemptId: string, errorType: "knowledge_gap" | "reasoning_error" | "slip" | null) {
+  const parsed = z
+    .object({ attemptId: z.uuid(), errorType: z.enum(["knowledge_gap", "reasoning_error", "slip"]).nullable() })
+    .safeParse({ attemptId, errorType });
+  if (!parsed.success) return { ok: false as const, error: "Ongeldige invoer" };
+  const { supabase } = await requireUser();
+  const { error } = await supabase.from("question_attempts").update({ error_type: parsed.data.errorType }).eq("id", parsed.data.attemptId);
+  return error ? { ok: false as const, error: error.message } : { ok: true as const };
+}
+
 /** Fout antwoord → met één klik een conceptkaart. */
 export async function questionCardAction(questionId: string) {
   const { supabase } = await requireUser();
@@ -187,7 +198,16 @@ function questionFields(fd: FormData) {
   }
   const model_answer = optText(fd, "model_answer");
   if (format === "open" && !model_answer) throw new Error("Een open vraag heeft een modelantwoord nodig");
-  return { kind, format, stem, options, correct_option: correct, model_answer, explanation: optText(fd, "explanation") };
+  return {
+    kind,
+    format,
+    stem,
+    options,
+    correct_option: correct,
+    model_answer,
+    explanation: optText(fd, "explanation"),
+    needs_verification: fd.get("needs_verification") === "on",
+  };
 }
 
 export async function createQuestion(fd: FormData) {
@@ -298,6 +318,7 @@ export async function draftQuestionsAction(_prev: FormState, fd: FormData): Prom
         correct_option: mcq ? q.correct_option : null,
         model_answer: q.model_answer.trim() || null,
         explanation: q.explanation.trim() || null,
+        needs_verification: q.needs_verification,
         status: "draft",
         origin: "ai",
       })

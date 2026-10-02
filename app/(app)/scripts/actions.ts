@@ -30,6 +30,7 @@ function scriptFields(fd: FormData) {
     similar_conditions: csv(fd, "similar_conditions"),
     source_id: optText(fd, "source_id"),
     source_locator: optText(fd, "source_locator"),
+    needs_verification: fd.get("needs_verification") === "on",
   };
 }
 
@@ -121,6 +122,7 @@ export async function draftScriptAction(_prev: FormState, fd: FormData): Promise
       similar_conditions: s.similar_conditions.map((c) => c.trim()).filter(Boolean),
       source_id: optText(fd, "source_id"),
       source_locator: optText(fd, "source_locator"),
+      needs_verification: s.needs_verification,
       status: "draft",
       origin: "ai",
     })
@@ -167,6 +169,7 @@ export async function draftCompareAction(_prev: FormState, fd: FormData): Promis
     back: result.card.back.trim(),
     explanation: result.card.explanation.trim() || null,
     tags: ["vergelijken"],
+    needs_verification: result.card.needs_verification,
     status: "draft",
     origin: "ai",
   });

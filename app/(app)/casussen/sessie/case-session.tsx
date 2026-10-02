@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
+import { ErrorChips } from "@/components/error-chips";
 import { Badge, Button, Field, Input, Notice, Panel, Textarea } from "@/components/ui";
+import type { ErrorType } from "@/lib/labels";
 import type { CaseFeedback } from "@/lib/ai/schemas";
 import { MAX_HINTS, type ExpertReflection, type Reflection } from "@/lib/cases";
 import {
@@ -98,6 +100,7 @@ function CaseRunner({
   const [feedback, setFeedback] = useState<CaseFeedback | null>(null);
   const [correct, setCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState<number | null>(null);
+  const [errorType, setErrorType] = useState<ErrorType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -382,6 +385,7 @@ function CaseRunner({
               ))}
             </div>
           </fieldset>
+          {correct === false ? <ErrorChips suggested={errorType} onPick={setErrorType} skipLabel="Weet ik niet" /> : null}
           <fieldset className="space-y-2">
             <legend className="text-sm font-medium">Hoe ging je redenering? (1 = slecht, 5 = uitstekend)</legend>
             <div className="flex gap-2">
@@ -410,6 +414,7 @@ function CaseRunner({
                   cued: cuedList !== null,
                   hints_used: hints.length,
                   correct: correct!,
+                  error_type: correct ? null : errorType,
                   self_score: score!,
                   ai_feedback: feedback ? JSON.stringify(feedback) : null,
                   duration_ms: Date.now() - startedAt,

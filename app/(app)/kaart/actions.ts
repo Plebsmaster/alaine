@@ -24,6 +24,7 @@ function cardFields(fd: FormData) {
     explanation: optText(fd, "explanation"),
     source_locator: optText(fd, "source_locator"),
     tags: csv(fd, "tags"),
+    needs_verification: fd.get("needs_verification") === "on",
   };
 }
 

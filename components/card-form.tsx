@@ -8,6 +8,7 @@ export const CARD_TYPE_OPTIONS = [
   { value: "image", label: "Beeld" },
   { value: "skill", label: "Vaardigheid" },
   { value: "communication", label: "Communicatie" },
+  { value: "chain", label: "Keten (mechanisme in stappen)" },
 ];
 
 type Objective = { id: string; code: string | null; description: string };
@@ -17,7 +18,15 @@ export function CardFields({
   objectives,
   selected = [],
 }: {
-  card?: { type: string; front: string; back: string; explanation: string | null; source_locator: string | null; tags: string[] };
+  card?: {
+    type: string;
+    front: string;
+    back: string;
+    explanation: string | null;
+    source_locator: string | null;
+    tags: string[];
+    needs_verification?: boolean;
+  };
   objectives: Objective[];
   selected?: string[];
 }) {
@@ -35,7 +44,7 @@ export function CardFields({
       <Field label="Voorkant (vraag)" hint="Dwing ophalen af: geen ja/nee-vraag, het antwoord staat niet in de vraag.">
         <Textarea name="front" defaultValue={card?.front} required maxLength={2000} />
       </Field>
-      <Field label="Achterkant (kort antwoord)">
+      <Field label="Achterkant (kort antwoord)" hint="Bij een ketenkaart: de stappen gescheiden door → (bijv. ACE-remming → minder angiotensine II → minder aldosteron).">
         <Textarea name="back" defaultValue={card?.back} required maxLength={2000} />
       </Field>
       <Field label="Uitleg (optioneel)">
@@ -49,6 +58,10 @@ export function CardFields({
           <Input name="tags" defaultValue={card?.tags.join(", ") ?? ""} />
         </Field>
       </div>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" name="needs_verification" defaultChecked={card?.needs_verification ?? false} className="h-4 w-4" />
+        Te controleren (komt niet aantoonbaar uit de bron)
+      </label>
       {objectives.length > 0 ? (
         <fieldset className="space-y-1">
           <legend className="text-sm font-medium">Leerdoelen</legend>

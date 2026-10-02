@@ -13,11 +13,12 @@ export type AiFunction =
   | "draft_compare"
   | "draft_cases"
   | "draft_questions"
-  | "explain_feedback"
+  | "explain_check"
   | "case_hint"
-  | "case_feedback";
+  | "case_feedback"
+  | "stopcheck";
 
-const FAST_FUNCTIONS: AiFunction[] = ["explain_feedback", "case_hint"];
+const FAST_FUNCTIONS: AiFunction[] = ["explain_check", "case_hint"];
 
 export function aiConfigured(): boolean {
   return !!process.env.ANTHROPIC_API_KEY;

@@ -4,7 +4,11 @@ export const BASE_RULES = `Je bent een studiecoach voor een student in de master
 - Schrijf in helder Nederlands, kort en concreet. Gebruik Nederlandse medische termen, met de Latijnse of Engelse term tussen haakjes waar dat gebruikelijk is.
 - Baseer je alleen op de meegegeven bron of uitwerking. Staat iets niet in de bron, zeg dat dan en verzin het niet.
 - Geef geen behandeladvies voor echte patiënten. Dit is studiemateriaal.
-- Antwoord uitsluitend in het gevraagde JSON-formaat, zonder tekst eromheen.`;
+- Antwoord uitsluitend in het gevraagde JSON-formaat, zonder tekst eromheen.
+- Onderscheid wat uit de bron komt van algemene kennis. Gebruik je iets dat niet in de bron staat, zet dan needs_verification op true.
+- Noem geen doseringen, contra-indicaties of richtlijnadviezen die niet in de bron staan. Verwijs dan naar het Farmacotherapeutisch Kompas, de NHG-Standaard of de FMS-richtlijn. Staan ze wel in de bron, zet dan ook needs_verification op true.
+- Farmacologie bouw je op in vaste volgorde: geneesmiddelgroep, voorbeeldmiddel, kernmechanisme, effect en bijwerking als keten. Interacties pas daarna.
+- Let bij mechanismen op richtingen: stijgt/daalt, stimulatie/remming, retentie/uitscheiding, preload/afterload.`;
 
 /** Maximaal ongeveer 15.000 woorden brontekst per aanroep (AI_PROMPTS.md). */
 export const MAX_SOURCE_WORDS = 15_000;
@@ -21,7 +25,8 @@ Vul alleen velden die de bron onderbouwt; laat andere velden leeg ("").
 Velden: epidemiology, pathophysiology, presentation, findings, management, key_discriminators, similar_conditions (lijst).
 Schrijf per veld maximaal vijf korte zinnen of punten.
 BRONTEKST: """${input.sourceText}"""
-Geef JSON: {"illness_script": {...}}`,
+Zet "needs_verification" op true als iets niet uit de bron komt.
+Geef JSON: {"illness_script": {..., "needs_verification": true|false}}`,
   };
 }
 
@@ -43,7 +48,7 @@ De voorkant vraagt naar het onderscheid ("Hoe onderscheid je A van B?").
 De achterkant noemt de twee tot vier kenmerken die het meest onderscheidend zijn, per aandoening.
 Gebruik alleen informatie uit de SCRIPTS.
 SCRIPTS: ${JSON.stringify(scripts)}
-Geef JSON: {"card": {"front","back","explanation"}}`,
+Geef JSON: {"card": {"front","back","explanation","needs_verification"}}`,
   };
 }
 
@@ -108,6 +113,7 @@ export function draftCasesPrompt(input: {
 - "teaching_points": de twee of drie lessen van de casus.
 - Varieer de moeilijkheid (1 tot 3).
 - "objectives": de ids van de leerdoelen die de casus afdekt.
+- "needs_verification": true als de casus iets bevat dat niet in de SCRIPTS staat.
 SCRIPTS: ${JSON.stringify(input.scripts)}
 LEERDOELEN: ${JSON.stringify(input.objectives)}
 Geef JSON: {"cases": [...]}`,
@@ -134,6 +140,7 @@ export function draftQuestionsPrompt(input: {
 - "format" is "open" of "mcq". Bij mcq: "options" (vier) en "correct_option" (index vanaf 0); bij open: "options" leeg en "correct_option" -1.
 - "model_answer": het modelantwoord (bij mcq mag dit leeg zijn).
 - "objectives": de ids van de leerdoelen.
+- "needs_verification": true als de vraag of het antwoord iets bevat dat niet in de bron of de scripts staat.
 SCRIPTS: ${JSON.stringify(input.scripts)}
 BRONTEKST: """${input.sourceText}"""
 LEERDOELEN: ${JSON.stringify(input.objectives)}
@@ -141,7 +148,7 @@ Geef JSON: {"questions": [...]}`,
   };
 }
 
-export const DRAFT_CARD_TYPES = ["fact", "explain", "skill", "communication"] as const;
+export const DRAFT_CARD_TYPES = ["fact", "explain", "chain", "skill", "communication"] as const;
 export type DraftCardType = (typeof DRAFT_CARD_TYPES)[number];
 
 export function draftCardsPrompt(input: {
@@ -161,31 +168,57 @@ Regels voor goede kaarten:
 - Zet bij "explanation" het waarom, als de bron dat geeft.
 - Koppel elke kaart aan de leerdoelen die hij afdekt (gebruik de gegeven ids). Kaarten die bij geen enkel leerdoel passen maak je niet.
 - Geef bij elke kaart "source_locator" (pagina of paragraaf) als die in de tekst staat.
-- Typen: fact = feit of definitie; explain = mechanisme of waarom-vraag; skill = stappen van een handeling; communication = gespreksvoering.
+- Typen: fact = feit of definitie; explain = waarom-vraag; chain = mechanisme als keten; skill = stappen van een handeling; communication = gespreksvoering.
+- Ketenkaart (chain): maak er één voor elk mechanisme in de bron. Voorkant: begin en eind van de keten ("ACE-remmer → serumkalium: leg de keten uit."). Achterkant: de stappen gescheiden door " → ".
+- Bij farmacologie in deze volgorde: geneesmiddelgroep en voorbeeldmiddel (fact), kernmechanisme (chain), belangrijkste effect en bijwerking (chain). Interacties pas daarna.
+- "needs_verification": true als iets op de kaart niet uit de BRONTEKST komt, of als het een dosering, contra-indicatie of richtlijnadvies is.
 - Gebruik alleen deze typen: ${input.types.join(", ")}. Maak maximaal ${input.max} kaarten.
 LEERDOELEN: ${JSON.stringify(input.objectives)}
 BRONTEKST: """${input.sourceText}"""
-Geef JSON: {"cards": [{"type","front","back","explanation","objectives","source_locator"}]}`,
+Geef JSON: {"cards": [{"type","front","back","explanation","objectives","source_locator","needs_verification"}]}`,
   };
 }
 
-export function explainFeedbackPrompt(input: {
-  card: { front: string; back: string; explanation: string | null };
+export type CheckStep = { answer: string; verdict: string; hint: string | null; recovery_question: string | null };
+
+/**
+ * explain_check (Aanvulling 01, A3): nakijken vóórdat de student het antwoord ziet.
+ * Stap 1: correct → bevestiging + vervolgvraag; deels/fout → alleen hint + herstelvraag.
+ * Stap 2: na het antwoord op de herstelvraag de volledige uitleg.
+ */
+export function explainCheckPrompt(input: {
+  stage: 1 | 2;
+  card: { type: string; front: string; back: string; explanation: string | null };
   sourceExcerpt: string;
   answer: string;
+  previous: CheckStep | null;
 }) {
   return {
     system: BASE_RULES,
-    user: `Beoordeel het antwoord van de student op de kaart.
-- Begin met wat klopt.
-- Noem daarna wat ontbreekt of niet klopt, met de juiste formulering uit de achterkant of bron.
-- Benoem een misvatting expliciet als je die ziet.
-- Sluit af met één vervolgvraag die het begrip verdiept.
-- Maximaal 120 woorden.
-- Geef een suggestie voor de beoordeling: 1 (fout), 2 (deels), 3 (goed), 4 (goed en volledig). De student kiest zelf.
+    user: `Je kijkt het antwoord van de student na. De student heeft het juiste antwoord nog NIET gezien.
+STAP = ${input.stage}   (1 = eerste antwoord, 2 = antwoord op de herstelvraag)
+Bij STAP 1:
+- Correct: bevestig kort wat klopt en geef één verdiepende vervolgvraag.
+- Deels of fout: geef GEEN uitleg en verklap het antwoord niet. Geef één korte hint en één kleinere herstelvraag die terugleidt naar de juiste redenering.
+Bij STAP 2: geef de volledige uitleg: wat klopte, wat ontbrak en de juiste redenering.
+Bij type chain: controleer ontbrekende stappen, volgorde en omkeringen. Noem een omkering altijd expliciet; dat is een reasoning_error.
+Fouttype bij een niet-correct antwoord: knowledge_gap (kennis ontbreekt), reasoning_error (kennis aanwezig, redenering of richting fout), slip (alleen als de rest van het antwoord laat zien dat de kennis er is).
+Beoordelingssuggestie: correct bij stap 1 = 3 of 4; na een hint wel gelukt = 2; niet gelukt = 1.
+Maximaal 100 woorden.
 KAART: ${JSON.stringify(input.card)}
 BRON: """${input.sourceExcerpt}"""
-ANTWOORD STUDENT: """${input.answer}"""
-Geef JSON: {"correct": "...", "missing": "...", "misconception": "..." | null, "follow_up": "...", "suggested_rating": 1-4}`,
+ANTWOORD: """${input.answer}"""
+EERDERE STAP: ${JSON.stringify(input.previous)}
+Geef JSON: {"verdict": "correct"|"partial"|"incorrect", "error_type": ...|null, "hint": ...|null, "recovery_question": ...|null, "explanation": ...|null, "follow_up": ...|null, "suggested_rating": 1-4}`,
+  };
+}
+
+export function stopcheckPrompt(items: unknown[]) {
+  return {
+    system: BASE_RULES,
+    user: `Vat in maximaal vijf punten samen wat de student vandaag echt moet onthouden, op basis van de fouten en twijfels van deze sessie.
+Elk punt is één zin die direct als flashcard kan dienen. Geen nieuwe stof.
+FOUTEN VANDAAG: ${JSON.stringify(items)}
+Geef JSON: {"points": [{"text": "...", "item_ref": "..."}]}`,
   };
 }

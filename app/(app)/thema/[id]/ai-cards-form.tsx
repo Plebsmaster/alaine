@@ -6,7 +6,8 @@ import { draftCardsAction, type DraftCardsState } from "./actions";
 
 const TYPES = [
   { value: "fact", label: "Feit of definitie" },
-  { value: "explain", label: "Uitleg (waarom, mechanisme)" },
+  { value: "explain", label: "Uitleg (waarom)" },
+  { value: "chain", label: "Keten (mechanisme in stappen)" },
   { value: "skill", label: "Vaardigheid (stappen)" },
   { value: "communication", label: "Communicatie" },
 ];
@@ -53,7 +54,7 @@ export function AiCardsForm({
         <legend className="mb-1 text-sm font-medium">Kaarttypes</legend>
         {TYPES.map((t) => (
           <label key={t.value} className="flex min-h-11 items-center gap-2 text-sm">
-            <input type="checkbox" name="types" value={t.value} defaultChecked={t.value === "fact" || t.value === "explain"} className="h-4 w-4" />
+            <input type="checkbox" name="types" value={t.value} defaultChecked={t.value === "fact" || t.value === "explain" || t.value === "chain"} className="h-4 w-4" />
             {t.label}
           </label>
         ))}

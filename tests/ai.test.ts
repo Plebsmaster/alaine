@@ -33,6 +33,7 @@ const goodScript = {
     management: "",
     key_discriminators: "Volledig irregulair.",
     similar_conditions: ["Boezemflutter"],
+    needs_verification: false,
   },
 };
 
@@ -68,8 +69,8 @@ describe("runJson", () => {
 
   it("doet één nieuwe poging met de validatiefout erbij", async () => {
     const { api, calls } = fakeApi([
-      { parsed: { card: { front: "", back: "x", explanation: "" } } },
-      { parsed: { card: { front: "Hoe onderscheid je A van B?", back: "…", explanation: "" } } },
+      { parsed: { card: { front: "", back: "x", explanation: "", needs_verification: false } } },
+      { parsed: { card: { front: "Hoe onderscheid je A van B?", back: "…", explanation: "", needs_verification: false } } },
     ]);
     const out = await runJson({ fn: "draft_compare", system: "s", user: "u", schema: draftCompareOutput, api });
     expect(out.card.front).toBe("Hoe onderscheid je A van B?");
@@ -92,7 +93,7 @@ describe("runJson", () => {
   });
 
   it("kiest het snelle model voor hints en feedback", () => {
-    expect(modelFor("case_hint")).toBe(modelFor("explain_feedback"));
+    expect(modelFor("case_hint")).toBe(modelFor("explain_check"));
     expect(modelFor("case_hint")).not.toBe(modelFor("draft_cards"));
   });
 });
@@ -129,6 +130,7 @@ describe("casus-AI", () => {
           teaching_points: "…",
           difficulty: 2,
           objectives: [],
+          needs_verification: false,
         },
       ],
     };
@@ -136,5 +138,38 @@ describe("casus-AI", () => {
     expect((await runJson({ fn: "case_hint", system: "s", user: "u", schema: caseHintOutput, api })).hint).toBe("Kijk naar de enkels.");
     expect((await runJson({ fn: "case_feedback", system: "s", user: "u", schema: caseFeedbackOutput, api })).lessons).toHaveLength(1);
     expect((await runJson({ fn: "draft_cases", system: "s", user: "u", schema: draftCasesOutput, api })).cases).toHaveLength(1);
+  });
+});
+
+import { BASE_RULES as RULES, explainCheckPrompt } from "@/lib/ai/prompts";
+import { explainCheckOutput, stopcheckOutput } from "@/lib/ai/schemas";
+
+describe("Aanvulling 01", () => {
+  it("BASE_RULES bevat de regels over bron, doseringen, farmacologie en richtingen", () => {
+    expect(RULES).toContain("needs_verification op true");
+    expect(RULES).toContain("Farmacotherapeutisch Kompas");
+    expect(RULES).toContain("geneesmiddelgroep, voorbeeldmiddel, kernmechanisme");
+    expect(RULES).toContain("retentie/uitscheiding");
+  });
+
+  it("explain_check geeft stap, kaarttype en eerdere stap mee", () => {
+    const p = explainCheckPrompt({
+      stage: 2,
+      card: { type: "chain", front: "ACE-remmer → kalium?", back: "a → b", explanation: null },
+      sourceExcerpt: "",
+      answer: "b → a",
+      previous: { answer: "x", verdict: "incorrect", hint: "h", recovery_question: "q" },
+    });
+    expect(p.user).toContain("STAP = 2");
+    expect(p.user).toContain('"type":"chain"');
+    expect(p.user).toContain('"recovery_question":"q"');
+    expect(p.user).toContain("De student heeft het juiste antwoord nog NIET gezien.");
+  });
+
+  it("schema's voor explain_check en stopcheck", async () => {
+    const check = { verdict: "incorrect", error_type: "reasoning_error", hint: "Kijk naar de richting.", recovery_question: "Stijgt of daalt kalium?", explanation: null, follow_up: null, suggested_rating: 1 };
+    const { api } = fakeApi([{ parsed: check }, { parsed: { points: [{ text: "ACE-remming verhoogt kalium.", item_ref: "x" }] } }]);
+    expect((await runJson({ fn: "explain_check", system: "s", user: "u", schema: explainCheckOutput, api })).error_type).toBe("reasoning_error");
+    expect((await runJson({ fn: "stopcheck", system: "s", user: "u", schema: stopcheckOutput, api })).points).toHaveLength(1);
   });
 });

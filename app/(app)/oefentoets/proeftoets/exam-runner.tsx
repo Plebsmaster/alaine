@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
+import { ErrorChips } from "@/components/error-chips";
 import { Badge, Button, Notice, Panel, Textarea } from "@/components/ui";
+import type { ErrorType } from "@/lib/labels";
 import { scoreByObjective } from "@/lib/exam";
-import { markOpenAction, questionCardAction, submitExamAction, type ExamResult } from "../actions";
+import { markOpenAction, questionCardAction, setQuestionErrorAction, submitExamAction, type ExamResult } from "../actions";
 
 export type ExamQuestion = { id: string; format: "open" | "mcq"; stem: string; options: string[] | null; topic_name: string };
 type Answer = { chosen_option: number | null; answer_text: string | null };
@@ -94,6 +96,7 @@ export function ExamRunner({ questions, sessionId }: { questions: ExamQuestion[]
 function ExamResults({ initial }: { initial: ExamResult[] }) {
   const [results, setResults] = useState(initial);
   const [cards, setCards] = useState<Record<string, "busy" | "done" | string>>({});
+  const [errors, setErrors] = useState<Record<string, ErrorType | null>>({});
   const byObjective = useMemo(() => scoreByObjective(results), [results]);
   const mcq = results.filter((r) => r.format === "mcq");
   const open = results.filter((r) => r.format === "open");
@@ -198,6 +201,16 @@ function ExamResults({ initial }: { initial: ExamResult[] }) {
               </div>
             )}
             {r.explanation ? <p className="prose-card text-sm text-muted">{r.explanation}</p> : null}
+            {r.correct === false ? (
+              <ErrorChips
+                suggested={errors[r.attempt_id] ?? null}
+                skipLabel="Weet ik niet"
+                onPick={(t) => {
+                  setErrors((e) => ({ ...e, [r.attempt_id]: t }));
+                  void setQuestionErrorAction(r.attempt_id, t).catch(() => null);
+                }}
+              />
+            ) : null}
             {r.correct === false ? (
               cards[r.question_id] === "done" ? (
                 <p className="text-sm text-good">Conceptkaart gemaakt; staat op Goedkeuren.</p>

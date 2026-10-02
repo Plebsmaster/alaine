@@ -129,6 +129,7 @@ const saveInput = attemptInput.extend({
   cued: z.boolean(),
   hints_used: z.number().int().min(0).max(MAX_HINTS),
   correct: z.boolean(),
+  error_type: z.enum(["knowledge_gap", "reasoning_error", "slip"]).nullable(),
   self_score: z.number().int().min(1).max(5),
   ai_feedback: z.string().max(20_000).nullable(),
   duration_ms: z.number().int().min(0).max(24 * 3_600_000),
@@ -210,6 +211,7 @@ function caseFields(fd: FormData) {
     expert_reflection: reflection,
     teaching_points: optText(fd, "teaching_points"),
     difficulty: Math.min(3, Math.max(1, difficulty)),
+    needs_verification: fd.get("needs_verification") === "on",
   };
 }
 
@@ -326,6 +328,7 @@ export async function draftCasesAction(_prev: FormState, fd: FormData): Promise<
         expert_reflection: rows,
         teaching_points: c.teaching_points.trim() || null,
         difficulty: Math.min(3, Math.max(1, c.difficulty)),
+        needs_verification: c.needs_verification,
         status: "draft",
         origin: "ai",
       })

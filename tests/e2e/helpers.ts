@@ -1,18 +1,54 @@
 import { createClient } from "@supabase/supabase-js";
 import { config } from "dotenv";
 import { devices, expect, type Browser, type Page } from "@playwright/test";
+import { E2E_EMAIL } from "../../playwright.config";
 
 config({ path: ".env.local", quiet: true });
 
 export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-export const EMAIL = (process.env.ALLOWED_EMAIL ?? "").toLowerCase();
+/** Eigen testgebruiker; nooit het account van de student (ALLOWED_EMAIL in .env.local). */
+export const EMAIL = E2E_EMAIL;
 const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
 
 /** Rooktests wissen testdata en draaien daarom alleen tegen de lokale Supabase. */
 export const LOCAL = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?/.test(SUPABASE_URL);
 
-export function admin() {
+function serviceRole() {
   return createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
+}
+
+let token: Promise<string> | null = null;
+
+/** Sessie van de testgebruiker (maakt het account aan als het nog niet bestaat). */
+function testUserToken(): Promise<string> {
+  token ??= (async () => {
+    const service = serviceRole();
+    const { data: users } = await service.auth.admin.listUsers({ perPage: 1000 });
+    if (!users.users.some((u) => u.email?.toLowerCase() === EMAIL)) {
+      const { error } = await service.auth.admin.createUser({ email: EMAIL, email_confirm: true });
+      if (error) throw error;
+    }
+    const { data: link, error } = await service.auth.admin.generateLink({ type: "magiclink", email: EMAIL });
+    if (error) throw error;
+    const anon = createClient(SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
+    const { data: session, error: verifyError } = await anon.auth.verifyOtp({
+      type: "magiclink",
+      token_hash: link.properties.hashed_token,
+    });
+    if (verifyError || !session.session) throw verifyError ?? new Error("Geen sessie voor de testgebruiker");
+    return session.session.access_token;
+  })();
+  return token;
+}
+
+/**
+ * Database-client die werkt als de testgebruiker: RLS laat alleen diens rijen zien, dus
+ * tellingen en wijzigingen raken nooit de data van de student.
+ */
+export function admin() {
+  return createClient(SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    accessToken: testUserToken,
+  });
 }
 
 /** Schone start: verwijder de voorbeeldmodule (cascade) van de testgebruiker. */

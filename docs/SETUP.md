@@ -51,6 +51,6 @@ npm run dev                 # http://localhost:3000
 
 - Inlogmails lokaal lezen: http://127.0.0.1:54324 (Mailpit).
 - `npm test`: unit tests (FSRS, wachtrij, importer).
-- `npm run test:e2e`: rooktest in de browser tegen de lokale Supabase. Die wist de voorbeeldmodule en draait daarom alleen als `NEXT_PUBLIC_SUPABASE_URL` naar localhost wijst.
-- AI-tests zonder echte API-key: start de app met `ANTHROPIC_API_KEY=test ANTHROPIC_BASE_URL=http://127.0.0.1:4010 npm run start -- -p 3001` en draai `E2E_AI=1 E2E_BASE_URL=http://localhost:3001 npx playwright test tests/e2e/ai.spec.ts`. De test start zelf een nagebootste API op poort 4010.
+- `npm run test:e2e`: rooktest in de browser tegen de lokale Supabase. Draait met een eigen testgebruiker (`e2e@pa-studie.test`, of `E2E_EMAIL`) op een eigen productieserver (poort 3100), zodat je eigen data onaangeroerd blijft. Wist alleen de voorbeeldmodule van die testgebruiker en draait alleen als `NEXT_PUBLIC_SUPABASE_URL` naar localhost wijst.
+- AI-tests zonder echte API-key: start de app met `ALLOWED_EMAIL=e2e@pa-studie.test ANTHROPIC_API_KEY=test ANTHROPIC_BASE_URL=http://127.0.0.1:4010 npm run start -- -p 3001` en draai `E2E_AI=1 E2E_BASE_URL=http://localhost:3001 npx playwright test tests/e2e/ai.spec.ts`. De test start zelf een nagebootste API op poort 4010.
 - `npm run db:types`: TypeScript-types opnieuw genereren na een migratie.

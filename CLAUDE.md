@@ -76,7 +76,7 @@ supabase/migrations/
 ## Commando's
 
 - `npm run dev`, `npm run build`, `npm run lint`, `npm run typecheck`, `npm test`
-- `npm run test:e2e`: Playwright-rooktest tegen de lokale Supabase (`supabase start`); wist de voorbeeldmodule
+- `npm run test:e2e`: Playwright-rooktest tegen de lokale Supabase (`supabase start`), met eigen testgebruiker `e2e@pa-studie.test` op een eigen server (poort 3100); raakt de data van de student niet. Wist de voorbeeldmodule van de testgebruiker
 - `npm run import -- [--dry-run] <pad-naar-json>`: importeert een bestand volgens `docs/IMPORT_FORMAT.md`
 - `npm run db:types`: `lib/supabase/database.types.ts` opnieuw genereren na een migratie (lokale stack)
 - Migraties: `supabase link` en `supabase db push`, of via de Supabase MCP als die verbonden is

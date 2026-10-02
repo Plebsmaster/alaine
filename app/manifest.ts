@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/vandaag",
     scope: "/",
     display: "standalone",
-    background_color: "#f7f7f5",
+    background_color: "#f5f4ef",
     theme_color: "#2f6f62",
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },

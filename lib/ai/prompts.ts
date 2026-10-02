@@ -113,3 +113,30 @@ LEERDOELEN: ${JSON.stringify(input.objectives)}
 Geef JSON: {"cases": [...]}`,
   };
 }
+
+export function draftQuestionsPrompt(input: {
+  topic: string;
+  n: number;
+  kind: "pretest" | "exam";
+  format: "open" | "mcq" | "mixed";
+  scripts: unknown[];
+  sourceText: string;
+  objectives: { id: string; code: string | null; description: string }[];
+}) {
+  const format = { open: "alleen open vragen", mcq: "alleen meerkeuzevragen", mixed: "meerkeuze en open door elkaar" }[input.format];
+  return {
+    system: BASE_RULES,
+    user: `Maak ${input.n} ${input.kind}-vragen voor het thema "${input.topic}" (${format}).
+- Pretest: brede, samenhangende vragen over de kern van het thema, open te beantwoorden. Ze worden gesteld vóórdat de student de stof heeft bestudeerd.
+- Exam: zo veel mogelijk casusvragen op toepassingsniveau, niet alleen reproductie.
+- Meerkeuze: vier opties, één juist, afleiders die aannemelijk zijn voor iemand die het net niet weet. Geen "alle bovenstaande" of "geen van bovenstaande".
+- Koppel elke vraag aan leerdoelen en geef een korte uitleg.
+- "format" is "open" of "mcq". Bij mcq: "options" (vier) en "correct_option" (index vanaf 0); bij open: "options" leeg en "correct_option" -1.
+- "model_answer": het modelantwoord (bij mcq mag dit leeg zijn).
+- "objectives": de ids van de leerdoelen.
+SCRIPTS: ${JSON.stringify(input.scripts)}
+BRONTEKST: """${input.sourceText}"""
+LEERDOELEN: ${JSON.stringify(input.objectives)}
+Geef JSON: {"questions": [...]}`,
+  };
+}

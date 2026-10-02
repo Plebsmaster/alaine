@@ -55,3 +55,19 @@ const aiCase = z.object({
 });
 
 export const draftCasesOutput = z.object({ cases: z.array(aiCase).min(1) });
+
+export const draftQuestionsOutput = z.object({
+  questions: z
+    .array(
+      z.object({
+        format: z.enum(["open", "mcq"]),
+        stem: z.string().min(1).max(2000),
+        options: z.array(z.string()),
+        correct_option: z.number().int(),
+        model_answer: z.string(),
+        explanation: z.string(),
+        objectives: z.array(z.string()),
+      }),
+    )
+    .min(1),
+});

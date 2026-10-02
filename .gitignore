@@ -1,0 +1,17 @@
+# Studiestof blijft lokaal
+content/*
+!content/README.md
+!content/voorbeeld-import.json
+
+# Omgeving en geheimen
+.env
+.env*.local
+
+# Next.js en tooling
+node_modules/
+.next/
+out/
+coverage/
+.vercel/
+*.tsbuildinfo
+.DS_Store

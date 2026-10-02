@@ -1,0 +1,128 @@
+{
+  "format": "pa-studie-import",
+  "version": 1,
+  "modules": [
+    {
+      "external_id": "voorbeeld",
+      "name": "VOORBEELD - verwijderen na testen",
+      "study_year": 1,
+      "sort_order": 99,
+      "exam_date": null
+    }
+  ],
+  "topics": [
+    {
+      "external_id": "voorbeeld-fysiologie",
+      "module": "voorbeeld",
+      "name": "Voorbeeld: hart en longen",
+      "sort_order": 1
+    }
+  ],
+  "objectives": [
+    {
+      "external_id": "voorbeeld-fysiologie-ld-01",
+      "topic": "voorbeeld-fysiologie",
+      "code": "V.1",
+      "description": "De student kan de pompfunctie van het hart beschrijven met de begrippen EDV, ESV, slagvolume en ejectiefractie.",
+      "sort_order": 1
+    },
+    {
+      "external_id": "voorbeeld-fysiologie-ld-02",
+      "topic": "voorbeeld-fysiologie",
+      "code": "V.2",
+      "description": "De student kan uitleggen waar en hoe de gaswisseling in de longen plaatsvindt.",
+      "sort_order": 2
+    }
+  ],
+  "sources": [
+    {
+      "external_id": "martini-hart",
+      "kind": "book",
+      "title": "Anatomie en fysiologie, een inleiding",
+      "author": "Martini",
+      "chapter": null,
+      "pages": null,
+      "url": null,
+      "notes": "Hoofdstuk over het hart; nummer invullen"
+    },
+    {
+      "external_id": "martini-h15",
+      "kind": "book",
+      "title": "Anatomie en fysiologie, een inleiding",
+      "author": "Martini",
+      "chapter": "15",
+      "pages": null,
+      "url": null,
+      "notes": "Het ademhalingsstelsel"
+    }
+  ],
+  "cards": [
+    {
+      "external_id": "voorbeeld-fysiologie-k-001",
+      "topic": "voorbeeld-fysiologie",
+      "type": "fact",
+      "front": "Hoe bereken je de ejectiefractie (EF)?",
+      "back": "EF = slagvolume / einddiastolisch volume (EDV) x 100%, waarbij slagvolume = EDV - ESV.",
+      "explanation": "De EF is het deel van de vulling dat per slag wordt uitgepompt.",
+      "source": "martini-hart",
+      "source_locator": null,
+      "objectives": ["voorbeeld-fysiologie-ld-01"],
+      "tags": ["voorbeeld"],
+      "image": null
+    },
+    {
+      "external_id": "voorbeeld-fysiologie-k-002",
+      "topic": "voorbeeld-fysiologie",
+      "type": "explain",
+      "front": "Waarom neemt het slagvolume toe als de vulling van het hart (EDV) toeneemt?",
+      "back": "Door het Frank-Starling-mechanisme: meer vulling rekt de hartspiervezels verder op, waardoor ze krachtiger samentrekken en er meer bloed wordt uitgepompt.",
+      "explanation": "Zo past het hart de uitstoot automatisch aan het aanbod van bloed aan.",
+      "source": "martini-hart",
+      "source_locator": null,
+      "objectives": ["voorbeeld-fysiologie-ld-01"],
+      "tags": ["voorbeeld"],
+      "image": null
+    },
+    {
+      "external_id": "voorbeeld-fysiologie-k-003",
+      "topic": "voorbeeld-fysiologie",
+      "type": "fact",
+      "front": "Waar vindt de gaswisseling in de long plaats?",
+      "back": "In de alveoli, over het dunne membraan tussen alveolus en longcapillair.",
+      "explanation": null,
+      "source": "martini-h15",
+      "source_locator": null,
+      "objectives": ["voorbeeld-fysiologie-ld-02"],
+      "tags": ["voorbeeld"],
+      "image": null
+    }
+  ],
+  "questions": [
+    {
+      "external_id": "voorbeeld-fysiologie-pt-01",
+      "topic": "voorbeeld-fysiologie",
+      "source": "martini-hart",
+      "kind": "pretest",
+      "format": "open",
+      "stem": "Welke factoren bepalen samen het hartminuutvolume?",
+      "options": null,
+      "correct_option": null,
+      "model_answer": "Hartfrequentie x slagvolume. Het slagvolume hangt af van preload, afterload en contractiliteit.",
+      "explanation": null,
+      "objectives": ["voorbeeld-fysiologie-ld-01"]
+    },
+    {
+      "external_id": "voorbeeld-fysiologie-tv-01",
+      "topic": "voorbeeld-fysiologie",
+      "source": "martini-hart",
+      "kind": "exam",
+      "format": "mcq",
+      "stem": "Het einddiastolisch volume is 120 ml en het eindsystolisch volume 50 ml. Hoe groot is de ejectiefractie ongeveer?",
+      "options": ["42%", "58%", "70%", "140%"],
+      "correct_option": 1,
+      "model_answer": null,
+      "explanation": "Slagvolume = 120 - 50 = 70 ml. EF = 70 / 120 = 0,58, dus ongeveer 58%.",
+      "objectives": ["voorbeeld-fysiologie-ld-01"]
+    }
+  ]
+}

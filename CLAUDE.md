@@ -1,0 +1,81 @@
+# CLAUDE.md — PA Studie-app
+
+## Wat dit is
+
+Een persoonlijke studie-app voor de master Physician Assistant (HU, cohort 2026, specialisatie dermatologie). Eén gebruiker, gebruikt op laptop en telefoon. De app is gebouwd rond bewezen leermethoden; die zijn het product, niet de techniek.
+
+Lees `docs/SPEC.md` voordat je iets bouwt. Bouw fase voor fase en rond elke fase af met de acceptatiecriteria.
+
+## Stack
+
+- Next.js 16, App Router, TypeScript (strict), Server Components en Server Actions
+- Tailwind CSS; componenten mogen van shadcn/ui komen
+- Supabase: Postgres, Auth (magic link), Storage; `@supabase/ssr` voor sessies in Next.js
+- `ts-fsrs` (v5) voor het plannen van herhalingen
+- `@anthropic-ai/sdk` voor AI-functies, alleen server-side
+- `zod` voor alle validatie van import en AI-output
+- Vitest voor unit tests; Playwright voor één end-to-end rooktest per fase
+- Hosting op Vercel; Supabase in regio eu-central-1
+
+## Niet-onderhandelbare principes
+
+Dit zijn de regels uit het leeronderzoek. Een feature die ze breekt, bouw je niet.
+
+1. **Eerst ophalen, dan pas zien.** Een antwoord, uitwerking of AI-feedback is nooit zichtbaar voordat de gebruiker zelf een antwoord heeft gegeven of bewust op "Toon antwoord" drukt.
+2. **FSRS plant, de gebruiker niet.** Geen handmatige "herhaal over X dagen". Alle planning via `lib/fsrs.ts`.
+3. **Gemengd herhalen.** De dagelijkse wachtrij mengt thema's. Nooit standaard per thema in een blok.
+4. **AI maakt alleen concepten.** Alles wat AI genereert krijgt `status = 'draft'` en komt pas na goedkeuring in de herhaalstapel.
+5. **AI geeft hints en feedback, geen kant-en-klare antwoorden** vóór de gebruiker heeft geantwoord. Zie `docs/AI_PROMPTS.md`.
+6. **AI werkt vanuit de bron.** Elke AI-aanroep krijgt de relevante brontekst of uitwerking mee.
+7. **Echte cijfers boven gevoel.** Toon retentie en zwakke plekken uit het logboek, geen motiverende schattingen.
+
+## Taal en UI
+
+- Alle UI-tekst in het Nederlands. Code, tabellen en variabelen in het Engels.
+- Mobile first: duimvriendelijke knoppen onderin, minimaal 44 px hoog. Op laptop sneltoetsen: spatie = omdraaien, 1–4 = beoordelen.
+- Beoordelingsknoppen: Opnieuw, Moeilijk, Goed, Makkelijk, elk met het volgende interval eronder (via `fsrs.repeat`).
+- Rustig, leesbaar ontwerp; lichte en donkere modus.
+
+## Privacy en beveiliging
+
+- Row Level Security op elke tabel: een gebruiker ziet alleen eigen rijen (`user_id = auth.uid()`).
+- Inloggen alleen voor het adres in `ALLOWED_EMAIL`; controleer dat server-side.
+- `SUPABASE_SERVICE_ROLE_KEY` en `ANTHROPIC_API_KEY` alleen server-side, nooit in clientcode.
+- Geen patiëntgegevens. Toon bij het aanmaken van een casus vanuit stage een korte melding: "Schrijf geanonimiseerd: geen naam, geboortedatum of herkenbare details."
+- `content/` staat in `.gitignore`, behalve `content/README.md` en `content/voorbeeld-import.json`.
+
+## Structuur
+
+```
+app/
+  (auth)/login/
+  (app)/vandaag/          dagelijkse herhaling (startpagina)
+  (app)/goedkeuren/       concepten nakijken en goedkeuren
+  (app)/thema/[id]/       thema-overzicht, leerdoelen, dekking
+  (app)/scripts/          illness scripts
+  (app)/casussen/         casusmodus
+  (app)/oefentoets/       pretest en proeftoets
+  (app)/overzicht/        dashboard
+  (app)/instellingen/
+  api/ai/                 AI-routes (server only)
+lib/
+  fsrs.ts                 enige plek waar ts-fsrs wordt aangeroepen
+  queue.ts                opbouw van de dagelijkse wachtrij
+  supabase/{client,server}.ts
+  ai/{client,prompts,schemas}.ts
+  import/{schema,importer}.ts
+scripts/import.ts         lokaal importscript (service role)
+supabase/migrations/
+```
+
+## Commando's
+
+- `npm run dev`, `npm run build`, `npm run lint`, `npm test`
+- `npm run import -- <pad-naar-json>`: importeert een bestand volgens `docs/IMPORT_FORMAT.md`
+- Migraties: `supabase link` en `supabase db push`, of via de Supabase MCP als die verbonden is
+
+## Werkwijze
+
+- Kleine commits per onderdeel, met een duidelijke boodschap.
+- Schrijf eerst tests voor `lib/fsrs.ts`, `lib/queue.ts` en de importer; die moeten kloppen.
+- Twijfel je over een keuze die de leermethode raakt, vraag het dan in plaats van te gokken.

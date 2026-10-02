@@ -78,7 +78,8 @@ supabase/migrations/
 
 ## Stand en afspraken in de code
 
-- Fase 0, 1 en 3 zijn gebouwd. Van fase 2 bestaat `/goedkeuren` (kaarten en conceptscripts) en de leerdoelendekking op `/thema/[id]`; `draft_cards` en `explain_feedback` nog niet. Fase 4–6 zijn plaatshouders.
+- Fase 0, 1, 3 en 4 zijn gebouwd. Van fase 2 bestaat `/goedkeuren` (kaarten, conceptscripts, casussen met bulk-goedkeuren) en de leerdoelendekking op `/thema/[id]`; `draft_cards` en `explain_feedback` nog niet. Fase 5–6 zijn plaatshouders.
+- Casussen: selectie in `lib/cases.ts` (puur, getest). De sessiepagina stuurt alleen titel, vignet en vraag naar de browser; differentiaal en expert-uitwerking komen pas via server actions (`revealAlternativesAction` in stap 3, `revealExpertAction` na stap 4).
 - AI: `lib/ai/client.ts` (`runJson`: structured output met zod, één herkansing, logging in `ai_usage`), prompts in `lib/ai/prompts.ts`, schema's in `lib/ai/schemas.ts`. Modellen via `ANTHROPIC_MODEL` en `ANTHROPIC_MODEL_FAST`. Zonder key tonen de schermen een melding in plaats van een knop die faalt.
 - Illness scripts: `approve_illness_script` (migratie 0003) zet het script actief en maakt per gevuld veld één conceptkaart (`cards.script_field`), idempotent.
 - Next.js 16: `proxy.ts` (vroeger middleware), async `params`/`searchParams`/`cookies()`. Lees `AGENTS.md`.

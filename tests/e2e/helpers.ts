@@ -56,10 +56,10 @@ export async function newPage(browser: Browser, device: keyof typeof devices) {
   return context.newPage();
 }
 
-export async function importExample(page: Page) {
+export async function importExample(page: Page, file = "content/voorbeeld-import.json") {
   await page.goto("/instellingen");
-  await page.getByLabel("Importbestand (JSON)").setInputFiles("content/voorbeeld-import.json");
+  await page.getByLabel("Importbestand (JSON)").setInputFiles(file);
   await expect(page.getByText("Controle geslaagd")).toBeVisible();
-  await page.getByRole("button", { name: /Importeer voorbeeld-import\.json/ }).click();
+  await page.getByRole("button", { name: /^Importeer / }).click();
   await expect(page.getByText("Import klaar")).toBeVisible();
 }

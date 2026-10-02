@@ -1,0 +1,119 @@
+{
+  "format": "pa-studie-import",
+  "version": 1,
+  "modules": [
+    {
+      "external_id": "voorbeeld",
+      "name": "VOORBEELD - verwijderen na testen",
+      "study_year": 1,
+      "sort_order": 99,
+      "exam_date": null
+    }
+  ],
+  "topics": [
+    {
+      "external_id": "voorbeeld-hart",
+      "module": "voorbeeld",
+      "name": "Voorbeeld: hart",
+      "sort_order": 1
+    },
+    {
+      "external_id": "voorbeeld-long",
+      "module": "voorbeeld",
+      "name": "Voorbeeld: long",
+      "sort_order": 2
+    },
+    {
+      "external_id": "voorbeeld-huid",
+      "module": "voorbeeld",
+      "name": "Voorbeeld: huid",
+      "sort_order": 3
+    }
+  ],
+  "cases": [
+    {
+      "external_id": "voorbeeld-hart-c-001",
+      "topic": "voorbeeld-hart",
+      "source": null,
+      "title": "Kortademige man van 72",
+      "vignette": "Man, 72 jaar, sinds weken toenemend kortademig bij traplopen, 's nachts kortademig. Bij onderzoek: enkeloedeem, crepitaties basaal.",
+      "question": "Wat is je werkdiagnose?",
+      "correct_diagnosis": "Hartfalen",
+      "expert_reflection": [
+        {
+          "diagnosis": "Hartfalen",
+          "supporting": "passend beeld",
+          "against": "",
+          "missing": "",
+          "rank": 1
+        },
+        {
+          "diagnosis": "COPD",
+          "supporting": "",
+          "against": "EXPERT-HART-geen-piepen",
+          "missing": "",
+          "rank": 2
+        }
+      ],
+      "teaching_points": "Les: herken Hartfalen.",
+      "difficulty": 2,
+      "objectives": []
+    },
+    {
+      "external_id": "voorbeeld-long-c-001",
+      "topic": "voorbeeld-long",
+      "source": null,
+      "title": "Hoestende vrouw van 58",
+      "vignette": "Vrouw, 58 jaar, rookt 40 pakjaren, al jaren hoesten met slijm, verlengd expirium en piepen.",
+      "question": "Wat is je werkdiagnose?",
+      "correct_diagnosis": "COPD",
+      "expert_reflection": [
+        {
+          "diagnosis": "COPD",
+          "supporting": "passend beeld",
+          "against": "",
+          "missing": "",
+          "rank": 1
+        },
+        {
+          "diagnosis": "Astma",
+          "supporting": "",
+          "against": "EXPERT-LONG-begon-laat",
+          "missing": "",
+          "rank": 2
+        }
+      ],
+      "teaching_points": "Les: herken COPD.",
+      "difficulty": 2,
+      "objectives": []
+    },
+    {
+      "external_id": "voorbeeld-huid-c-001",
+      "topic": "voorbeeld-huid",
+      "source": null,
+      "title": "Schilferende plekken",
+      "vignette": "Man, 30 jaar, scherp begrensde rode plaques met zilverwitte schilfers op ellebogen en knieën.",
+      "question": "Wat is je werkdiagnose?",
+      "correct_diagnosis": "Psoriasis",
+      "expert_reflection": [
+        {
+          "diagnosis": "Psoriasis",
+          "supporting": "passend beeld",
+          "against": "",
+          "missing": "",
+          "rank": 1
+        },
+        {
+          "diagnosis": "Eczeem",
+          "supporting": "",
+          "against": "EXPERT-HUID-scherpe-grens",
+          "missing": "",
+          "rank": 2
+        }
+      ],
+      "teaching_points": "Les: herken Psoriasis.",
+      "difficulty": 2,
+      "objectives": []
+    }
+  ]
+}

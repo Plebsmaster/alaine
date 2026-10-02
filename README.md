@@ -8,11 +8,12 @@ Dit pakket is alles wat Claude Code nodig heeft om je studie-app te bouwen: een 
 | --- | --- | --- |
 | 0 | Fundament: Next.js, Supabase, inloggen met code (alleen `ALLOWED_EMAIL`), PWA | Gebouwd |
 | 1 | Herhalen: beheer, import, FSRS, dagelijkse wachtrij, herhaalscherm, sneltoetsen | Gebouwd |
-| 2 | Goedkeuren met AI-concepten en AI-feedback | Goedkeuren van kaarten staat er al; `draft_cards` en `explain_feedback` volgen |
+| 2 | Goedkeuren met AI-concepten en AI-feedback | Goedkeuren van kaarten, scripts en casussen staat er al; `draft_cards` en `explain_feedback` volgen |
 | 3 | Illness scripts: scriptkaarten bij goedkeuren, naast elkaar vergelijken, `draft_script`, `draft_compare` | Gebouwd (AI getest zonder echte API-aanroep) |
-| 4–6 | Casussen, oefentoets, overzicht en offline | Nog te bouwen |
+| 4 | Casusmodus: sessies, reflectietabel, hints, expert-vergelijking, stagecasussen, `case_hint`, `case_feedback`, `draft_cases` | Gebouwd (AI getest zonder echte API-aanroep) |
+| 5–6 | Oefentoets, overzicht en offline | Nog te bouwen |
 
-Getest met een lokale Supabase: 44 unit tests (FSRS, wachtrij, importer, AI-laag met een nagebootste API) en rooktests in de browser voor fase 0–1 (inloggen, importeren, goedkeuren, herhalen op telefoon en laptop) en fase 3 (scriptkaarten, vergelijken). De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
+Getest met een lokale Supabase: 52 unit tests (FSRS, wachtrij, importer, casusselectie, AI-laag met een nagebootste API) en rooktests in de browser voor fase 0–1 (inloggen, importeren, goedkeuren, herhalen op telefoon en laptop), fase 3 (scriptkaarten, vergelijken) en fase 4 (casussessie, stagecasus). De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
 
 ## Wat er in deze repo zit
 
@@ -88,7 +89,12 @@ Volg docs/CONTENT_PIPELINE.md voor thema <naam> in content/module-1/.
 Maak het importbestand en laat me de samenvatting zien voordat je importeert.
 ```
 
-**Fase 4 tot en met 6**
+**Fase 4: casusmodus**: gebouwd. Test zelf:
+1. Zet casussen klaar: importeer ze, laat ze maken door AI (vanaf twee goedgekeurde scripts per thema), of schrijf er zelf een. Keur ze goed op **Goedkeuren** (meerdere tegelijk kan).
+2. **Casussen → Start sessie**: werkdiagnose, reflectie, alternatieven, rangschikken, vergelijken met de expert, zelfscore, en een kaart van wat je miste.
+3. **Nieuwe casus uit stage**: geanonimiseerd, en direct actief.
+
+**Fase 5 en 6**
 ```
 Bouw fase <n> uit docs/SPEC.md.
 ```

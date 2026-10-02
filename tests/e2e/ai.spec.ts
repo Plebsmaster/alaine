@@ -267,7 +267,7 @@ test("draft_script, draft_compare, draft_cases, case_hint, case_feedback, draft_
   await page.getByRole("checkbox", { name: "Hartfalen vergelijken" }).check();
   await page.getByRole("checkbox", { name: "COPD vergelijken" }).check();
   await page.getByRole("button", { name: "Vergelijk geselecteerde" }).click();
-  await page.getByRole("button", { name: "Maak vergelijkingskaart" }).click();
+  await page.getByRole("button", { name: "Vergelijkingskaart (AI)" }).click();
   await expect(page).toHaveURL(/\/goedkeuren/);
   await expect.poll(() => draftsOpen(page)).toBe(3 + 6 + 1);
 

@@ -52,11 +52,38 @@ test("script goedkeuren maakt kaarten per gevuld veld; vergelijken naast elkaar"
   await page.getByRole("button", { name: "Vergelijk geselecteerde" }).click();
   await expect(page.getByRole("columnheader", { name: "Hartfalen" })).toBeVisible();
   await expect(page.getByRole("columnheader", { name: "COPD" })).toBeVisible();
-  const presentatie = page.locator("tbody", { has: page.getByRole("columnheader", { name: "Presentatie" }) });
-  await expect(presentatie).toContainText("enkeloedeem");
-  await expect(presentatie).toContainText("roker");
+  // Onderscheidende kenmerken staan bovenaan (ontwerp 1p).
+  await expect(page.getByRole("rowheader").first()).toHaveText(/onderscheidend/i);
+  const row = (name: RegExp) => page.locator("tr", { has: page.getByRole("rowheader", { name }) });
+  await expect(row(/presentatie/i)).toContainText("enkeloedeem");
+  await expect(row(/presentatie/i)).toContainText("roker");
   // Zonder API-key is de AI-knop uit, met uitleg.
-  await expect(page.getByRole("button", { name: "Maak vergelijkingskaart" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Vergelijkingskaart (AI)" })).toBeDisabled();
+
+  // Overhoren: de eerste kolom blijft zichtbaar, de rest is afgedekt tot je hem opent.
+  await page.getByRole("link", { name: "Overhoren" }).click();
+  await expect(page).toHaveURL(/modus=overhoren/);
+  await expect(page.getByRole("columnheader").first()).toHaveText("COPD");
+  await expect(row(/presentatie/i)).toContainText("roker");
+  await expect(row(/presentatie/i)).not.toContainText("enkeloedeem");
+  // Met het toetsenbord: Enter opent de cel, de focus gaat naar de volgende afgedekte cel.
+  await page.getByRole("button", { name: "Wat verwacht je? Toon presentatie bij Hartfalen" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(row(/presentatie/i)).toContainText("enkeloedeem");
+  await expect(page.getByRole("button", { name: "Wat verwacht je? Toon bevindingen bij Hartfalen" })).toBeFocused();
+  // Met de muis.
+  await page.getByRole("button", { name: "Wat verwacht je? Toon pathofysiologie bij Hartfalen" }).click();
+  await expect(row(/pathofysiologie/i)).toContainText("pompt onvoldoende");
+  await page.getByRole("button", { name: "Alles tonen" }).click();
+  await expect(page.getByRole("button", { name: /^Wat verwacht je\?/ })).toHaveCount(0);
+
+  // Aandoeningen verwijderen en toevoegen via de URL; de modus blijft staan.
+  await page.getByRole("link", { name: "Hartfalen uit de vergelijking halen" }).click();
+  await expect(page.getByText("Kies nog minstens één aandoening om mee te vergelijken.")).toBeVisible();
+  await page.getByRole("button", { name: "+ Aandoening" }).click();
+  await page.getByRole("link", { name: /^Hartfalen/ }).click();
+  await expect(page.getByRole("columnheader", { name: "Hartfalen" })).toBeVisible();
+  await expect(page).toHaveURL(/modus=overhoren/);
 
   // De scriptkaarten staan als concept op Goedkeuren, nog niet in de herhaling.
   await page.goto("/goedkeuren");

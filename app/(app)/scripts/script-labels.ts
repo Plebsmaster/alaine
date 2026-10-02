@@ -14,3 +14,13 @@ export const SCRIPT_STATUS_LABELS: Record<string, string> = {
   draft: "Concept",
   archived: "Gearchiveerd",
 };
+
+/** Vergelijken (ontwerp 1p): onderscheidende kenmerken eerst, dan wat je bij de patiënt ziet. */
+export const COMPARE_FIELDS: { key: ScriptFieldKey; label: string }[] = [
+  { key: "key_discriminators", label: "Onderscheidend" },
+  { key: "presentation", label: "Presentatie" },
+  { key: "findings", label: "Bevindingen" },
+  { key: "pathophysiology", label: "Pathofysiologie" },
+  { key: "management", label: "Beleid" },
+  { key: "epidemiology", label: "Epidemiologie" },
+];

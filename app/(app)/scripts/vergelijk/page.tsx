@@ -1,82 +1,122 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageHeader, Panel } from "@/components/ui";
+import { Panel, Segmented } from "@/components/ui";
 import { aiConfigured } from "@/lib/ai/client";
 import { requireUser } from "@/lib/auth";
-import { SCRIPT_FIELDS } from "../script-labels";
+import { compareHref, MAX_COMPARE, parseCompareIds, parseCompareMode } from "@/lib/compare";
 import { CompareCardForm } from "./compare-form";
+import { CompareView, type CompareScript } from "./compare-view";
+import { ScriptPicker } from "./script-picker";
 
 export const metadata: Metadata = { title: "Scripts vergelijken" };
 
-const UUID = /^[0-9a-f-]{36}$/i;
-
+// Illness scripts vergelijken (docs/design/README.md, 1p). Welke scripts en welke modus staan
+// in de URL (?id=…&modus=overhoren); afgedekte cellen zijn alleen clientstate.
 export default async function ComparePage({ searchParams }: PageProps<"/scripts/vergelijk">) {
-  const { id } = await searchParams;
-  const ids = [...new Set((Array.isArray(id) ? id : id ? [id] : []).filter((x) => UUID.test(x)))].slice(0, 4);
+  const { id, modus } = await searchParams;
+  const ids = parseCompareIds(id);
+  const mode = parseCompareMode(modus);
   const { supabase } = await requireUser();
 
   const { data } = ids.length
-    ? await supabase.from("illness_scripts").select("*").in("id", ids)
+    ? await supabase
+        .from("illness_scripts")
+        .select("id, condition, epidemiology, pathophysiology, presentation, findings, management, key_discriminators")
+        .in("id", ids)
     : { data: [] };
-  const scripts = ids.map((i) => (data ?? []).find((s) => s.id === i)).filter((s) => !!s);
+  const { data: active } = await supabase.from("illness_scripts").select("id, condition, topics(name)").eq("status", "active").order("condition");
 
-  if (scripts.length < 2) {
-    return (
-      <>
-        <PageHeader title="Scripts vergelijken" />
-        <Panel className="text-sm text-muted">
-          Kies minstens twee aandoeningen op <Link className="underline" href="/scripts">Illness scripts</Link>.
-        </Panel>
-      </>
-    );
-  }
+  const scripts: CompareScript[] = ids
+    .map((i) => (data ?? []).find((s) => s.id === i))
+    .filter((s) => !!s)
+    .map((s) => ({
+      id: s.id,
+      condition: s.condition,
+      values: {
+        epidemiology: s.epidemiology,
+        pathophysiology: s.pathophysiology,
+        presentation: s.presentation,
+        findings: s.findings,
+        management: s.management,
+        key_discriminators: s.key_discriminators,
+      },
+    }));
+  const current = scripts.map((s) => s.id);
+  const addable = (active ?? [])
+    .filter((s) => !current.includes(s.id))
+    .map((s) => ({ id: s.id, condition: s.condition, topic: s.topics?.name ?? null, href: compareHref([...current, s.id], mode) }));
+  const ready = scripts.length >= 2;
 
-  const rows = [
-    ...SCRIPT_FIELDS.filter((f) => f.key !== "key_discriminators"),
-    SCRIPT_FIELDS.find((f) => f.key === "key_discriminators")!,
-  ];
+  const modeSwitch = (
+    <Segmented
+      size="sm"
+      label="Weergave"
+      value={mode}
+      items={[
+        { key: "lezen", label: "Lezen", href: compareHref(current, "lezen") },
+        { key: "overhoren", label: "Overhoren", href: compareHref(current, "overhoren") },
+      ]}
+    />
+  );
 
   return (
     <>
-      <p className="mb-1 text-sm text-muted">
-        <Link href="/scripts" className="underline">Illness scripts</Link>
-      </p>
-      <PageHeader title="Naast elkaar">
-        <CompareCardForm ids={scripts.map((s) => s.id)} enabled={aiConfigured()} />
-      </PageHeader>
-
-      {/* Veldnaam als eigen rij erboven, zodat de waarden de volle breedte delen: op de telefoon passen twee aandoeningen naast elkaar. */}
-      <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-        <table className="w-full table-fixed border-separate border-spacing-0 text-sm" style={{ minWidth: `${scripts.length * 9}rem` }}>
-          <thead>
-            <tr>
-              {scripts.map((s) => (
-                <th key={s.id} scope="col" className="border-b-2 border-border p-2 text-left text-base font-semibold">
-                  <Link href={`/scripts/${s.id}`} className="hover:underline">
-                    {s.condition}
-                  </Link>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          {rows.map((f) => (
-            <tbody key={f.key} className={f.key === "key_discriminators" ? "bg-surface-2" : undefined}>
-              <tr>
-                <th scope="colgroup" colSpan={scripts.length} className="px-2 pb-1 pt-4 text-left text-xs font-semibold uppercase tracking-wide text-muted">
-                  {f.label}
-                </th>
-              </tr>
-              <tr>
-                {scripts.map((s) => (
-                  <td key={s.id} className="prose-card border-b border-border p-2 align-top">
-                    {s[f.key] || <span className="text-muted">–</span>}
-                  </td>
-                ))}
-              </tr>
-            </tbody>
-          ))}
-        </table>
+      <div className="mb-2 flex items-center justify-between gap-3 md:hidden">
+        <Link href="/scripts" className="flex min-h-11 items-center text-[13px] text-accent">
+          ‹ Illness scripts
+        </Link>
+        {ready ? modeSwitch : null}
       </div>
+
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="mr-2.5 w-full font-serif text-[28px] font-medium leading-tight md:w-auto md:text-[30px]">Vergelijken</h1>
+          {scripts.map((s) => (
+            <span key={s.id} className="flex items-center gap-0.5 rounded-full border border-border-strong bg-surface py-0.5 pl-3 pr-1 text-[13px]">
+              {s.condition}
+              <Link
+                href={compareHref(
+                  current.filter((x) => x !== s.id),
+                  mode,
+                )}
+                aria-label={`${s.condition} uit de vergelijking halen`}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-faint transition-colors hover:bg-surface-2 hover:text-text motion-reduce:transition-none"
+              >
+                <span aria-hidden>×</span>
+              </Link>
+            </span>
+          ))}
+          {current.length < MAX_COMPARE && addable.length > 0 ? <ScriptPicker options={addable} /> : null}
+        </div>
+        {ready ? (
+          <div className="hidden shrink-0 items-start gap-2.5 md:flex">
+            {modeSwitch}
+            <CompareCardForm ids={current} enabled={aiConfigured()} />
+          </div>
+        ) : null}
+      </div>
+
+      {ready ? (
+        <>
+          <CompareView key={`${current.join(",")}-${mode}`} scripts={scripts} mode={mode} />
+          <div className="mt-6 md:hidden">
+            <CompareCardForm ids={current} enabled={aiConfigured()} />
+          </div>
+        </>
+      ) : (
+        <Panel className="space-y-1 text-sm text-muted">
+          <p>{scripts.length === 0 ? "Kies twee tot vier aandoeningen om naast elkaar te zetten." : "Kies nog minstens één aandoening om mee te vergelijken."}</p>
+          {addable.length === 0 ? (
+            <p>
+              Er zijn geen andere goedgekeurde scripts. Maak er een op{" "}
+              <Link className="underline" href="/scripts">
+                Illness scripts
+              </Link>
+              .
+            </p>
+          ) : null}
+        </Panel>
+      )}
     </>
   );
 }

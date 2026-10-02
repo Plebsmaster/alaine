@@ -26,7 +26,7 @@ export default async function CaseSessionPage({ searchParams }: PageProps<"/casu
   if (cases.length === 0) {
     return (
       <>
-        <PageHeader title="Casussessie" />
+        <PageHeader title="Casussessie" settings={false} />
         <Panel className="text-sm text-muted">
           Geen casussen gevonden. <Link className="underline" href="/casussen">Start een nieuwe sessie</Link>.
         </Panel>
@@ -36,7 +36,7 @@ export default async function CaseSessionPage({ searchParams }: PageProps<"/casu
 
   return (
     <>
-      <PageHeader title="Casussessie" />
+      <PageHeader title="Casussessie" settings={false} />
       <CaseSession cases={cases} sessionId={crypto.randomUUID()} aiEnabled={aiConfigured()} />
     </>
   );

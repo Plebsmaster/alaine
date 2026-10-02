@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
+import { SETTINGS_ICON } from "./nav-links";
 
 // Basiscomponenten volgens docs/design/README.md ("Basiscomponenten"). Alleen tokens, geen hexkleuren.
 
@@ -36,10 +37,38 @@ export function Panel({ className = "", ...props }: ComponentProps<"div">) {
   return <div className={`rounded-2xl border border-border bg-surface p-5 md:p-6 ${className}`} {...props} />;
 }
 
-export function PageHeader({ title, children }: { title: string; children?: ReactNode }) {
+/** Ronde instellingenknop rechtsboven in de paginakop (alleen telefoon; op laptop zit hij in de bovenbalk). */
+export function SettingsButton() {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-      <h1 className="font-serif text-[28px] font-medium leading-[1.1] md:text-[34px]">{title}</h1>
+    <Link
+      data-shell
+      href="/instellingen"
+      aria-label="Instellingen"
+      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-2 text-text-2 md:hidden"
+    >
+      <svg viewBox="0 0 24 24" width={20} height={20} fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" aria-hidden>
+        <path d={SETTINGS_ICON} />
+      </svg>
+    </Link>
+  );
+}
+
+export function PageHeader({
+  title,
+  children,
+  settings = true,
+}: {
+  title: string;
+  children?: ReactNode;
+  /** Instellingenknop op de telefoon tonen (niet op Instellingen zelf en niet in de focusmodus). */
+  settings?: boolean;
+}) {
+  return (
+    <div className="mb-6 flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end md:justify-between">
+      <div className="flex items-start justify-between gap-3">
+        <h1 className="font-serif text-[32px] font-medium leading-[1.1] md:text-[34px]">{title}</h1>
+        {settings ? <SettingsButton /> : null}
+      </div>
       {children}
     </div>
   );

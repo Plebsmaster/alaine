@@ -15,7 +15,7 @@ import {
   revealExpertAction,
   saveAttemptAction,
   type AttemptInput,
-} from "../actions";
+} from "@/app/(app)/casussen/actions";
 
 export type PublicCase = { id: string; title: string; vignette: string; question: string; topic_name: string };
 

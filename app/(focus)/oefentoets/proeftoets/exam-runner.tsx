@@ -6,7 +6,7 @@ import { ErrorChips } from "@/components/error-chips";
 import { Badge, Button, Notice, Panel, Textarea } from "@/components/ui";
 import type { ErrorType } from "@/lib/labels";
 import { scoreByObjective } from "@/lib/exam";
-import { markOpenAction, questionCardAction, setQuestionErrorAction, submitExamAction, type ExamResult } from "../actions";
+import { markOpenAction, questionCardAction, setQuestionErrorAction, submitExamAction, type ExamResult } from "@/app/(app)/oefentoets/actions";
 
 export type ExamQuestion = { id: string; format: "open" | "mcq"; stem: string; options: string[] | null; topic_name: string };
 type Answer = { chosen_option: number | null; answer_text: string | null };

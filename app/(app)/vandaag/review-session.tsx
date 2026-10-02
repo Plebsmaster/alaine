@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Badge, Button, Notice, Panel, Textarea } from "@/components/ui";
 import type { ReviewCard } from "@/lib/data/review";
 import { CARD_TYPE_LABELS, ERROR_TYPES, VERIFY_TEXT, type ErrorType } from "@/lib/labels";
@@ -18,6 +18,7 @@ import {
 import { CheckError, CheckOutcome, RecoveryPrompt, useAnswerCheck } from "./answer-check";
 import { ChainCompare, ChainInput } from "./chain";
 import { ErrorChips } from "@/components/error-chips";
+import { FocusBar, FocusMarker } from "@/components/nav";
 import { Stopcheck } from "./stopcheck";
 
 const TYPED_ANSWER_TYPES = new Set(["explain", "chain", "illness_script", "compare"]);
@@ -59,11 +60,13 @@ type Props = {
   /** Moment waarop de server deze wachtrij maakte; een nieuwere lokale stand wint. */
   generatedAt: number;
   aiEnabled: boolean;
+  /** Paginakop (van de server), boven de sessie. */
+  header?: ReactNode;
 };
 
 type Current = { card: ReviewCard; source: "queue" | "pending" } | null;
 
-export function ReviewSession({ initialQueue, initialPending, settings, endOfDay, userId, generatedAt, aiEnabled }: Props) {
+export function ReviewSession({ initialQueue, initialPending, settings, endOfDay, userId, generatedAt, aiEnabled, header }: Props) {
   const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
   const [queue, setQueue] = useState(initialQueue);
   const [pending, setPending] = useState(initialPending);
@@ -337,10 +340,25 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
   // Voorkant per kaart (voor de stopcheck zonder AI).
   const frontOf = new Map([...initialQueue, ...initialPending, ...queue, ...pending].map((c) => [c.card_id, c.front]));
 
+  // Focusmodus zodra er kaarten of resultaten zijn; zonder kaarten blijft de gewone navigatie.
+  const focus = !!current || results.length > 0 || pending.length > 0;
+  const chrome = (
+    <>
+      {focus ? (
+        <>
+          <FocusMarker />
+          <FocusBar />
+        </>
+      ) : null}
+      {header}
+    </>
+  );
+
   if (!current) {
     const waiting = pending.length > 0;
     return (
       <>
+        {chrome}
         <SessionEnd results={results} startedAt={startedAt} waiting={waiting} pending={pending} saved={outboxCount === 0} offline={saveState === "offline"} />
         {!waiting ? (
           <Stopcheck
@@ -366,6 +384,7 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
 
   return (
     <div className="space-y-4 pb-24 md:pb-0">
+      {chrome}
       <div className="flex items-center justify-between text-sm text-muted">
         <span>
           Nog {remaining} {remaining === 1 ? "kaart" : "kaarten"}

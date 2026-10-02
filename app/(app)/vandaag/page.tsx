@@ -15,24 +15,24 @@ export default async function TodayPage() {
   const total = today.queue.length + today.pending.length;
 
   return (
-    <>
-      <PageHeader title="Vandaag">
-        <p className="text-sm text-muted">
-          {total === 0
-            ? "Geen kaarten"
-            : `${total} ${total === 1 ? "kaart" : "kaarten"} · ongeveer ${today.estimateMinutes} min`}
-          {today.counts.new > 0 ? ` · ${today.counts.new} nieuw` : ""}
-        </p>
-      </PageHeader>
-      <ReviewSession
-        initialQueue={today.queue}
-        initialPending={today.pending}
-        settings={{ desired_retention: settings.desired_retention, fsrs_params: settings.fsrs_params }}
-        endOfDay={today.endOfDay}
-        userId={user.id}
-        generatedAt={today.generatedAt}
-        aiEnabled={aiConfigured()}
-      />
-    </>
+    <ReviewSession
+      header={
+        <PageHeader title="Vandaag">
+          <p className="text-sm text-muted">
+            {total === 0
+              ? "Geen kaarten"
+              : `${total} ${total === 1 ? "kaart" : "kaarten"} · ongeveer ${today.estimateMinutes} min`}
+            {today.counts.new > 0 ? ` · ${today.counts.new} nieuw` : ""}
+          </p>
+        </PageHeader>
+      }
+      initialQueue={today.queue}
+      initialPending={today.pending}
+      settings={{ desired_retention: settings.desired_retention, fsrs_params: settings.fsrs_params }}
+      endOfDay={today.endOfDay}
+      userId={user.id}
+      generatedAt={today.generatedAt}
+      aiEnabled={aiConfigured()}
+    />
   );
 }

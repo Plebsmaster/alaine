@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader, Panel } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
@@ -24,10 +23,7 @@ export default async function PretestPage({ params }: PageProps<"/oefentoets/pre
   if (!topic) notFound();
   return (
     <>
-      <p className="mb-1 text-sm text-muted">
-        <Link href="/oefentoets" className="underline">Oefentoets</Link>
-      </p>
-      <PageHeader title={`Pretest: ${topic.name}`} />
+      <PageHeader title={`Pretest: ${topic.name}`} settings={false} />
       {(questions ?? []).length === 0 ? (
         <Panel className="text-sm text-muted">Nog geen goedgekeurde pretestvragen voor dit thema.</Panel>
       ) : (

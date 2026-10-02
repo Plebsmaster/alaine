@@ -163,3 +163,9 @@ body {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+/* Focusmodus: zodra een element met data-focus op de pagina staat (herhaalsessie op /vandaag),
+   verdwijnt de navigatie van de app. Zonder JavaScript, dus geen flits en ook offline. */
+body:has([data-focus]) [data-shell] {
+  display: none;
+}

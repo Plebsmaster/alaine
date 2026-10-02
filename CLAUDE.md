@@ -58,6 +58,7 @@ app/
   (app)/goedkeuren/       concepten nakijken en goedkeuren
   (app)/thema/[id]/       thema-overzicht, leerdoelen, dekking
   (app)/scripts/          illness scripts
+  (focus)/                zonder navigatie: casussen/sessie, oefentoets/proeftoets, oefentoets/pretest/[topicId]
   (app)/casussen/         casusmodus
   (app)/oefentoets/       pretest en proeftoets
   (app)/overzicht/        dashboard
@@ -92,6 +93,8 @@ supabase/migrations/
 - Casussen: selectie in `lib/cases.ts` (puur, getest). De sessiepagina stuurt alleen titel, vignet en vraag naar de browser; differentiaal en expert-uitwerking komen pas via server actions (`revealAlternativesAction` in stap 3, `revealExpertAction` na stap 4).
 - AI: `lib/ai/client.ts` (`runJson`: structured output met zod, één herkansing, logging in `ai_usage`), prompts in `lib/ai/prompts.ts`, schema's in `lib/ai/schemas.ts`. Modellen via `ANTHROPIC_MODEL` en `ANTHROPIC_MODEL_FAST`. Zonder key tonen de schermen een melding in plaats van een knop die faalt.
 - Illness scripts: `approve_illness_script` (migratie 0003) zet het script actief en maakt per gevuld veld één conceptkaart (`cards.script_field`), idempotent.
+- Shell (ontwerp 1b): vier werkruimtes in `components/nav-links.ts` (Vandaag, Leren, Studiestof, Inzicht); bovenbalk + subnav op laptop, onderbalk op telefoon (`components/nav.tsx`), tellers uit `lib/data/shell.ts`. Instellingen via de knop rechts; uitloggen op /instellingen; /meer stuurt door naar /themas.
+- Focusmodus: route group `app/(focus)` (eigen layout met `requireUser()`). /vandaag blijft in `(app)` en zet de focusmodus zelf aan met `<FocusMarker />` zodra er kaarten of resultaten zijn; elementen met `data-shell` verdwijnen dan via CSS (`app/globals.css`), zonder flits en ook offline.
 - Next.js 16: `proxy.ts` (vroeger middleware), async `params`/`searchParams`/`cookies()`. Lees `AGENTS.md`.
 - Database: schrijfacties die samen moeten slagen lopen via Postgres-functies in `supabase/migrations/`: `rate_card` (planning + log, idempotent per reviewmoment), `approve_card`, `import_bundle` (hele importbestand in één transactie). Allemaal `security invoker`, dus RLS geldt.
 - Views met `security_invoker`: `review_queue` (wachtrij), `topic_card_counts`, `objective_coverage`.

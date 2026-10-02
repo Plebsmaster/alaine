@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PageHeader, Panel } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { ExamRunner, type ExamQuestion } from "./exam-runner";
@@ -29,10 +28,7 @@ export default async function ExamRunPage({ searchParams }: PageProps<"/oefentoe
 
   return (
     <>
-      <p className="mb-1 text-sm text-muted">
-        <Link href="/oefentoets" className="underline">Oefentoets</Link>
-      </p>
-      <PageHeader title="Proeftoets">
+      <PageHeader title="Proeftoets" settings={false}>
         <span className="text-sm text-muted">{questions.length} vragen</span>
       </PageHeader>
       {questions.length === 0 ? (

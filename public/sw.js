@@ -4,7 +4,7 @@
 //   De wachtrij en voortgang zelf staan in IndexedDB (lib/offline/idb.ts).
 // - Andere pagina's zonder verbinding: een korte melding met een link naar /vandaag.
 // Server actions (POST), auth en export gaan altijd naar het netwerk.
-const VERSION = "v1";
+const VERSION = "v2"; // v2: nieuwe app-shell en lettertypes (ontwerp variant b)
 const STATIC = `static-${VERSION}`;
 const PAGES = `pages-${VERSION}`;
 const OFFLINE_PAGES = ["/vandaag"];

@@ -35,7 +35,8 @@ test("offline herhalen en synchroniseren", async ({ page, context }) => {
   });
   await page.reload();
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
-  await expect.poll(() => page.evaluate(async () => !!(await (await caches.open("pages-v1")).match("/vandaag")))).toBe(true);
+  // In alle caches zoeken, zodat een nieuwe cacheversie (public/sw.js) de test niet breekt.
+  await expect.poll(() => page.evaluate(async () => !!(await caches.match("/vandaag")))).toBe(true);
 
   // Vliegtuigmodus: de pagina opent uit de cache en herhalen werkt.
   await offline(context);

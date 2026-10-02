@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Button, Field, Notice, Panel, Textarea } from "@/components/ui";
-import { pretestAnswerAction } from "../../actions";
+import { pretestAnswerAction } from "@/app/(app)/oefentoets/actions";
 
 type Q = { id: string; stem: string };
 type Revealed = { model_answer: string | null; explanation: string | null };

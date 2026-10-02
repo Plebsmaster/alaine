@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { PageHeader, Panel } from "@/components/ui";
+import { LogoutButton } from "@/components/logout-button";
+import { buttonClass, PageHeader, Panel } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
 import { getSettings } from "@/lib/data/settings";
+import { signOut } from "../actions";
 import { ImportPanel } from "./import-panel";
 import { SettingsForm } from "./settings-form";
 
@@ -15,7 +17,7 @@ export default async function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Instellingen" />
+      <PageHeader title="Instellingen" settings={false} />
       <div className="space-y-6">
         <Panel>
           <h2 className="mb-3 font-semibold">Herhalen</h2>
@@ -39,7 +41,11 @@ export default async function SettingsPage() {
           </a>
         </Panel>
 
-        <p className="text-xs text-muted">Ingelogd als {user.email}</p>
+        <Panel>
+          <h2 className="mb-1 font-semibold">Account</h2>
+          <p className="mb-3 text-sm text-muted">Ingelogd als {user.email}</p>
+          <LogoutButton signOut={signOut} className={buttonClass("secondary")} />
+        </Panel>
       </div>
     </>
   );

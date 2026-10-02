@@ -42,5 +42,6 @@ test("fouttype vastleggen, stopcheck en verdeling op het overzicht", async ({ pa
     ]);
 
   await page.goto("/overzicht");
+  await page.getByText("Alle cijfers per thema").click();
   await expect(page.getByText("1 kennis · 0 redenering · 0 slordig")).toBeVisible();
 });

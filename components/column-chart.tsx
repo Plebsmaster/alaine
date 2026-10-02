@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { niceMax } from "@/lib/dashboard";
 
 export type Column = { key: string; label: string; detail: string; value: number };
 
@@ -15,12 +16,15 @@ export function ColumnChart({
   columns,
   unit,
   emptyText,
+  compact = false,
 }: {
   title: string;
   columns: Column[];
   /** Eenheid in enkelvoud en meervoud, bijv. ["herhaling", "herhalingen"]. */
   unit: [string, string];
   emptyText?: string;
+  /** Lage variant (staafgebied 70 px) voor een zijpaneel. */
+  compact?: boolean;
 }) {
   const fmt = (n: number) => `${n} ${n === 1 ? unit[0] : unit[1]}`;
   const [active, setActive] = useState<number | null>(null);
@@ -31,11 +35,15 @@ export function ColumnChart({
 
   return (
     <figure className="space-y-2">
-      <figcaption className="text-sm font-medium">{title}</figcaption>
+      <figcaption className="text-[15px] font-bold">{title}</figcaption>
       {max === 0 && emptyText ? <p className="text-sm text-muted">{emptyText}</p> : null}
-      <div className="relative">
-        <div className="pointer-events-none absolute left-0 top-11 text-xs tabular-nums text-muted">{top}</div>
-        <div className="flex h-52 items-end gap-[2px] border-b border-border pt-16" onPointerLeave={() => setActive(null)}>
+      {/* Asmaximum in een eigen kolom links, zodat het nooit over het piek-label valt. */}
+      <div className="relative ml-[26px]">
+        <div className="pointer-events-none absolute -left-[26px] top-4 text-[11px] leading-none tabular-nums text-muted">{top}</div>
+        <div
+          className={`flex items-end gap-[2px] border-b border-border pt-4 ${compact ? "h-[86px]" : "h-48"}`}
+          onPointerLeave={() => setActive(null)}
+        >
           {columns.map((c, i) => {
             const h = top ? (c.value / top) * 100 : 0;
             return (
@@ -49,12 +57,12 @@ export function ColumnChart({
                 className="group relative flex h-full flex-1 cursor-default items-end justify-center focus-visible:outline-offset-0"
               >
                 {i === peak ? (
-                  <span className="absolute text-xs tabular-nums text-muted" style={{ bottom: `calc(${h}% + 2px)` }}>
+                  <span className="absolute text-[11px] tabular-nums text-muted" style={{ bottom: `calc(${h}% + 2px)` }}>
                     {c.value}
                   </span>
                 ) : null}
                 <span
-                  className={`block w-full max-w-6 rounded-t-[4px] bg-chart transition-opacity ${active !== null && active !== i ? "opacity-60" : ""}`}
+                  className={`block w-full max-w-5 rounded-t-[4px] bg-chart transition-opacity ${active !== null && active !== i ? "opacity-60" : ""}`}
                   style={{ height: c.value ? `max(${h}%, 2px)` : 0 }}
                 />
               </button>
@@ -64,7 +72,7 @@ export function ColumnChart({
         {active !== null ? (
           <div
             role="status"
-            className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 whitespace-nowrap rounded-lg border border-border bg-surface px-2 py-1 text-xs shadow-sm"
+            className="pointer-events-none absolute -top-2 z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg border border-border bg-surface px-2 py-1 text-xs"
             style={{ left: `clamp(3.5rem, ${((active + 0.5) / columns.length) * 100}%, calc(100% - 3.5rem))` }}
           >
             <strong className="block text-sm tabular-nums">{fmt(columns[active].value)}</strong>
@@ -94,13 +102,4 @@ export function ColumnChart({
       </details>
     </figure>
   );
-}
-
-/** Ronde bovengrens voor de as: 0, 5, 10, 20, 50, 100, … */
-function niceMax(n: number): number {
-  if (n <= 0) return 0;
-  const steps = [1, 2, 5, 10];
-  const mag = 10 ** Math.floor(Math.log10(n));
-  for (const s of steps) if (s * mag >= n) return s * mag;
-  return 10 * mag;
 }

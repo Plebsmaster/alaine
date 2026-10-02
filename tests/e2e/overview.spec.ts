@@ -27,17 +27,24 @@ test("overzicht toont echte cijfers uit het logboek", async ({ page }) => {
   await db.from("card_schedule").update({ lapses: 5 }).eq("card_id", card!.id);
 
   await page.goto("/overzicht");
+  // Per thema: dekking van de leerdoelen (V.1 gedekt, V.2 niet).
+  const perTopic = page.getByRole("region", { name: "Per thema" });
+  await expect(perTopic.getByText("1/2")).toBeVisible();
+  // Aandacht nodig: eerst het leerdoel zonder dekking, dan de lastige kaart.
+  const attention = page.getByRole("region", { name: "Aandacht nodig" });
+  await expect(attention.getByText(/V\.2/)).toBeVisible();
+  await expect(attention.getByText(/5× vergeten · herschrijf of splits/)).toBeVisible();
+
+  // Alle cijfers blijven beschikbaar onder "Alle cijfers per thema".
+  await page.getByText("Alle cijfers per thema").click();
   await expect(page.getByText("Studiestreak")).toBeVisible();
   await expect(page.locator("dd", { hasText: /^1 dag$/ })).toBeVisible();
   const row = page.getByRole("row", { name: /Voorbeeld: hart en longen/ });
   await expect(row.getByRole("cell").nth(1)).toHaveText("1"); // actief
   await expect(row.getByRole("cell").nth(2)).toHaveText("2"); // concept
-  await expect(page.getByText("1 leerdoel(en) hebben nog geen actieve kaart of casus.")).toBeVisible();
-  await expect(page.getByText(/V\.2/)).toBeVisible();
-  await expect(page.getByText("5× vergeten")).toBeVisible();
 
   // Werklast: de learning-kaart staat vandaag; de tabelweergave toont alle waarden.
-  const chart = page.locator("figure", { hasText: "Werklast komende 14 dagen" });
+  const chart = page.locator("figure", { hasText: "Werklast, 14 dagen" });
   await chart.getByText("Als tabel").click();
   await expect(chart.getByRole("row").first()).toContainText("1 herhaling");
   // Tooltip op toetsenbordfocus.

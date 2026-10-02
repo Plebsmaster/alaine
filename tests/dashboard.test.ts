@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { minutesByDay, nextDays, pastDays, retention, streak, workload } from "@/lib/dashboard";
+import { minutesByDay, nextDays, niceMax, pastDays, retention, retentionScale, streak, workload } from "@/lib/dashboard";
 import { STATE } from "@/lib/fsrs";
 
 const TZ = "Europe/Amsterdam";
@@ -85,5 +85,30 @@ describe("errorProfile", () => {
     expect(errorProfile(["knowledge_gap", "knowledge_gap", "slip"]).advice).toBe("Vooral kennisgaten: terug naar de stof.");
     expect(errorProfile(["knowledge_gap", "slip"]).advice).toBeNull(); // te weinig
     expect(errorProfile(["knowledge_gap", "reasoning_error", "slip"]).advice).toBeNull(); // geen overheersend type
+  });
+});
+
+describe("niceMax", () => {
+  it("rondt af op 1, 2, 2,5, 5 of 10 keer een macht van tien", () => {
+    expect(niceMax(0)).toBe(0);
+    expect(niceMax(1)).toBe(1);
+    expect(niceMax(3)).toBe(5);
+    expect(niceMax(23)).toBe(25);
+    expect(niceMax(26)).toBe(50);
+    expect(niceMax(180)).toBe(200);
+    expect(niceMax(210)).toBe(250);
+  });
+});
+
+describe("retentionScale", () => {
+  it("loopt van 70 tot 100, of lager als een thema daaronder zit", () => {
+    expect(retentionScale([92, 81, null]).min).toBe(70);
+    expect(retentionScale([92, 64]).min).toBe(60);
+    expect(retentionScale([null]).min).toBe(70);
+    const { pos } = retentionScale([92, 81]);
+    expect(pos(70)).toBe(0);
+    expect(pos(85)).toBeCloseTo(0.5);
+    expect(pos(100)).toBe(1);
+    expect(pos(50)).toBe(0); // buiten de schaal: aan de rand
   });
 });

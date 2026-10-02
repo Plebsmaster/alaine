@@ -132,7 +132,8 @@ test("draft_cards, controleren, nakijken met hint, ketenkaart, fouttype en stopc
   // draft_cards vanaf de themapagina.
   await page.goto("/themas");
   await page.getByRole("link", { name: /Voorbeeld: hart en longen/ }).click();
-  await page.getByText("Kaarten laten maken uit brontekst (AI)").click();
+  await page.getByRole("link", { name: /^Kaarten \d+/ }).click();
+  await page.getByRole("link", { name: "Kaarten maken uit brontekst (AI)" }).click();
   await page.getByRole("textbox", { name: /^Brontekst/ }).fill("Het slagvolume is EDV min ESV. ACE-remmers ...");
   await page.getByRole("button", { name: "Maak conceptkaarten" }).click();
   await expect(page).toHaveURL(/\/goedkeuren\?thema=/);

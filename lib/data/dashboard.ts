@@ -30,6 +30,9 @@ export type TopicRow = {
   lastCaseScore: number | null;
   errors: ErrorCounts;
   errorAdvice: string | null;
+  /** Leerdoelen met een actieve kaart of casus, en het totaal. */
+  covered: number;
+  objectives: number;
 };
 
 export async function loadDashboard(supabase: ServerClient, settings: UserSettings, now = new Date()) {
@@ -68,6 +71,11 @@ export async function loadDashboard(supabase: ServerClient, settings: UserSettin
   const cardTopic = new Map(cards.map((c) => [c.id, c.topic_id]));
   const moduleById = new Map(modules.map((m) => [m.id, m]));
   const countBy = new Map(counts.map((c) => [c.topic_id, c]));
+  const coverageOf = (topicId: string) => {
+    const rows = coverage.filter((c) => c.topic_id === topicId);
+    const covered = rows.filter((c) => Number(c.active_cards ?? 0) > 0 || Number(c.active_cases ?? 0) > 0).length;
+    return { covered, objectives: rows.length };
+  };
 
   // Per thema
   const topicRows: TopicRow[] = [...topics]
@@ -92,6 +100,7 @@ export async function loadDashboard(supabase: ServerClient, settings: UserSettin
         lastCaseScore: lastCase?.self_score ?? null,
         errors: profile.counts,
         errorAdvice: profile.advice,
+        ...coverageOf(t.id),
       };
     });
 

@@ -104,3 +104,23 @@ export function errorProfile(types: (string | null | undefined)[]): { counts: Er
   }
   return { counts, advice };
 }
+
+/** Ronde bovengrens voor een grafiekas, in stappen 1, 2, 2,5, 5, 10 (23 → 25, niet 50). */
+export function niceMax(n: number): number {
+  if (n <= 0) return 0;
+  const steps = [1, 2, 2.5, 5, 10];
+  const mag = 10 ** Math.floor(Math.log10(n));
+  for (const s of steps) if (s * mag >= n) return s * mag;
+  return 10 * mag;
+}
+
+/**
+ * Schaal voor "Retentie per thema" (ontwerp 1j): van `min` tot 100%. `min` is 70, of lager
+ * (afgerond op tientallen) als een thema daaronder zit. `pos` geeft 0–1 voor een percentage.
+ */
+export function retentionScale(percents: (number | null)[]): { min: number; pos: (x: number) => number } {
+  const known = percents.filter((p): p is number => p !== null);
+  const lowest = known.length ? Math.min(...known) : 100;
+  const min = Math.min(70, Math.floor(lowest / 10) * 10);
+  return { min, pos: (x: number) => Math.max(0, Math.min(1, (x - min) / (100 - min))) };
+}

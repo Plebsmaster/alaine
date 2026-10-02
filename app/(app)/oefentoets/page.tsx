@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button, LinkButton, Notice, PageHeader, Panel, Select } from "@/components/ui";
+import { Icon } from "@/components/nav";
+import { Button, LinkButton, Notice, PageHeader, Select } from "@/components/ui";
 import { aiConfigured } from "@/lib/ai/client";
 import { requireUser } from "@/lib/auth";
 import { EXAM_DEFAULT } from "@/lib/exam";
@@ -31,6 +32,13 @@ export default async function ExamPage({ searchParams }: PageProps<"/oefentoets"
   const drafts = (questions ?? []).filter((q) => q.status === "draft").length;
   const error = typeof fout === "string" ? ERRORS[fout] : undefined;
 
+  const pretestTopics = sorted
+    .map((t) => {
+      const qs = count(t.id, "pretest");
+      return { id: t.id, name: t.name, n: qs.length, done: qs.filter((q) => tried.has(q.id)).length };
+    })
+    .filter((t) => t.n > 0);
+
   return (
     <>
       <PageHeader title="Oefentoets">
@@ -39,79 +47,106 @@ export default async function ExamPage({ searchParams }: PageProps<"/oefentoets"
           <LinkButton href="/oefentoets/vraag/nieuw">Nieuwe vraag</LinkButton>
         </div>
       </PageHeader>
-      <div className="space-y-6">
+      <div className="space-y-5">
         {error ? <Notice tone="error">{error}</Notice> : null}
         {drafts > 0 ? (
           <Notice>
-            {drafts} conceptvra(a)g(en) wachten op <Link className="underline" href="/goedkeuren?soort=vragen">Goedkeuren</Link>.
+            {drafts} conceptvra(a)g(en) wachten op{" "}
+            <Link className="font-bold text-accent" href="/goedkeuren?soort=vragen">
+              Goedkeuren
+            </Link>
+            .
           </Notice>
         ) : null}
 
-        <Panel className="space-y-3">
-          <h2 className="font-semibold">Pretest</h2>
-          <p className="text-sm text-muted">
-            Doe de pretest vóórdat je aan een thema begint. Je ziet na elke vraag het modelantwoord; er is geen score. Proberen helpt je de stof daarna beter te onthouden.
-          </p>
-          <ul className="divide-y divide-border rounded-lg border border-border">
-            {sorted.map((t) => {
-              const qs = count(t.id, "pretest");
-              const done = qs.filter((q) => tried.has(q.id)).length;
-              return (
-                <li key={t.id} className="flex min-h-12 items-center justify-between gap-3 px-3 py-2">
-                  <span>
-                    {t.name}
-                    <span className="ml-2 text-xs text-muted">
-                      {qs.length} vragen{done ? ` · ${done} geprobeerd` : ""}
-                    </span>
-                  </span>
-                  {qs.length > 0 ? (
-                    <Link href={`/oefentoets/pretest/${t.id}`} className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-2">
-                      Start pretest
-                    </Link>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        </Panel>
+        {/* Ontwerp 1s/1t: pretest en proeftoets naast elkaar. */}
+        <div className="grid gap-4 md:grid-cols-2 md:items-start">
+          <section aria-labelledby="pretest" className="flex flex-col gap-3 rounded-2xl border border-border bg-surface px-5 py-5 md:px-6 md:py-[22px]">
+            <h2 id="pretest" className="font-serif text-2xl font-medium">
+              Pretest
+            </h2>
+            <p className="text-sm leading-normal text-text-2">
+              Doe de pretest vóórdat je aan een thema begint. Je ziet na elke vraag het modelantwoord; er is geen score. Proberen helpt je de stof daarna beter te onthouden.
+            </p>
+            {pretestTopics.length === 0 ? (
+              <p className="text-sm text-muted">Nog geen goedgekeurde pretestvragen.</p>
+            ) : (
+              <ul className="border-t border-border-subtle">
+                {pretestTopics.map((t) => (
+                  <li key={t.id} className="flex min-h-[50px] items-center gap-2.5 border-b border-border-subtle py-1.5 last:border-b-0">
+                    <div className="flex-1">
+                      <span className="block text-[15px]">{t.name}</span>
+                      <span className="text-xs text-muted">
+                        {t.n} vragen{t.done ? ` · ${t.done} geprobeerd` : ""}
+                      </span>
+                    </div>
+                    {t.done >= t.n ? (
+                      <span className="text-[13px] text-accent">✓ Gedaan</span>
+                    ) : (
+                      <Link
+                        href={`/oefentoets/pretest/${t.id}`}
+                        className="inline-flex min-h-11 shrink-0 items-center rounded-[9px] border border-border-strong px-3 text-[13px] font-medium transition-colors hover:bg-surface-2 motion-reduce:transition-none md:min-h-[34px]"
+                      >
+                        Start pretest
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
-        <Panel className="space-y-3">
-          <h2 className="font-semibold">Proeftoets</h2>
-          <p className="text-sm text-muted">Gemengd over de thema&apos;s die je kiest. Je ziet het resultaat per leerdoel pas na inleveren.</p>
-          <form action={startExam} className="space-y-3">
-            <fieldset className="space-y-1">
-              <legend className="sr-only">Thema&apos;s</legend>
-              {sorted.map((t) => {
-                const n = count(t.id, "exam").length;
-                return (
-                  <label key={t.id} className="flex min-h-11 items-center gap-2 text-sm">
-                    <input type="checkbox" name="topic" value={t.id} disabled={n === 0} className="h-5 w-5" aria-label={`${t.name} in proeftoets`} />
-                    <span className={n === 0 ? "text-muted" : undefined}>
-                      {t.name} <span className="text-xs text-muted">({n} toetsvragen)</span>
-                    </span>
-                  </label>
-                );
-              })}
-            </fieldset>
-            <div className="flex flex-wrap items-end gap-2">
-              <label className="space-y-1 text-sm">
-                <span className="block font-medium">Aantal vragen</span>
-                <Select name="n" defaultValue={String(EXAM_DEFAULT)} className="w-24">
-                  {[10, 20, 30, 40, 60].map((n) => (
-                    <option key={n} value={n}>
-                      {n}
-                    </option>
-                  ))}
-                </Select>
-              </label>
-              <Button variant="primary">Start proeftoets</Button>
-            </div>
-          </form>
-        </Panel>
+          <section aria-labelledby="proeftoets" className="flex flex-col gap-3 rounded-2xl border border-border bg-surface px-5 py-5 md:px-6 md:py-[22px]">
+            <h2 id="proeftoets" className="font-serif text-2xl font-medium">
+              Proeftoets
+            </h2>
+            <p className="text-sm leading-normal text-text-2">Gemengd over de thema&apos;s die je kiest. Je ziet het resultaat per leerdoel pas na inleveren.</p>
+            <form action={startExam} className="flex flex-col gap-3">
+              <fieldset className="border-t border-border-subtle">
+                <legend className="sr-only">Thema&apos;s</legend>
+                {sorted.map((t) => {
+                  const n = count(t.id, "exam").length;
+                  return (
+                    <label key={t.id} className={`flex min-h-11 items-center gap-3 ${n === 0 ? "opacity-45" : "cursor-pointer"}`}>
+                      <span className="relative flex h-5 w-5 shrink-0">
+                        <input
+                          type="checkbox"
+                          name="topic"
+                          value={t.id}
+                          disabled={n === 0}
+                          aria-label={`${t.name} in proeftoets`}
+                          className="peer h-5 w-5 cursor-pointer appearance-none rounded-[5px] border-[1.5px] border-border-dashed bg-surface checked:border-accent checked:bg-accent disabled:cursor-not-allowed"
+                        />
+                        <Icon d="M4 12l5 5L20 6" size={13} strokeWidth={3} className="pointer-events-none absolute inset-0 m-auto hidden text-accent-text peer-checked:block" />
+                      </span>
+                      <span className="flex-1 text-[15px]">{t.name}</span>
+                      <span className="text-[13px] tabular-nums text-muted">{n} toetsvragen</span>
+                    </label>
+                  );
+                })}
+              </fieldset>
+              <div className="mt-1 flex items-end gap-2.5">
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[13px] font-bold">Aantal vragen</span>
+                  <Select name="n" defaultValue={String(EXAM_DEFAULT)} className="w-24">
+                    {[10, 20, 30, 40, 60].map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+                <Button variant="primary" className="flex-1">
+                  Start proeftoets
+                </Button>
+              </div>
+            </form>
+          </section>
+        </div>
 
         {sorted.length > 0 ? (
-          <details className="rounded-xl border border-border bg-surface p-4">
-            <summary className="cursor-pointer font-semibold">Vragen laten maken door AI</summary>
+          <details className="rounded-2xl border border-border bg-surface px-5 py-4 md:px-6">
+            <summary className="flex min-h-8 cursor-pointer items-center text-[15px] font-bold">Vragen laten maken door AI</summary>
             <div className="mt-3">
               <AiQuestionsForm topics={sorted.map((t) => ({ id: t.id, label: `${t.modules?.name ?? ""} · ${t.name}` }))} enabled={aiConfigured()} />
             </div>

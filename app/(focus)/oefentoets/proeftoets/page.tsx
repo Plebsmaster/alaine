@@ -26,16 +26,14 @@ export default async function ExamRunPage({ searchParams }: PageProps<"/oefentoe
       topic_name: q.topics?.name ?? "",
     }));
 
-  return (
-    <>
-      <PageHeader title="Proeftoets" settings={false}>
-        <span className="text-sm text-muted">{questions.length} vragen</span>
-      </PageHeader>
-      {questions.length === 0 ? (
+  if (questions.length === 0) {
+    return (
+      <>
+        <PageHeader title="Proeftoets" settings={false} />
         <Panel className="text-sm text-muted">Geen vragen gevonden. Start een nieuwe proeftoets.</Panel>
-      ) : (
-        <ExamRunner questions={questions} sessionId={crypto.randomUUID()} />
-      )}
-    </>
-  );
+      </>
+    );
+  }
+  // Eigen kop met vraagoverzicht (ontwerp 1t).
+  return <ExamRunner questions={questions} sessionId={crypto.randomUUID()} />;
 }

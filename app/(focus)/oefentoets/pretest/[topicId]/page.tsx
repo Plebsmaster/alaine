@@ -21,14 +21,14 @@ export default async function PretestPage({ params }: PageProps<"/oefentoets/pre
       .limit(PRETEST_MAX),
   ]);
   if (!topic) notFound();
-  return (
-    <>
-      <PageHeader title={`Pretest: ${topic.name}`} settings={false} />
-      {(questions ?? []).length === 0 ? (
+  if ((questions ?? []).length === 0) {
+    return (
+      <>
+        <PageHeader title={`Pretest: ${topic.name}`} settings={false} />
         <Panel className="text-sm text-muted">Nog geen goedgekeurde pretestvragen voor dit thema.</Panel>
-      ) : (
-        <PretestRunner questions={questions!} sessionId={crypto.randomUUID()} />
-      )}
-    </>
-  );
+      </>
+    );
+  }
+  // Eigen kop met vraagoverzicht (ontwerp 1t).
+  return <PretestRunner questions={questions!} sessionId={crypto.randomUUID()} topicName={topic.name} />;
 }

@@ -46,6 +46,8 @@ export type GradedQuestion = {
   /** true/false, of null als een open vraag nog niet is nagekeken. */
   correct: boolean | null;
   objectives: { id: string; code: string | null; description: string }[];
+  /** Thema van de vraag; voor de groepering in het resultaat. */
+  topic?: string | null;
 };
 
 export type ObjectiveScore = {
@@ -56,13 +58,15 @@ export type ObjectiveScore = {
   total: number;
   /** Vragen die nog niet zijn nagekeken (open vragen zonder zelfbeoordeling). */
   pending: number;
+  /** Thema van de eerste vraag met dit leerdoel; null voor "Zonder leerdoel". */
+  topic: string | null;
 };
 
 /** Score per leerdoel. Een vraag met meerdere leerdoelen telt bij elk mee. */
 export function scoreByObjective(results: GradedQuestion[]): ObjectiveScore[] {
   const map = new Map<string, ObjectiveScore>();
-  const add = (key: string, o: Omit<ObjectiveScore, "correct" | "total" | "pending">, r: GradedQuestion) => {
-    const s = map.get(key) ?? { ...o, correct: 0, total: 0, pending: 0 };
+  const add = (key: string, o: Omit<ObjectiveScore, "correct" | "total" | "pending" | "topic">, r: GradedQuestion) => {
+    const s = map.get(key) ?? { ...o, correct: 0, total: 0, pending: 0, topic: o.id === null ? null : (r.topic ?? null) };
     s.total += 1;
     if (r.correct === true) s.correct += 1;
     if (r.correct === null) s.pending += 1;
@@ -77,4 +81,21 @@ export function scoreByObjective(results: GradedQuestion[]): ObjectiveScore[] {
     if (b.id === null) return -1;
     return (a.code ?? a.description).localeCompare(b.code ?? b.description, "nl", { numeric: true });
   });
+}
+
+/** Leerdoelscores per thema, in de volgorde waarin de thema's voorkomen ("Zonder leerdoel" achteraan). */
+export function groupScoresByTopic(scores: ObjectiveScore[]): { topic: string | null; items: ObjectiveScore[] }[] {
+  const groups: { topic: string | null; items: ObjectiveScore[] }[] = [];
+  for (const s of scores) {
+    const g = groups.find((x) => x.topic === s.topic);
+    if (g) g.items.push(s);
+    else groups.push({ topic: s.topic, items: [s] });
+  }
+  return [...groups.filter((g) => g.topic !== null), ...groups.filter((g) => g.topic === null)];
+}
+
+/** Eén blokje per vraag: eerst goed, dan fout, dan nog na te kijken. */
+export function scoreCells(s: Pick<ObjectiveScore, "correct" | "total" | "pending">): ("correct" | "wrong" | "pending")[] {
+  const wrong = Math.max(0, s.total - s.correct - s.pending);
+  return [...Array(s.correct).fill("correct"), ...Array(wrong).fill("wrong"), ...Array(s.pending).fill("pending")];
 }

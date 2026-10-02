@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pickExamQuestions, scoreByObjective } from "@/lib/exam";
+import { groupScoresByTopic, pickExamQuestions, scoreByObjective, scoreCells } from "@/lib/exam";
 
 let seed = 1;
 const rnd = () => {
@@ -48,5 +48,29 @@ describe("scoreByObjective", () => {
     expect(s[1]).toMatchObject({ correct: 1, total: 1 });
     expect(s[2]).toMatchObject({ correct: 0, total: 1, pending: 1 });
     expect(s[3]).toMatchObject({ description: "Zonder leerdoel", correct: 1, total: 1 });
+  });
+});
+
+describe("groupScoresByTopic", () => {
+  const o = (id: string, code: string) => ({ id, code, description: code });
+
+  it("groepeert per thema van de vraag; zonder leerdoel achteraan", () => {
+    const scores = scoreByObjective([
+      { question_id: "q1", correct: true, objectives: [o("a", "1.1")], topic: "Huid" },
+      { question_id: "q2", correct: false, objectives: [o("b", "2.1")], topic: "Ritme" },
+      { question_id: "q3", correct: null, objectives: [o("c", "1.2")], topic: "Huid" },
+      { question_id: "q4", correct: true, objectives: [], topic: "Ritme" },
+    ]);
+    const groups = groupScoresByTopic(scores);
+    expect(groups.map((g) => g.topic)).toEqual(["Huid", "Ritme", null]);
+    expect(groups[0].items.map((x) => x.code)).toEqual(["1.1", "1.2"]);
+    expect(groups[2].items[0]).toMatchObject({ description: "Zonder leerdoel", topic: null });
+  });
+});
+
+describe("scoreCells", () => {
+  it("eerst goed, dan fout, dan na te kijken", () => {
+    expect(scoreCells({ correct: 1, total: 4, pending: 1 })).toEqual(["correct", "wrong", "wrong", "pending"]);
+    expect(scoreCells({ correct: 0, total: 0, pending: 0 })).toEqual([]);
   });
 });

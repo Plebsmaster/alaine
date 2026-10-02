@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { admin, importExample, LOCAL, login, resetExample } from "./helpers";
 
-// Fase 5: een pretest is te maken vóór een thema; een proeftoets mengt thema's en
-// toont per leerdoel de score.
+// Fase 5 en ontwerp 1t: een pretest is te maken vóór een thema; een proeftoets mengt thema's,
+// toont één vraag per scherm met vraagoverzicht en na inleveren per leerdoel de score.
 test.skip(!LOCAL, "De rooktest wist testdata en draait alleen tegen de lokale Supabase (supabase start).");
 
 test.beforeAll(resetExample);
@@ -43,27 +43,39 @@ test("pretest en proeftoets", async ({ page }) => {
   await page.getByRole("checkbox", { name: "Voorbeeld: KNO in proeftoets" }).check();
   await page.getByRole("button", { name: "Start proeftoets" }).click();
   await expect(page).toHaveURL(/\/oefentoets\/proeftoets\?ids=/);
-  await expect(page.getByRole("heading", { name: "Proeftoets" })).toBeVisible();
-  await expect(page.getByText("8 vragen", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Proeftoets/ })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Vraagoverzicht" }).getByRole("button")).toHaveCount(8);
   const html = await page.content();
   expect(html).not.toMatch(/UITLEG-|MODEL-OPEN/);
 
+  // Eén vraag per scherm (ontwerp 1t). Overal optie A (juist voor ritme, fout voor KNO); open vragen invullen.
+  const topics: string[] = [];
+  let mcq = 0;
+  for (let i = 1; i <= 8; i++) {
+    await expect(page.getByText(`Vraag ${i} van 8`)).toBeVisible();
+    topics.push((await page.locator("main").getByText(/^Voorbeeld: (ritme|KNO)$/).textContent()) ?? "");
+    const radios = page.getByRole("radio");
+    if ((await radios.count()) > 0) {
+      await radios.first().check();
+      mcq++;
+    } else {
+      await page.getByRole("textbox", { name: `Antwoord op vraag ${i}` }).fill("Mijn antwoord");
+    }
+    if (i < 8) await page.getByRole("button", { name: "Volgende", exact: true }).click();
+  }
+  expect(mcq).toBe(6);
   // Gemengd: beide thema's, en geen twee opeenvolgende vragen uit hetzelfde thema.
-  const badges = await page.locator("main").getByText(/^Voorbeeld: (ritme|KNO)$/).allTextContents();
-  expect(new Set(badges).size).toBe(2);
-  for (let i = 1; i < badges.length; i++) expect(badges[i]).not.toBe(badges[i - 1]);
-
-  // Overal optie A (juist voor ritme, fout voor KNO); open vragen invullen.
-  const sets = page.locator("main fieldset");
-  await expect(sets).toHaveCount(6);
-  for (let i = 0; i < 6; i++) await sets.nth(i).locator("input[type=radio]").first().check();
-  for (const box of await page.getByRole("textbox", { name: /^Antwoord op vraag/ }).all()) await box.fill("Mijn antwoord");
+  expect(new Set(topics).size).toBe(2);
+  for (let i = 1; i < topics.length; i++) expect(topics[i]).not.toBe(topics[i - 1]);
+  // Terug via het vraagoverzicht: het antwoord blijft staan.
+  await page.getByRole("button", { name: "Vraag 1, beantwoord" }).click();
+  await expect(page.getByText("Vraag 1 van 8")).toBeVisible();
   await expect(page.getByText("8 van 8 beantwoord")).toBeVisible();
-  await page.getByRole("button", { name: "Inleveren" }).click();
+  await page.getByRole("button", { name: "Inleveren" }).first().click();
 
-  await expect(page.getByText("Resultaat")).toBeVisible();
+  await expect(page.getByRole("heading", { name: /van 8 goed$/ })).toBeVisible();
   await expect(page.getByText("meerkeuze 3/6")).toBeVisible();
-  const row = (code: string) => page.getByRole("row", { name: new RegExp(`^${code.replace(".", "\\.")} `) });
+  const row = (code: string) => page.getByRole("row", { name: new RegExp(` ${code.replace(".", "\\.")} `) });
   await expect(row("R.1")).toContainText("3/4");
   await expect(row("R.1")).toContainText("1 na te kijken");
   await expect(row("K.1")).toContainText("0/4");

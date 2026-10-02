@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { AiError, modelFor, runJson, type ParseClient } from "@/lib/ai/client";
 import { BASE_RULES, draftComparePrompt, draftScriptPrompt, wordCount } from "@/lib/ai/prompts";
-import { draftCompareOutput, draftScriptOutput } from "@/lib/ai/schemas";
+import { caseFeedbackOutput, caseHintOutput, draftCasesOutput, draftCompareOutput, draftScriptOutput } from "@/lib/ai/schemas";
+import { caseHintPrompt } from "@/lib/ai/prompts";
 
 type Reply = { parsed: unknown; stop_reason?: string };
 
@@ -93,5 +94,47 @@ describe("runJson", () => {
   it("kiest het snelle model voor hints en feedback", () => {
     expect(modelFor("case_hint")).toBe(modelFor("explain_feedback"));
     expect(modelFor("case_hint")).not.toBe(modelFor("draft_cards"));
+  });
+});
+
+describe("casus-AI", () => {
+  it("hintprompt verbiedt de diagnose te verklappen en noemt het hintnummer", () => {
+    const p = caseHintPrompt({
+      case: { title: "t", vignette: "v", question: "q", correct_diagnosis: "Hartfalen", expert_reflection: [], teaching_points: null },
+      attempt: { working_diagnosis: "COPD", reflection: [], final_ranking: [] },
+      n: 2,
+    });
+    expect(p.user).toContain("verklapt de diagnose NIET");
+    expect(p.user).toContain("HINTNUMMER: 2");
+  });
+
+  it("schema's voor hint, feedback en casussen werken met structured output", async () => {
+    const feedback = {
+      diagnosis_correct: false,
+      decisive_finding: "Enkeloedeem",
+      per_diagnosis: [{ diagnosis: "COPD", seen: "roken", missed: "oedeem" }],
+      missing_alternatives: ["Hartfalen"],
+      lessons: ["Enkeloedeem bij kortademigheid wijst op hartfalen."],
+    };
+    const cases = {
+      cases: [
+        {
+          title: "Kortademig",
+          vignette: "Man, 72 jaar…",
+          correct_diagnosis: "Hartfalen",
+          expert_reflection: [
+            { diagnosis: "Hartfalen", supporting: "oedeem", against: "", missing: "", rank: 1 },
+            { diagnosis: "COPD", supporting: "", against: "geen piepen", missing: "", rank: 2 },
+          ],
+          teaching_points: "…",
+          difficulty: 2,
+          objectives: [],
+        },
+      ],
+    };
+    const { api } = fakeApi([{ parsed: { hint: "Kijk naar de enkels." } }, { parsed: feedback }, { parsed: cases }]);
+    expect((await runJson({ fn: "case_hint", system: "s", user: "u", schema: caseHintOutput, api })).hint).toBe("Kijk naar de enkels.");
+    expect((await runJson({ fn: "case_feedback", system: "s", user: "u", schema: caseFeedbackOutput, api })).lessons).toHaveLength(1);
+    expect((await runJson({ fn: "draft_cases", system: "s", user: "u", schema: draftCasesOutput, api })).cases).toHaveLength(1);
   });
 });

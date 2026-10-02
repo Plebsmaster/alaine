@@ -21,3 +21,37 @@ export const draftCompareOutput = z.object({
     explanation: z.string(),
   }),
 });
+
+export const caseHintOutput = z.object({ hint: z.string().min(1) });
+
+export const caseFeedbackOutput = z.object({
+  diagnosis_correct: z.boolean(),
+  decisive_finding: z.string(),
+  per_diagnosis: z.array(z.object({ diagnosis: z.string(), seen: z.string(), missed: z.string() })),
+  missing_alternatives: z.array(z.string()),
+  lessons: z.array(z.string()),
+});
+
+export type CaseFeedback = z.infer<typeof caseFeedbackOutput>;
+
+const aiCase = z.object({
+  title: z.string().min(1),
+  vignette: z.string().min(1).max(2000),
+  correct_diagnosis: z.string().min(1),
+  expert_reflection: z
+    .array(
+      z.object({
+        diagnosis: z.string().min(1),
+        supporting: z.string(),
+        against: z.string(),
+        missing: z.string(),
+        rank: z.number().int(),
+      }),
+    )
+    .min(2),
+  teaching_points: z.string(),
+  difficulty: z.number().int(),
+  objectives: z.array(z.string()),
+});
+
+export const draftCasesOutput = z.object({ cases: z.array(aiCase).min(1) });

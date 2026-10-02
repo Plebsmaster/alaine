@@ -44,7 +44,7 @@ export async function loadDashboard(supabase: ServerClient, settings: UserSettin
     supabase.from("topic_card_counts").select("*").then((r) => r.data ?? []),
     all((a, b) => supabase.from("review_queue").select("card_id, topic_id, front, due, state, reps, lapses").order("card_id").range(a, b)),
     all((a, b) => supabase.from("cards").select("id, topic_id").order("id").range(a, b)),
-    all((a, b) => supabase.from("review_logs").select("card_id, state, rating, error_type").gte("review", since30).order("id").range(a, b)),
+    all((a, b) => supabase.from("review_logs").select("card_id, state, rating, error_type, review").gte("review", since30).order("id").range(a, b)),
     all((a, b) => supabase.from("review_logs").select("review, duration_ms").gte("review", since14).order("id").range(a, b)),
     supabase
       .from("case_attempts")
@@ -136,6 +136,11 @@ export async function loadDashboard(supabase: ServerClient, settings: UserSettin
   const activeDays = new Set(sessions.map((s) => dayKey(new Date(s.started_at), tz)));
   const overall = retention(logs);
 
+  // Nieuwe kaarten die vandaag nog aan de beurt komen (zelfde limiet als /vandaag).
+  const newAvailable = queue.filter((q) => q.state === 0 && q.reps === 0).length;
+  const newStartedToday = logs.filter((l) => l.state === 0 && dayKey(new Date(l.review), tz) === today).length;
+  const newToday = Math.min(newAvailable, Math.max(0, settings.max_new_per_day - newStartedToday));
+
   return {
     topics: topicRows,
     workload: load,
@@ -146,6 +151,7 @@ export async function loadDashboard(supabase: ServerClient, settings: UserSettin
     streak: streak(activeDays, today),
     minutesToday: minutes.at(-1)?.minutes ?? 0,
     dueToday: load[0]?.count ?? 0,
+    newToday,
     retention: overall,
   };
 }

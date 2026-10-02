@@ -31,7 +31,11 @@ export default async function OverviewPage() {
       <PageHeader title="Overzicht" />
       <div className="space-y-6">
         <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <Stat label="Vandaag te herhalen" value={String(d.dueToday)} />
+          <Stat
+            label="Vandaag"
+            value={String(d.dueToday + d.newToday)}
+            note={`${d.dueToday} herhalen · ${d.newToday} nieuw`}
+          />
           <Stat label="Studiestreak" value={`${d.streak} ${d.streak === 1 ? "dag" : "dagen"}`} />
           <Stat label="Minuten vandaag" value={String(d.minutesToday)} />
           <Stat

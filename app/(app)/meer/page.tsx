@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MORE_LINKS } from "@/components/nav";
+import { MORE_LINKS } from "@/components/nav-links";
 import { LogoutButton } from "@/components/logout-button";
 import { PageHeader } from "@/components/ui";
 import { signOut } from "../actions";

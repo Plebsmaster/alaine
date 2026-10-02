@@ -78,7 +78,8 @@ supabase/migrations/
 
 ## Stand en afspraken in de code
 
-- Fase 0, 1 en 3–6 zijn gebouwd. Van fase 2 bestaat `/goedkeuren` (kaarten, conceptscripts, casussen en vragen met bulk-goedkeuren) en de leerdoelendekking op `/thema/[id]`; `draft_cards` en `explain_feedback` nog niet.
+- Alle fases (0–6) uit SPEC zijn gebouwd. `explain_feedback` schrijft de feedback mee in `review_logs.ai_feedback` via `rate_card` (migratie 0004).
+- AI-functies end-to-end testen kan zonder echte key: `tests/e2e/ai.spec.ts` start een nagebootste Messages-API (zie docs/SETUP.md).
 - Offline (fase 6): `public/sw.js` bewaart app-bestanden en `/vandaag`; `lib/offline/idb.ts` houdt de wachtrij van vandaag en een uitgaande rij beoordelingen in IndexedDB. Zolang de rij niet leeg is, wint de lokale stand van de wachtrij van de server. Uitloggen wist beide. In Playwright omzeilt de service worker `setOffline`; de offline-test blokkeert daarom ook via `context.route`.
 - Overzicht: rekenwerk in `lib/dashboard.ts` (puur, getest), data in `lib/data/dashboard.ts`. Grafiekkleur `--chart` is gevalideerd met de dataviz-validator.
 - Oefentoets: selectie en score per leerdoel in `lib/exam.ts` (puur, getest). Pretest en proeftoets sturen geen modelantwoorden of juiste opties naar de browser vóór antwoorden of inleveren (`pretestAnswerAction`, `submitExamAction`).

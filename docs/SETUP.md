@@ -8,7 +8,7 @@ Dit doe je één keer zelf. Claude Code kan het niet voor je doen, omdat het om 
 2. Noteer onder **Project Settings → API** de project-URL, de `anon`/publishable key en de `service_role`/secret key.
 3. **Database klaarzetten.** Kies één van twee manieren:
    - Met de terminal: `npx supabase login`, `npx supabase link --project-ref <ref>` en `npx supabase db push`.
-   - Of in het dashboard: **SQL Editor**: voer de bestanden in `supabase/migrations/` één voor één uit, in volgorde (`0001_init.sql`, `0002_phase1.sql`, `0003_phase3.sql`, …). Komt er later een nieuw bestand bij, voer dan alleen dat uit.
+   - Of in het dashboard: **SQL Editor**: voer de bestanden in `supabase/migrations/` één voor één uit, in volgorde (`0001_init.sql`, `0002_phase1.sql`, `0003_phase3.sql`, `0004_phase2.sql`, …). Komt er later een nieuw bestand bij, voer dan alleen dat uit.
 4. **Authentication → URL Configuration**
    - *Site URL*: je Vercel-adres (bijv. `https://pa-studie.vercel.app`). Zolang je die nog niet hebt: `http://localhost:3000`.
    - *Redirect URLs*: `http://localhost:3000/**` en `https://<jouw-vercel-adres>/**`.
@@ -52,4 +52,5 @@ npm run dev                 # http://localhost:3000
 - Inlogmails lokaal lezen: http://127.0.0.1:54324 (Mailpit).
 - `npm test`: unit tests (FSRS, wachtrij, importer).
 - `npm run test:e2e`: rooktest in de browser tegen de lokale Supabase. Die wist de voorbeeldmodule en draait daarom alleen als `NEXT_PUBLIC_SUPABASE_URL` naar localhost wijst.
+- AI-tests zonder echte API-key: start de app met `ANTHROPIC_API_KEY=test ANTHROPIC_BASE_URL=http://127.0.0.1:4010 npm run start -- -p 3001` en draai `E2E_AI=1 E2E_BASE_URL=http://localhost:3001 npx playwright test tests/e2e/ai.spec.ts`. De test start zelf een nagebootste API op poort 4010.
 - `npm run db:types`: TypeScript-types opnieuw genereren na een migratie.

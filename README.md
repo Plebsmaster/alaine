@@ -8,13 +8,13 @@ Dit pakket is alles wat Claude Code nodig heeft om je studie-app te bouwen: een 
 | --- | --- | --- |
 | 0 | Fundament: Next.js, Supabase, inloggen met code (alleen `ALLOWED_EMAIL`), PWA | Gebouwd |
 | 1 | Herhalen: beheer, import, FSRS, dagelijkse wachtrij, herhaalscherm, sneltoetsen | Gebouwd |
-| 2 | Goedkeuren met AI-concepten en AI-feedback | Goedkeuren van kaarten, scripts, casussen en vragen staat er al; `draft_cards` en `explain_feedback` volgen |
-| 3 | Illness scripts: scriptkaarten bij goedkeuren, naast elkaar vergelijken, `draft_script`, `draft_compare` | Gebouwd (AI getest zonder echte API-aanroep) |
-| 4 | Casusmodus: sessies, reflectietabel, hints, expert-vergelijking, stagecasussen, `case_hint`, `case_feedback`, `draft_cases` | Gebouwd (AI getest zonder echte API-aanroep) |
-| 5 | Pretest en proeftoets: resultaat per leerdoel, foute antwoorden als kaart, `draft_questions` | Gebouwd (AI getest zonder echte API-aanroep) |
+| 2 | Goedkeuren met AI-concepten (`draft_cards`) en AI-feedback (`explain_feedback`) | Gebouwd |
+| 3 | Illness scripts: scriptkaarten bij goedkeuren, naast elkaar vergelijken, `draft_script`, `draft_compare` | Gebouwd |
+| 4 | Casusmodus: sessies, reflectietabel, hints, expert-vergelijking, stagecasussen, `case_hint`, `case_feedback`, `draft_cases` | Gebouwd |
+| 5 | Pretest en proeftoets: resultaat per leerdoel, foute antwoorden als kaart, `draft_questions` | Gebouwd |
 | 6 | Overzicht, export en offline herhalen | Gebouwd |
 
-Getest met een lokale Supabase: 61 unit tests (FSRS, wachtrij, importer, casusselectie, toetsselectie en score per leerdoel, overzichtscijfers, AI-laag met een nagebootste API) en rooktests in de browser voor fase 0–1 en 3–6, waaronder herhalen in vliegtuigmodus. De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
+Getest met een lokale Supabase: 61 unit tests (FSRS, wachtrij, importer, casusselectie, toetsselectie en score per leerdoel, overzichtscijfers, AI-laag met een nagebootste API) en rooktests in de browser voor alle fases, waaronder herhalen in vliegtuigmodus. Alle AI-functies zijn end-to-end getest tegen een nagebootste Anthropic-API (`tests/e2e/ai.spec.ts`), nog niet tegen de echte. De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
 
 ## Wat er in deze repo zit
 
@@ -105,9 +105,11 @@ Maak het importbestand en laat me de samenvatting zien voordat je importeert.
 2. **Offline**: open Vandaag één keer met verbinding, zet je telefoon in vliegtuigmodus en herhaal. Na herverbinden worden je beoordelingen vanzelf opgeslagen. De rest van de app vraagt verbinding.
 3. **Export**: Instellingen → Download export.
 
-**Volgende stappen**
-- Rest van fase 2: `draft_cards` (AI-kaarten uit brontekst) en `explain_feedback` (AI-feedback op je getypte antwoord).
-- Studiestof omzetten met `docs/CONTENT_PIPELINE.md` zodra je de stof hebt.
+**Fase 2: AI-concepten en AI-feedback**: gebouwd. Test zelf (met `ANTHROPIC_API_KEY`):
+1. Op een themapagina: **Kaarten laten maken uit brontekst (AI)**. De kaarten komen als concept op Goedkeuren.
+2. Op Vandaag bij een uitlegkaart: typ je antwoord, kies **Toon antwoord** en daarna **Feedback van AI**. De voorgestelde beoordeling is gemarkeerd; je kiest zelf.
+
+**Volgende stap**: studiestof omzetten met `docs/CONTENT_PIPELINE.md` zodra je de stof hebt.
 
 ## Wat je níet deelt
 

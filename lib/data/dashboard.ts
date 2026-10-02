@@ -1,6 +1,6 @@
 import "server-only";
 
-import { dayKey, LEECH_LAPSES, minutesByDay, pastDays, retention, streak, workload } from "@/lib/dashboard";
+import { dayKey, errorProfile, LEECH_LAPSES, type ErrorCounts, minutesByDay, pastDays, retention, streak, workload } from "@/lib/dashboard";
 import type { ServerClient } from "@/lib/supabase/server";
 import { daysUntil } from "@/lib/time";
 import type { UserSettings } from "./settings";
@@ -28,6 +28,8 @@ export type TopicRow = {
   retention: number | null;
   retentionN: number;
   lastCaseScore: number | null;
+  errors: ErrorCounts;
+  errorAdvice: string | null;
 };
 
 export async function loadDashboard(supabase: ServerClient, settings: UserSettings, now = new Date()) {
@@ -36,23 +38,30 @@ export async function loadDashboard(supabase: ServerClient, settings: UserSettin
   const since14 = new Date(now.getTime() - 15 * 86_400_000).toISOString();
   const since60 = new Date(now.getTime() - 60 * 86_400_000).toISOString();
 
-  const [topics, modules, counts, queue, cards, logs, recentLogs, attempts, sessions, objectives, coverage] = await Promise.all([
+  const [topics, modules, counts, queue, cards, logs, recentLogs, attempts, sessions, objectives, coverage, questionErrors] = await Promise.all([
     supabase.from("topics").select("id, name, sort_order, module_id").order("sort_order").then((r) => r.data ?? []),
     supabase.from("modules").select("id, name, sort_order, exam_date").order("sort_order").then((r) => r.data ?? []),
     supabase.from("topic_card_counts").select("*").then((r) => r.data ?? []),
     all((a, b) => supabase.from("review_queue").select("card_id, topic_id, front, due, state, reps, lapses").order("card_id").range(a, b)),
     all((a, b) => supabase.from("cards").select("id, topic_id").order("id").range(a, b)),
-    all((a, b) => supabase.from("review_logs").select("card_id, state, rating").gte("review", since30).order("id").range(a, b)),
+    all((a, b) => supabase.from("review_logs").select("card_id, state, rating, error_type").gte("review", since30).order("id").range(a, b)),
     all((a, b) => supabase.from("review_logs").select("review, duration_ms").gte("review", since14).order("id").range(a, b)),
     supabase
       .from("case_attempts")
-      .select("created_at, self_score, duration_ms, cases(topic_id)")
+      .select("created_at, self_score, duration_ms, error_type, cases(topic_id)")
       .order("created_at", { ascending: false })
       .limit(2000)
       .then((r) => r.data ?? []),
     supabase.from("study_sessions").select("kind, started_at, ended_at").gte("started_at", since60).limit(5000).then((r) => r.data ?? []),
     supabase.from("learning_objectives").select("id, topic_id, code, description, sort_order").order("sort_order").then((r) => r.data ?? []),
     supabase.from("objective_coverage").select("*").then((r) => r.data ?? []),
+    supabase
+      .from("question_attempts")
+      .select("error_type, questions(topic_id)")
+      .gte("created_at", since30)
+      .not("error_type", "is", null)
+      .limit(5000)
+      .then((r) => r.data ?? []),
   ]);
 
   const today = dayKey(now, tz);
@@ -66,6 +75,11 @@ export async function loadDashboard(supabase: ServerClient, settings: UserSettin
     .map((t) => {
       const r = retention(logs.filter((l) => cardTopic.get(l.card_id) === t.id));
       const lastCase = attempts.find((a) => a.cases?.topic_id === t.id);
+      const profile = errorProfile([
+        ...logs.filter((l) => cardTopic.get(l.card_id) === t.id).map((l) => l.error_type),
+        ...attempts.filter((a) => a.cases?.topic_id === t.id && a.created_at >= since30).map((a) => a.error_type),
+        ...questionErrors.filter((q) => q.questions?.topic_id === t.id).map((q) => q.error_type),
+      ]);
       return {
         id: t.id,
         name: t.name,
@@ -76,6 +90,8 @@ export async function loadDashboard(supabase: ServerClient, settings: UserSettin
         retention: r.value,
         retentionN: r.n,
         lastCaseScore: lastCase?.self_score ?? null,
+        errors: profile.counts,
+        errorAdvice: profile.advice,
       };
     });
 

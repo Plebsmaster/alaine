@@ -11,8 +11,9 @@ export const metadata: Metadata = { title: "Goedkeuren" };
 const LIMIT = 50;
 
 export default async function ApprovePage({ searchParams }: PageProps<"/goedkeuren">) {
-  const { thema } = await searchParams;
+  const { thema, controleren } = await searchParams;
   const topicFilter = typeof thema === "string" ? thema : null;
+  const verifyOnly = controleren === "1";
   const { supabase } = await requireUser();
 
   const count = (table: "cards" | "illness_scripts" | "cases" | "questions") =>
@@ -20,38 +21,47 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
 
   let draftsQuery = supabase
     .from("cards")
-    .select("id, topic_id, type, front, back, explanation, origin, flag_note, source_locator, topics(name, sort_order), sources(title, chapter), card_objectives(learning_objectives(code, sort_order))")
+    .select("id, topic_id, type, front, back, explanation, origin, flag_note, source_locator, needs_verification, topics(name, sort_order), sources(title, chapter), card_objectives(learning_objectives(code, sort_order))")
     .eq("status", "draft")
     .order("created_at")
     .order("external_id", { nullsFirst: false })
     .limit(LIMIT);
   if (topicFilter) draftsQuery = draftsQuery.eq("topic_id", topicFilter);
+  if (verifyOnly) draftsQuery = draftsQuery.eq("needs_verification", true);
 
   let scriptsQuery = supabase
     .from("illness_scripts")
-    .select("id, condition, origin, topics(name)")
+    .select("id, condition, origin, needs_verification, topics(name)")
     .eq("status", "draft")
     .order("condition")
     .limit(100);
   if (topicFilter) scriptsQuery = scriptsQuery.eq("topic_id", topicFilter);
+  if (verifyOnly) scriptsQuery = scriptsQuery.eq("needs_verification", true);
 
   let casesQuery = supabase
     .from("cases")
-    .select("id, title, correct_diagnosis, origin, topics(name)")
+    .select("id, title, correct_diagnosis, origin, needs_verification, topics(name)")
     .eq("status", "draft")
     .order("created_at")
     .order("external_id", { nullsFirst: false })
     .limit(100);
   if (topicFilter) casesQuery = casesQuery.eq("topic_id", topicFilter);
+  if (verifyOnly) casesQuery = casesQuery.eq("needs_verification", true);
 
   let questionsQuery = supabase
     .from("questions")
-    .select("id, kind, format, stem, origin, topics(name)")
+    .select("id, kind, format, stem, origin, needs_verification, topics(name)")
     .eq("status", "draft")
     .order("created_at")
     .order("external_id", { nullsFirst: false })
     .limit(200);
   if (topicFilter) questionsQuery = questionsQuery.eq("topic_id", topicFilter);
+  if (verifyOnly) questionsQuery = questionsQuery.eq("needs_verification", true);
+
+  // A7: aantal te controleren concepten, voor het filter.
+  const verifyCount = async (table: "cards" | "illness_scripts" | "cases" | "questions") =>
+    (await supabase.from(table).select("id", { count: "exact", head: true }).eq("status", "draft").eq("needs_verification", true)).count ?? 0;
+  const toVerify = (await Promise.all([verifyCount("cards"), verifyCount("illness_scripts"), verifyCount("cases"), verifyCount("questions")])).reduce((a, b) => a + b, 0);
 
   const [cards, scripts, cases, questions, { data: drafts, error }, { data: counts }, { data: draftScripts }, { data: draftCases }, { data: draftQuestions }] = await Promise.all([
     count("cards"),
@@ -86,6 +96,7 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
         ? [c.sources.title, c.sources.chapter ? `h. ${c.sources.chapter}` : null, c.source_locator].filter(Boolean).join(", ")
         : c.source_locator,
       objectives: c.card_objectives.map((o) => o.learning_objectives?.code).filter((x): x is string => !!x),
+      needs_verification: c.needs_verification,
     });
     groups.set(c.topic_id, g);
   }
@@ -120,6 +131,17 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
         </nav>
       ) : null}
 
+      {toVerify > 0 || verifyOnly ? (
+        <nav className="mb-4 flex flex-wrap gap-1 text-sm" aria-label="Filter op controleren">
+          <Link href={topicFilter ? `/goedkeuren?thema=${topicFilter}` : "/goedkeuren"} aria-current={!verifyOnly ? "page" : undefined} className="rounded-lg px-3 py-1.5 hover:bg-surface-2 aria-[current=page]:bg-surface-2 aria-[current=page]:font-semibold">
+            Alles
+          </Link>
+          <Link href={`/goedkeuren?controleren=1${topicFilter ? `&thema=${topicFilter}` : ""}`} aria-current={verifyOnly ? "page" : undefined} className="rounded-lg px-3 py-1.5 hover:bg-surface-2 aria-[current=page]:bg-surface-2 aria-[current=page]:font-semibold">
+            Te controleren ({toVerify})
+          </Link>
+        </nav>
+      ) : null}
+
       <div className="mb-6">
         <Notice>Zet het in je eigen woorden; dat onthoud je beter.</Notice>
       </div>
@@ -132,7 +154,10 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
             {(draftScripts ?? []).map((s) => (
               <li key={s.id}>
                 <Link href={`/scripts/${s.id}`} className="flex min-h-12 items-center justify-between gap-3 px-4 py-2 hover:bg-surface-2">
-                  <span>{s.condition}</span>
+                  <span>
+                    {s.condition}
+                    {s.needs_verification ? <span className="ml-2 text-xs font-semibold text-hard">Controleren</span> : null}
+                  </span>
                   <span className="text-xs text-muted">
                     {s.topics?.name}
                     {s.origin === "ai" ? " · AI" : ""}
@@ -155,6 +180,7 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
                   <input type="checkbox" name="id" value={c.id} aria-label={`${c.title} goedkeuren`} className="h-5 w-5 shrink-0" />
                   <Link href={`/casussen/${c.id}`} className="flex-1 hover:underline">
                     {c.title}
+                    {c.needs_verification ? <span className="ml-2 text-xs font-semibold text-hard">Controleren</span> : null}
                   </Link>
                   <span className="shrink-0 text-xs text-muted">
                     {c.topics?.name}
@@ -178,6 +204,7 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
                 <li key={q.id} className="flex min-h-12 items-center gap-3 px-4 py-2">
                   <input type="checkbox" name="id" value={q.id} aria-label={`Vraag goedkeuren: ${q.stem.slice(0, 60)}`} className="h-5 w-5 shrink-0" />
                   <Link href={`/oefentoets/vraag/${q.id}`} className="line-clamp-2 flex-1 text-sm hover:underline">
+                    {q.needs_verification ? <span className="mr-2 text-xs font-semibold text-hard">Controleren</span> : null}
                     {q.stem}
                   </Link>
                   <span className="shrink-0 text-xs text-muted">

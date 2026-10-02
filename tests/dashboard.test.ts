@@ -73,3 +73,17 @@ describe("minutesByDay", () => {
     ]);
   });
 });
+
+import { errorProfile } from "@/lib/dashboard";
+
+describe("errorProfile", () => {
+  it("telt fouttypes en geeft advies als één type overheerst", () => {
+    expect(errorProfile(["reasoning_error", "reasoning_error", "knowledge_gap", null])).toEqual({
+      counts: { knowledge_gap: 1, reasoning_error: 2, slip: 0 },
+      advice: "Vooral redeneerfouten: oefen meer casussen.",
+    });
+    expect(errorProfile(["knowledge_gap", "knowledge_gap", "slip"]).advice).toBe("Vooral kennisgaten: terug naar de stof.");
+    expect(errorProfile(["knowledge_gap", "slip"]).advice).toBeNull(); // te weinig
+    expect(errorProfile(["knowledge_gap", "reasoning_error", "slip"]).advice).toBeNull(); // geen overheersend type
+  });
+});

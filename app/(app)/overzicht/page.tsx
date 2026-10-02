@@ -80,7 +80,7 @@ export default async function OverviewPage() {
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">Per thema</h2>
           <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
-            <table className="w-full min-w-[36rem] text-left text-sm">
+            <table className="w-full min-w-[48rem] text-left text-sm">
               <thead className="text-xs text-muted">
                 <tr>
                   <th className="py-1 pr-3 font-medium">Thema</th>
@@ -88,7 +88,8 @@ export default async function OverviewPage() {
                   <th className="py-1 pr-3 text-right font-medium">Concept</th>
                   <th className="py-1 pr-3 text-right font-medium">Vandaag</th>
                   <th className="py-1 pr-3 text-right font-medium">Retentie 30 d</th>
-                  <th className="py-1 text-right font-medium">Laatste casus</th>
+                  <th className="py-1 pr-3 text-right font-medium">Laatste casus</th>
+                  <th className="py-1 font-medium">Fouttypes, 30 d</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,7 +108,13 @@ export default async function OverviewPage() {
                       {pct(t.retention)}
                       {t.retentionN ? <span className="block text-xs text-muted">n = {t.retentionN}</span> : null}
                     </td>
-                    <td className="py-2 text-right tabular-nums">{t.lastCaseScore === null ? "–" : `${t.lastCaseScore}/5`}</td>
+                    <td className="py-2 pr-3 text-right tabular-nums">{t.lastCaseScore === null ? "–" : `${t.lastCaseScore}/5`}</td>
+                    <td className="py-2 text-xs">
+                      <span className="tabular-nums">
+                        {t.errors.knowledge_gap} kennis · {t.errors.reasoning_error} redenering · {t.errors.slip} slordig
+                      </span>
+                      {t.errorAdvice ? <span className="block text-muted">{t.errorAdvice}</span> : null}
+                    </td>
                   </tr>
                 ))}
               </tbody>

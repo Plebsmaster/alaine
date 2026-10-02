@@ -88,3 +88,19 @@ export function minutesByDay(
 }
 
 export const LEECH_LAPSES = 4;
+
+export type ErrorCounts = { knowledge_gap: number; reasoning_error: number; slip: number };
+
+/** A1: verdeling van fouttypes, en een advies als één type duidelijk overheerst. */
+export function errorProfile(types: (string | null | undefined)[]): { counts: ErrorCounts; advice: string | null } {
+  const counts: ErrorCounts = { knowledge_gap: 0, reasoning_error: 0, slip: 0 };
+  for (const t of types) if (t && t in counts) counts[t as keyof ErrorCounts] += 1;
+  const total = counts.knowledge_gap + counts.reasoning_error + counts.slip;
+  let advice: string | null = null;
+  if (total >= 3) {
+    if (counts.reasoning_error > counts.knowledge_gap && counts.reasoning_error >= total / 2) advice = "Vooral redeneerfouten: oefen meer casussen.";
+    else if (counts.knowledge_gap > counts.reasoning_error && counts.knowledge_gap >= total / 2) advice = "Vooral kennisgaten: terug naar de stof.";
+    else if (counts.slip >= total / 2) advice = "Vooral slordigheid: kortere sessies, of stoppen als je moe bent.";
+  }
+  return { counts, advice };
+}

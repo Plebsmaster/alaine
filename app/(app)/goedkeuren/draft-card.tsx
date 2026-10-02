@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Badge, Button, Field, Notice, Panel, Textarea } from "@/components/ui";
-import { CARD_TYPE_LABELS } from "@/lib/labels";
+import { CARD_TYPE_LABELS, VERIFY_TEXT } from "@/lib/labels";
 import { approveCardAction, rejectCardAction } from "./actions";
 
 export type Draft = {
@@ -15,6 +15,7 @@ export type Draft = {
   flag_note: string | null;
   source: string | null;
   objectives: string[];
+  needs_verification: boolean;
 };
 
 const ORIGIN = { import: "geïmporteerd", ai: "AI-concept", manual: "eigen concept" } as Record<string, string>;
@@ -25,6 +26,7 @@ export function DraftCard({ draft }: { draft: Draft }) {
   const [explanation, setExplanation] = useState(draft.explanation ?? "");
   const [state, setState] = useState<"open" | "approved" | "rejected" | "later">("open");
   const [error, setError] = useState<string | null>(null);
+  const [verified, setVerified] = useState(false);
   const [pending, start] = useTransition();
 
   if (state !== "open") {
@@ -47,7 +49,17 @@ export function DraftCard({ draft }: { draft: Draft }) {
         <Badge>{CARD_TYPE_LABELS[draft.type] ?? draft.type}</Badge>
         <Badge>{ORIGIN[draft.origin] ?? draft.origin}</Badge>
         {changed ? <Badge>aangepast</Badge> : null}
+        {draft.needs_verification ? <Badge>Controleren</Badge> : null}
       </div>
+      {draft.needs_verification ? (
+        <div className="space-y-1 rounded-lg border border-hard p-2 text-sm">
+          <p>Komt (deels) niet uit de bron of bevat een dosering of richtlijnadvies. {VERIFY_TEXT}</p>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={verified} onChange={(e) => setVerified(e.target.checked)} className="h-4 w-4" />
+            Ik heb dit gecontroleerd
+          </label>
+        </div>
+      ) : null}
       {draft.flag_note ? <Notice tone="error">Klopt niet: {draft.flag_note}</Notice> : null}
       <Field label="Voorkant">
         <Textarea value={front} onChange={(e) => setFront(e.target.value)} maxLength={2000} />
@@ -72,7 +84,7 @@ export function DraftCard({ draft }: { draft: Draft }) {
           disabled={pending}
           onClick={() =>
             start(async () => {
-              const res = await approveCardAction({ id: draft.id, front, back, explanation });
+              const res = await approveCardAction({ id: draft.id, front, back, explanation, verified });
               if (res.ok) setState("approved");
               else setError(res.error);
             })

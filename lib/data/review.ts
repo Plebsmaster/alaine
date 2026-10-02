@@ -18,10 +18,11 @@ export type ReviewCard = QueueItem & {
   image_url: string | null;
   source_label: string | null;
   topic_name: string;
+  needs_verification: boolean;
 };
 
 const COLUMNS =
-  "card_id, topic_id, type, front, back, explanation, image_path, source_label, created_at, topic_name, topic_sort, module_sort, exam_date, objective_sort, due, stability, difficulty, elapsed_days, scheduled_days, learning_steps, reps, lapses, state, last_review";
+  "card_id, topic_id, type, front, back, explanation, image_path, source_label, created_at, topic_name, topic_sort, module_sort, exam_date, objective_sort, due, stability, difficulty, elapsed_days, scheduled_days, learning_steps, reps, lapses, state, last_review, needs_verification";
 
 function toSchedule(r: Row): Schedule {
   return {
@@ -55,6 +56,7 @@ function toCard(r: Row, imageUrls: Map<string, string>): ReviewCard {
     image_url: r.image_path ? imageUrls.get(r.image_path) ?? null : null,
     source_label: r.source_label || null,
     topic_name: r.topic_name ?? "",
+    needs_verification: r.needs_verification ?? false,
   };
 }
 

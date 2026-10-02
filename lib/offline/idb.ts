@@ -18,6 +18,7 @@ export type OutboxItem = {
     answerText: string | null;
     sessionId: string;
     aiFeedback?: string | null;
+    errorType?: "knowledge_gap" | "reasoning_error" | "slip" | null;
   };
 };
 

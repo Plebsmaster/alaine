@@ -4,21 +4,23 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge, Button, Notice, Panel, Textarea } from "@/components/ui";
 import type { ReviewCard } from "@/lib/data/review";
-import type { ExplainFeedback } from "@/lib/ai/schemas";
-import { CARD_TYPE_LABELS } from "@/lib/labels";
+import { CARD_TYPE_LABELS, ERROR_TYPES, VERIFY_TEXT, type ErrorType } from "@/lib/labels";
 import { preview, rate, RATINGS, STATE, type FsrsSettings, type RatingValue } from "@/lib/fsrs";
 import { available as idbAvailable, loadSnapshot, outboxAdd, outboxAll, outboxRemove, saveSnapshot } from "@/lib/offline/idb";
 import { pickNext, requeue } from "@/lib/queue";
 import {
-  explainFeedbackAction,
   flagCardAction,
   rateCardAction,
   suspendCardAction,
   tomorrowAction,
   type RateInput,
 } from "./actions";
+import { CheckError, CheckOutcome, RecoveryPrompt, useAnswerCheck } from "./answer-check";
+import { ChainCompare, ChainInput } from "./chain";
+import { ErrorChips } from "@/components/error-chips";
+import { Stopcheck } from "./stopcheck";
 
-const TYPED_ANSWER_TYPES = new Set(["explain", "illness_script", "compare"]);
+const TYPED_ANSWER_TYPES = new Set(["explain", "chain", "illness_script", "compare"]);
 const RATING_STYLES: Record<RatingValue, string> = {
   1: "border-again text-again",
   2: "border-hard text-hard",
@@ -29,7 +31,13 @@ const MAX_DURATION_MS = 5 * 60_000;
 const RETRY_DELAYS = [1_000, 3_000, 9_000];
 
 type SaveState = "idle" | "saving" | "offline" | "error";
-type Result = { rating: RatingValue; wasReview: boolean };
+type Result = {
+  rating: RatingValue;
+  wasReview: boolean;
+  cardId?: string;
+  errorType?: ErrorType | null;
+  answer?: string | null;
+};
 
 /** Wachtrij en voortgang van vandaag, voor heropenen zonder verbinding. */
 type Snapshot = {
@@ -65,8 +73,11 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
   });
   const [revealedAt, setRevealedAt] = useState<Date | null>(null);
   const [answer, setAnswer] = useState("");
-  const [feedback, setFeedback] = useState<ExplainFeedback | null>(null);
-  const [feedbackState, setFeedbackState] = useState<"idle" | "loading" | string>("idle");
+  const check = useAnswerCheck(current?.card.card_id ?? "");
+  // A1: na Opnieuw/Moeilijk eerst het fouttype (één tik of overslaan), dan pas door.
+  const [pendingRating, setPendingRating] = useState<{ rating: RatingValue; at: Date } | null>(null);
+  // A1: fouttype uit de nakijkstappen (stap 1 benoemt de fout; stap 2 is vaak "gelukt na hint").
+  const suggestedError = [...check.steps].reverse().find((st) => st.result.error_type)?.result.error_type ?? null;
   const shownAt = useRef(0);
   const [startedAt] = useState(() => Date.now());
   const [results, setResults] = useState<Result[]>([]);
@@ -194,6 +205,7 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
     shownAt.current = Date.now();
   }, [current?.card.card_id, current?.card.schedule.reps]);
 
+  const resetCheck = check.reset;
   const advance = useCallback((nextQueue: ReviewCard[], nextPending: ReviewCard[]) => {
     setQueue(nextQueue);
     setPending(nextPending);
@@ -201,11 +213,11 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
     setCurrent(next ? { card: next.item as ReviewCard, source: next.source } : null);
     setRevealedAt(null);
     setAnswer("");
-    setFeedback(null);
-    setFeedbackState("idle");
+    resetCheck();
+    setPendingRating(null);
     setMenu("closed");
     setFlagNote("");
-  }, []);
+  }, [resetCheck]);
 
   // Wachten op een learning-kaart: af en toe opnieuw kijken.
   useEffect(() => {
@@ -227,27 +239,48 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
     if (current && !revealedAt) setRevealedAt(new Date());
   }, [current, revealedAt]);
 
-  const onRate = useCallback(
-    (rating: RatingValue) => {
-      if (!current || !revealedAt) return;
-      const now = new Date();
+  const finalize = useCallback(
+    (rating: RatingValue, at: Date, errorType: ErrorType | null) => {
+      if (!current) return;
       const card = current.card;
-      const { schedule } = rate(card.schedule, rating, now, settings);
-      setResults((r) => [...r, { rating, wasReview: card.schedule.state === STATE.Review }]);
+      const { schedule } = rate(card.schedule, rating, at, settings);
+      setResults((r) => [
+        ...r,
+        { rating, wasReview: card.schedule.state === STATE.Review, cardId: card.card_id, errorType, answer: answer.trim() || null },
+      ]);
       void enqueue({
         cardId: card.card_id,
         rating,
-        reviewedAt: now.toISOString(),
-        durationMs: Math.min(MAX_DURATION_MS, now.getTime() - shownAt.current),
+        reviewedAt: at.toISOString(),
+        durationMs: Math.min(MAX_DURATION_MS, at.getTime() - shownAt.current),
         answerText: answer.trim() || null,
         sessionId,
-        aiFeedback: feedback ? JSON.stringify(feedback) : null,
+        aiFeedback: check.steps.length ? JSON.stringify(check.steps) : null,
+        errorType,
       });
       const nextQueue = current.source === "queue" ? queue.slice(1) : queue;
       const nextPending = requeue(pending, card, schedule, new Date(endOfDay)) as ReviewCard[];
       advance(nextQueue, nextPending);
     },
-    [current, revealedAt, settings, answer, feedback, sessionId, queue, pending, endOfDay, advance, enqueue],
+    [current, settings, answer, check.steps, sessionId, queue, pending, endOfDay, advance, enqueue],
+  );
+
+  const onRate = useCallback(
+    (rating: RatingValue) => {
+      if (!current || !revealedAt || pendingRating) return;
+      const at = new Date();
+      // FSRS krijgt altijd de eerlijke beoordeling; het fouttype is alleen analyse.
+      if (rating <= 2) setPendingRating({ rating, at });
+      else finalize(rating, at, null);
+    },
+    [current, revealedAt, pendingRating, finalize],
+  );
+
+  const pickError = useCallback(
+    (type: ErrorType | null) => {
+      if (pendingRating) finalize(pendingRating.rating, pendingRating.at, type);
+    },
+    [pendingRating, finalize],
   );
 
   const removeCurrent = useCallback(
@@ -277,6 +310,17 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
         return;
       }
       if (menu !== "closed" || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (pendingRating) {
+        // Fouttype: 1–3 kiest, Enter slaat over (of bevestigt de AI-suggestie).
+        if (["1", "2", "3"].includes(e.key)) {
+          e.preventDefault();
+          pickError(ERROR_TYPES[Number(e.key) - 1].value);
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          pickError(suggestedError);
+        }
+        return;
+      }
       if (e.key === " " && !revealedAt) {
         e.preventDefault();
         reveal();
@@ -287,15 +331,31 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [reveal, onRate, revealedAt, menu]);
+  }, [reveal, onRate, revealedAt, menu, pendingRating, pickError, suggestedError]);
 
   const remaining = queue.length + pending.length;
+  // Voorkant per kaart (voor de stopcheck zonder AI).
+  const frontOf = new Map([...initialQueue, ...initialPending, ...queue, ...pending].map((c) => [c.card_id, c.front]));
 
   if (!current) {
     const waiting = pending.length > 0;
     return (
       <>
         <SessionEnd results={results} startedAt={startedAt} waiting={waiting} pending={pending} saved={outboxCount === 0} offline={saveState === "offline"} />
+        {!waiting ? (
+          <Stopcheck
+            aiEnabled={aiEnabled && saveState !== "offline"}
+            items={results
+              .filter((r) => r.rating <= 2 && r.cardId)
+              .map((r) => ({
+                cardId: r.cardId!,
+                rating: r.rating,
+                errorType: r.errorType ?? null,
+                answer: r.answer ?? null,
+                front: frontOf.get(r.cardId!) ?? "",
+              }))}
+          />
+        ) : null}
         <SaveStatus state={saveState} count={outboxCount} onRetry={retry} />
       </>
     );
@@ -364,25 +424,55 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
 
         <p className="prose-card text-lg font-medium">{card.front}</p>
 
-        {typed && !revealedAt ? (
-          <Textarea
-            aria-label="Typ je antwoord (optioneel)"
-            placeholder="Typ je antwoord (optioneel)"
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            rows={4}
-          />
+        {card.needs_verification ? (
+          <p className="text-xs text-muted">
+            <Badge>Controleren</Badge> {VERIFY_TEXT}
+          </p>
         ) : null}
+
+        {typed && !revealedAt && check.steps.length === 0 ? (
+          card.type === "chain" ? (
+            <ChainInput value={answer} onChange={setAnswer} />
+          ) : (
+            <Textarea
+              aria-label="Typ je antwoord (optioneel)"
+              placeholder="Typ je antwoord (optioneel)"
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              rows={4}
+            />
+          )
+        ) : null}
+
+        {/* A3: bij deels of fout eerst hint en herstelvraag; het antwoord blijft verborgen. */}
+        {!revealedAt && check.last && check.last.stage === 1 && check.last.result.verdict !== "correct" ? (
+          <>
+            <div className="rounded-lg bg-surface-2 p-3 text-sm">
+              <div className="mb-1 text-xs font-medium text-muted">Jouw antwoord</div>
+              <p className="prose-card">{answer}</p>
+            </div>
+            <RecoveryPrompt
+              step={check.last}
+              loading={check.state === "loading"}
+              onSubmit={async (recovery) => {
+                if (await check.run(2, recovery)) reveal();
+              }}
+            />
+          </>
+        ) : null}
+        <CheckError state={check.state} />
 
         {revealedAt ? (
           <div className="space-y-3 border-t border-border pt-4">
-            {answer.trim() ? (
+            {answer.trim() && card.type === "chain" ? (
+              <ChainCompare answer={answer} back={card.back} />
+            ) : answer.trim() ? (
               <div className="rounded-lg bg-surface-2 p-3 text-sm">
                 <div className="mb-1 text-xs font-medium text-muted">Jouw antwoord</div>
                 <p className="prose-card">{answer}</p>
               </div>
             ) : null}
-            <p className="prose-card text-base">{card.back}</p>
+            {card.type === "chain" && answer.trim() ? null : <p className="prose-card text-base">{card.back}</p>}
             {card.explanation ? <p className="prose-card text-sm text-muted">{card.explanation}</p> : null}
             {card.image_url ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -390,71 +480,62 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
             ) : null}
             {card.source_label ? <p className="text-xs text-muted">Bron: {card.source_label}</p> : null}
 
-            {/* explain_feedback: pas na het tonen van het antwoord, en alleen op een getypt antwoord. */}
-            {answer.trim() && aiEnabled ? (
-              feedback ? (
-                <div className="space-y-1 rounded-lg bg-surface-2 p-3 text-sm" aria-live="polite">
-                  <p className="text-xs font-medium text-muted">Feedback van AI</p>
-                  {feedback.correct ? <p><strong>Klopt:</strong> {feedback.correct}</p> : null}
-                  {feedback.missing ? <p><strong>Ontbreekt:</strong> {feedback.missing}</p> : null}
-                  {feedback.misconception ? <p><strong>Misvatting:</strong> {feedback.misconception}</p> : null}
-                  {feedback.follow_up ? <p><strong>Denk verder:</strong> {feedback.follow_up}</p> : null}
-                  <p className="text-xs text-muted">
-                    Voorstel: {RATINGS.find((r) => r.value === feedback.suggested_rating)?.label}. Je kiest zelf.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <Button
-                    disabled={feedbackState === "loading"}
-                    onClick={async () => {
-                      setFeedbackState("loading");
-                      const res = await explainFeedbackAction(card.card_id, answer).catch(() => null);
-                      if (res?.ok) {
-                        setFeedback(res.feedback);
-                        setFeedbackState("idle");
-                      } else setFeedbackState(res?.error ?? "Geen verbinding. Probeer het opnieuw.");
-                    }}
-                  >
-                    {feedbackState === "loading" ? "AI leest je antwoord…" : "Feedback van AI"}
-                  </Button>
-                  {feedbackState !== "idle" && feedbackState !== "loading" ? (
-                    <p className="text-sm text-danger">{feedbackState}</p>
-                  ) : null}
-                </div>
-              )
-            ) : null}
+            <CheckOutcome steps={check.steps} />
           </div>
         ) : null}
       </Panel>
 
       {/* Telefoon: vast onderin boven de navigatie, binnen duimbereik. Laptop: onder de kaart. */}
       <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-10 border-t border-border bg-bg/95 px-4 py-2 backdrop-blur md:static md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
-        {!revealedAt ? (
-          <Button variant="primary" className="h-14 w-full text-base" onClick={reveal}>
-            Toon antwoord <kbd className="hidden text-xs opacity-70 md:inline">spatie</kbd>
-          </Button>
+        {pendingRating ? (
+          <ErrorChips suggested={suggestedError} onPick={pickError} />
+        ) : !revealedAt ? (
+          typed && aiEnabled && answer.trim() && check.steps.length === 0 ? (
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="primary"
+                className="h-14 text-base"
+                disabled={check.state === "loading"}
+                onClick={async () => {
+                  const step = await check.run(1, answer);
+                  if (step?.result.verdict === "correct") reveal();
+                }}
+              >
+                {check.state === "loading" ? "Nakijken…" : "Nakijken"}
+              </Button>
+              <Button className="h-14 text-base" onClick={reveal}>
+                Toon antwoord
+              </Button>
+            </div>
+          ) : (
+            <Button variant="primary" className="h-14 w-full text-base" onClick={reveal}>
+              Toon antwoord <kbd className="hidden text-xs opacity-70 md:inline">spatie</kbd>
+            </Button>
+          )
         ) : (
           <div className="grid grid-cols-4 gap-2">
-            {feedback ? (
+            {check.last ? (
               <span id="ai-voorstel" className="sr-only">
                 Voorstel van de AI
               </span>
             ) : null}
-            {RATINGS.map(({ value, label }) => (
-              <button
-                key={value}
-                onClick={() => onRate(value)}
-                aria-describedby={feedback?.suggested_rating === value ? "ai-voorstel" : undefined}
-                className={`flex min-h-14 flex-col items-center justify-center rounded-lg border-2 bg-surface px-1 text-[0.8rem] font-semibold hover:bg-surface-2 sm:text-sm ${RATING_STYLES[value]} ${feedback?.suggested_rating === value ? "ring-2 ring-offset-2 ring-[var(--focus)] ring-offset-[var(--bg)]" : ""}`}
-              >
-                <span>{label}</span>
-                <span className="text-xs font-normal text-muted">
-                  {previews?.[value].label}
-                  <span className="hidden md:inline"> · {value}</span>
-                </span>
-              </button>
-            ))}
+            {RATINGS.map(({ value, label }) => {
+              const suggested = check.last?.result.suggested_rating === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => onRate(value)}
+                  aria-describedby={suggested ? "ai-voorstel" : undefined}
+                  className={`flex min-h-14 flex-col items-center justify-center rounded-lg border-2 bg-surface px-1 text-[0.8rem] font-semibold hover:bg-surface-2 sm:text-sm ${RATING_STYLES[value]} ${suggested ? "ring-2 ring-[var(--focus)] ring-offset-2 ring-offset-[var(--bg)]" : ""}`}
+                >
+                  <span>{label}</span>
+                  <span className="text-xs font-normal text-muted">
+                    {previews?.[value].label}
+                    <span className="hidden md:inline"> · {value}</span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>

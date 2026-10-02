@@ -103,7 +103,7 @@ supabase/migrations/
 - Database: schrijfacties die samen moeten slagen lopen via Postgres-functies in `supabase/migrations/`: `rate_card` (planning + log, idempotent per reviewmoment), `approve_card`, `import_bundle` (hele importbestand in één transactie). Allemaal `security invoker`, dus RLS geldt.
 - Views met `security_invoker`: `review_queue` (wachtrij), `topic_card_counts`, `objective_coverage`.
 - Elke pagina en Server Action begint met `requireUser()` uit `lib/auth.ts` (controleert ook `ALLOWED_EMAIL`).
-- Inloggen gaat met een code uit de mail (`verifyOtp`), zodat het ook werkt in de PWA op het beginscherm; de link in de mail werkt via `/auth/confirm`.
+- Inloggen gaat met een code uit de mail (`verifyOtp`), zodat het ook werkt in de PWA op het beginscherm; de link in de mail werkt via `/auth/confirm`. De zes vakjes (ontwerp 1d) zijn één input met `autoComplete="one-time-code"` eronder, zonder `maxLength` zodat "123 456" plakken werkt; lengte in `app/(auth)/login/otp.ts` (gelijk aan `otp_length`).
 - Het herhaalscherm rekent intervallen op de client uit voor de weergave; de server rekent bij opslaan opnieuw vanaf de stand in de database.
 
 ## Werkwijze

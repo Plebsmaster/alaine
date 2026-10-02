@@ -17,6 +17,8 @@ Dit doe je één keer zelf. Claude Code kan het niet voor je doen, omdat het om 
    - Inhoud: de inhoud van `supabase/templates/magic_link.html` (voor Confirm signup: `confirmation.html`).
 
    Daardoor bevat de mail een **code**. Die heb je nodig op de telefoon: een app op het beginscherm deelt geen cookies met Safari of Chrome, dus een link uit de mail logt je daar niet in. De code werkt overal.
+
+   Controleer onder **Authentication → Sign In / Providers → Email** dat *Email OTP Length* op **6** staat: het inlogscherm heeft zes vakjes (`OTP_LENGTH` in `app/(auth)/login/otp.ts`, gelijk aan `otp_length` in `supabase/config.toml`).
 6. **Na je eerste login:** zet onder **Authentication → Sign In / Providers** de optie *Allow new users to sign up* uit. Dan kan niemand anders een account aanmaken, ook niet buiten de app om. De app controleert daarnaast altijd `ALLOWED_EMAIL`.
 
 > **Mail-limiet.** De ingebouwde mailservice van Supabase verstuurt maar een paar mails per uur, en alleen naar adressen van je Supabase-team (dat ben jij). Inloggen gebeurt zelden, omdat je sessie blijft bestaan, dus meestal is dat genoeg. Loop je er toch tegenaan, stel dan onder **Authentication → Emails → SMTP Settings** een eigen SMTP-dienst in (bijv. Resend of Postmark).

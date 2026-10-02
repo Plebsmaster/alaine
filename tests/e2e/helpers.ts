@@ -57,7 +57,7 @@ export async function resetExample() {
   await admin().from("modules").delete().eq("external_id", "voorbeeld");
 }
 
-async function latestCode(after: number): Promise<string> {
+export async function latestCode(after: number): Promise<string> {
   for (let i = 0; i < 30; i++) {
     const res = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${EMAIL}"`)}`);
     const { messages } = (await res.json()) as { messages: { ID: string; Created: string }[] };

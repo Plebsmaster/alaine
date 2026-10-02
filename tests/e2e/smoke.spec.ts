@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { admin, approveDraft, cardsDone, cardsLeft, draftsOpen, importExample, LOCAL, login, newPage, resetExample } from "./helpers";
+import { admin, approveDraft, cardsDone, cardsLeft, draftsOpen, EMAIL, importExample, latestCode, LOCAL, login, newPage, resetExample } from "./helpers";
 
 // Fase 0 + 1: inloggen (alleen ALLOWED_EMAIL), voorbeeld importeren, goedkeuren,
 // herhalen op de telefoon en direct zien op de laptop.
@@ -12,6 +12,29 @@ test("ander e-mailadres wordt geweigerd", async ({ page }) => {
   await page.getByLabel("E-mailadres").fill("iemand.anders@voorbeeld.nl");
   await page.getByRole("button", { name: "Stuur inlogcode" }).click();
   await expect(page.getByText("Dit e-mailadres heeft geen toegang tot deze app.")).toBeVisible();
+});
+
+test("inlogcode in zes vakjes: plakken met spaties, verkeerde code, dan inloggen", async ({ page }) => {
+  await page.goto("/login");
+  const sentAt = Date.now();
+  await page.getByLabel("E-mailadres").fill(EMAIL);
+  await page.getByRole("button", { name: "Stuur inlogcode" }).click();
+  await expect(page.getByRole("heading", { name: "Vul je code in" })).toBeVisible();
+
+  // Eén veld met one-time-code (iOS-autofill); alleen cijfers, hooguit zes.
+  const code = page.getByLabel("Code uit de e-mail");
+  await expect(code).toHaveAttribute("autocomplete", "one-time-code");
+  await expect(code).toHaveAttribute("inputmode", "numeric");
+  await code.fill("12 34 56 78");
+  await expect(code).toHaveValue("123456");
+  await page.getByRole("button", { name: "Inloggen", exact: true }).click();
+  await expect(page.getByText("Deze code klopt niet of is verlopen.")).toBeVisible();
+
+  const real = await latestCode(sentAt);
+  await code.fill(`${real.slice(0, 3)} ${real.slice(3)}`);
+  await page.getByRole("button", { name: "Inloggen", exact: true }).click();
+  await expect(page).toHaveURL(/\/vandaag/);
+  await new Promise((r) => setTimeout(r, 1500)); // één inlogmail per interval
 });
 
 test("importeren, goedkeuren, herhalen op telefoon, zichtbaar op laptop", async ({ browser }) => {

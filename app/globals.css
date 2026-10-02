@@ -16,6 +16,8 @@
   --good: #2f6f62;
   --easy: #2d5f9a;
   --focus: #2d5f9a;
+  /* Datamarkering in grafieken (gevalideerd met de dataviz-validator). */
+  --chart: #1baf7a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,6 +36,7 @@
     --good: #6fbfab;
     --easy: #8db7ea;
     --focus: #8db7ea;
+    --chart: #199e70;
   }
 }
 
@@ -51,6 +54,7 @@
   --color-hard: var(--hard);
   --color-good: var(--good);
   --color-easy: var(--easy);
+  --color-chart: var(--chart);
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 

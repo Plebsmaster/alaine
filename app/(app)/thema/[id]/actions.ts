@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { AiError, runJson } from "@/lib/ai/client";
+import { checkExcerpt } from "@/lib/ai/excerpt";
 import { DRAFT_CARD_TYPES, draftCardsPrompt, MAX_SOURCE_WORDS, wordCount, type DraftCardType } from "@/lib/ai/prompts";
 import { draftCardsOutput } from "@/lib/ai/schemas";
 import { requireUser } from "@/lib/auth";
@@ -84,6 +85,9 @@ export async function draftCardsAction(_prev: DraftCardsState, fd: FormData): Pr
   for (const c of result.cards.slice(0, max)) {
     const objs = c.objectives.filter((o) => known.has(o));
     if (objs.length === 0 || !types.includes(c.type)) continue; // geen leerdoel of ander type: overslaan
+    // Principe 10: alleen een citaat dat letterlijk in de brontekst staat, wordt bewaard;
+    // anders (of zonder citaat) moet de kaart gecontroleerd worden.
+    const excerpt = checkExcerpt(sourceText, c.source_excerpt);
     const { data, error } = await supabase
       .from("cards")
       .insert({
@@ -94,7 +98,8 @@ export async function draftCardsAction(_prev: DraftCardsState, fd: FormData): Pr
         back: c.back.trim(),
         explanation: c.explanation.trim() || null,
         source_locator: c.source_locator.trim() || locator,
-        needs_verification: c.needs_verification,
+        source_excerpt: excerpt.excerpt,
+        needs_verification: c.needs_verification || excerpt.needsVerification,
         status: "draft",
         origin: "ai",
       })

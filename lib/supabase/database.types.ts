@@ -192,6 +192,7 @@ export type Database = {
           origin: string;
           rewritten: boolean;
           script_field: string | null;
+          source_excerpt: string | null;
           source_id: string | null;
           source_locator: string | null;
           status: string;
@@ -215,6 +216,7 @@ export type Database = {
           origin?: string;
           rewritten?: boolean;
           script_field?: string | null;
+          source_excerpt?: string | null;
           source_id?: string | null;
           source_locator?: string | null;
           status?: string;
@@ -238,6 +240,7 @@ export type Database = {
           origin?: string;
           rewritten?: boolean;
           script_field?: string | null;
+          source_excerpt?: string | null;
           source_id?: string | null;
           source_locator?: string | null;
           status?: string;

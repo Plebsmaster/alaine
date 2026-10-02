@@ -12,7 +12,7 @@ test("pretest en proeftoets", async ({ page }) => {
   await importExample(page, "tests/e2e/fixtures/toets-import.json");
 
   // Alle conceptvragen in één keer goedkeuren.
-  await page.goto("/goedkeuren");
+  await page.goto("/goedkeuren?soort=vragen");
   const boxes = page.getByRole("checkbox", { name: /^Vraag goedkeuren/ });
   await expect(boxes).toHaveCount(16);
   for (const box of await boxes.all()) await box.check();

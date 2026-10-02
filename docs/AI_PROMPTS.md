@@ -26,7 +26,9 @@ Technisch:
 
 **Wanneer:** de gebruiker plakt brontekst bij een thema en kiest kaarttypes.
 **Invoer:** thema, leerdoelen van het thema, brontekst, bron-id en paginanummer, gewenste types, maximaal aantal (standaard 15).
-**Uitvoer:** concepten in `cards` (status `draft`, origin `ai`).
+**Uitvoer:** concepten in `cards` (status `draft`, origin `ai`), met `source_excerpt`: het letterlijke brondeel dat op Goedkeuren naast het concept staat.
+
+**Controle op de server (principe 10):** het citaat wordt alleen bewaard als het letterlijk in de meegegeven brontekst staat (witruimte, aanhalingstekens, streepjes, hoofdletters en afkappunten tellen niet mee; `lib/ai/excerpt.ts`). Staat het er niet, of is het leeg, dan wordt het niet bewaard en krijgt de kaart `needs_verification = true`.
 
 ```
 {BASE_RULES}
@@ -38,10 +40,11 @@ Regels voor goede kaarten:
 - Zet bij "explanation" het waarom, als de bron dat geeft.
 - Koppel elke kaart aan de leerdoelen die hij afdekt (gebruik de gegeven ids). Kaarten die bij geen enkel leerdoel passen maak je niet.
 - Geef bij elke kaart "source_locator" (pagina of paragraaf) als die in de tekst staat.
+- Geef bij elke kaart "source_excerpt": een letterlijk citaat van maximaal ongeveer 400 tekens uit de BRONTEKST waarop de kaart rust. Kopieer woord voor woord; parafraseer niet. Vind je geen passend citaat, laat het dan leeg ("") en zet needs_verification op true.
 - Typen: fact = feit of definitie; explain = mechanisme of waarom-vraag; skill = stappen van een handeling; communication = gespreksvoering.
 LEERDOELEN: {objectives_json}
 BRONTEKST: """{source_text}"""
-Geef JSON: {"cards": [{"type","front","back","explanation","objectives","source_locator"}]}
+Geef JSON: {"cards": [{"type","front","back","explanation","objectives","source_locator","source_excerpt","needs_verification"}]}
 ```
 
 ## draft_script

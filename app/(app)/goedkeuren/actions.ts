@@ -12,13 +12,29 @@ const approveInput = z.object({
   explanation: z.string().max(10_000),
   /** A7: de student heeft de te controleren inhoud nagekeken. */
   verified: z.boolean().optional(),
+  // Optioneel aan te passen in de editor (ontwerp 1n): type, tags en bronvermelding.
+  type: z.enum(["fact", "explain", "illness_script", "compare", "image", "skill", "communication", "chain"]).optional(),
+  tags: z.array(z.string().trim().min(1).max(50)).max(20).optional(),
+  source_locator: z.string().trim().max(200).optional(),
 });
 
 export async function approveCardAction(input: z.infer<typeof approveInput>) {
   const parsed = approveInput.safeParse(input);
   if (!parsed.success) return { ok: false as const, error: "Voor- en achterkant zijn verplicht (max. 2.000 tekens)." };
   const { supabase } = await requireUser();
-  const { id, front, back, explanation, verified } = parsed.data;
+  const { id, front, back, explanation, verified, type, tags, source_locator } = parsed.data;
+  if (type !== undefined || tags !== undefined || source_locator !== undefined) {
+    const { error: updateError } = await supabase
+      .from("cards")
+      .update({
+        ...(type !== undefined ? { type } : {}),
+        ...(tags !== undefined ? { tags } : {}),
+        ...(source_locator !== undefined ? { source_locator: source_locator || null } : {}),
+      })
+      .eq("id", id)
+      .eq("status", "draft");
+    if (updateError) return { ok: false as const, error: updateError.message };
+  }
   const { error } = await supabase.rpc("approve_card", {
     p_card_id: id,
     p_front: front,

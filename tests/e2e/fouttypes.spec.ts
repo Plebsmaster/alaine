@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { admin, cardsLeft, importExample, LOCAL, login, resetExample } from "./helpers";
+import { admin, approveDraft, cardsLeft, draftsOpen, importExample, LOCAL, login, resetExample } from "./helpers";
 
 // Aanvulling 01 zonder AI: fouttype na Opnieuw/Moeilijk (A1), stopcheck zonder AI,
 // en de verdeling van fouttypes op het overzicht.
@@ -11,8 +11,8 @@ test("fouttype vastleggen, stopcheck en verdeling op het overzicht", async ({ pa
   await login(page);
   await importExample(page);
   await page.goto("/goedkeuren");
-  await page.getByRole("button", { name: "Goedkeuren", exact: true }).first().click();
-  await expect(page.getByRole("textbox", { name: "Voorkant" })).toHaveCount(2);
+  await approveDraft(page);
+  await expect.poll(() => draftsOpen(page)).toBe(2);
 
   await page.goto("/vandaag");
   await expect.poll(() => cardsLeft(page)).toBe(1);

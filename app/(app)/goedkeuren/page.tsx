@@ -1,243 +1,438 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button, Notice, PageHeader, Panel } from "@/components/ui";
+import type { ReactNode } from "react";
+import { Badge, Button, Eyebrow, LinkButton, Segmented } from "@/components/ui";
 import { requireUser } from "@/lib/auth";
+import { ORIGIN_LABELS, VERIFY_TEXT } from "@/lib/labels";
 import { approveCases } from "../casussen/actions";
 import { approveQuestions } from "../oefentoets/actions";
-import { DraftCard, type Draft } from "./draft-card";
+import { SCRIPT_FIELDS } from "../scripts/script-labels";
+import { CardTriage, PhoneHeader, type DraftCardItem } from "./card-triage";
+import { TopicSelect } from "./topic-select";
 
 export const metadata: Metadata = { title: "Goedkeuren" };
 
-const LIMIT = 50;
+// Goedkeuren als triage (docs/design/README.md, 1n). Kaarten: lijst, bron en editor (CardTriage).
+// Scripts, casussen en vragen: lijst met alleen-lezenvoorbeeld en "Openen"; bulk alleen voor casussen en vragen.
+
+const KINDS = [
+  { key: "kaarten", label: "Kaarten", table: "cards" },
+  { key: "scripts", label: "Scripts", table: "illness_scripts" },
+  { key: "casussen", label: "Casus", table: "cases" },
+  { key: "vragen", label: "Vragen", table: "questions" },
+] as const;
+type Kind = (typeof KINDS)[number]["key"];
+type Table = (typeof KINDS)[number]["table"];
+
+const CARD_LIMIT = 300;
+const LIST_LIMIT = 200;
+
+type Source = { title: string; chapter: string | null; pages: string | null } | null;
+
+function sourceLabel(source: Source, locator: string | null): string | null {
+  const parts = [source?.title, source?.chapter ? `h. ${source.chapter}` : null, locator ?? (source?.pages ? `p. ${source.pages}` : null)];
+  const label = parts.filter(Boolean).join(" · ");
+  return label || null;
+}
 
 export default async function ApprovePage({ searchParams }: PageProps<"/goedkeuren">) {
-  const { thema, controleren } = await searchParams;
-  const topicFilter = typeof thema === "string" ? thema : null;
-  const verifyOnly = controleren === "1";
+  const sp = await searchParams;
+  const kind: Kind = KINDS.find((k) => k.key === sp.soort)?.key ?? "kaarten";
+  const topicFilter = typeof sp.thema === "string" && sp.thema ? sp.thema : null;
+  const verifyOnly = sp.controleren === "1";
+  const selectedId = typeof sp.id === "string" ? sp.id : null;
+  const table = KINDS.find((k) => k.key === kind)!.table;
   const { supabase } = await requireUser();
 
-  const count = (table: "cards" | "illness_scripts" | "cases" | "questions") =>
-    supabase.from(table).select("id", { count: "exact", head: true }).eq("status", "draft");
+  const draftCount = async (t: Table, verify = false) => {
+    let q = supabase.from(t).select("id", { count: "exact", head: true }).eq("status", "draft");
+    if (topicFilter) q = q.eq("topic_id", topicFilter);
+    if (verify) q = q.eq("needs_verification", true);
+    return (await q).count ?? 0;
+  };
+  const draftTopics = async (t: Table) => (await supabase.from(t).select("topic_id").eq("status", "draft")).data ?? [];
 
-  let draftsQuery = supabase
-    .from("cards")
-    .select("id, topic_id, type, front, back, explanation, origin, flag_note, source_locator, needs_verification, topics(name, sort_order), sources(title, chapter), card_objectives(learning_objectives(code, sort_order))")
-    .eq("status", "draft")
-    .order("created_at")
-    .order("external_id", { nullsFirst: false })
-    .limit(LIMIT);
-  if (topicFilter) draftsQuery = draftsQuery.eq("topic_id", topicFilter);
-  if (verifyOnly) draftsQuery = draftsQuery.eq("needs_verification", true);
-
-  let scriptsQuery = supabase
-    .from("illness_scripts")
-    .select("id, condition, origin, needs_verification, topics(name)")
-    .eq("status", "draft")
-    .order("condition")
-    .limit(100);
-  if (topicFilter) scriptsQuery = scriptsQuery.eq("topic_id", topicFilter);
-  if (verifyOnly) scriptsQuery = scriptsQuery.eq("needs_verification", true);
-
-  let casesQuery = supabase
-    .from("cases")
-    .select("id, title, correct_diagnosis, origin, needs_verification, topics(name)")
-    .eq("status", "draft")
-    .order("created_at")
-    .order("external_id", { nullsFirst: false })
-    .limit(100);
-  if (topicFilter) casesQuery = casesQuery.eq("topic_id", topicFilter);
-  if (verifyOnly) casesQuery = casesQuery.eq("needs_verification", true);
-
-  let questionsQuery = supabase
-    .from("questions")
-    .select("id, kind, format, stem, origin, needs_verification, topics(name)")
-    .eq("status", "draft")
-    .order("created_at")
-    .order("external_id", { nullsFirst: false })
-    .limit(200);
-  if (topicFilter) questionsQuery = questionsQuery.eq("topic_id", topicFilter);
-  if (verifyOnly) questionsQuery = questionsQuery.eq("needs_verification", true);
-
-  // A7: aantal te controleren concepten, voor het filter.
-  const verifyCount = async (table: "cards" | "illness_scripts" | "cases" | "questions") =>
-    (await supabase.from(table).select("id", { count: "exact", head: true }).eq("status", "draft").eq("needs_verification", true)).count ?? 0;
-  const toVerify = (await Promise.all([verifyCount("cards"), verifyCount("illness_scripts"), verifyCount("cases"), verifyCount("questions")])).reduce((a, b) => a + b, 0);
-
-  const [cards, scripts, cases, questions, { data: drafts, error }, { data: counts }, { data: draftScripts }, { data: draftCases }, { data: draftQuestions }] = await Promise.all([
-    count("cards"),
-    count("illness_scripts"),
-    count("cases"),
-    count("questions"),
-    draftsQuery,
-    supabase.from("topic_card_counts").select("topic_id, draft").gt("draft", 0),
-    scriptsQuery,
-    casesQuery,
-    questionsQuery,
+  const [counts, verifyCount, { data: topicRows }, topicLists] = await Promise.all([
+    Promise.all(KINDS.map((k) => draftCount(k.table))),
+    draftCount(table, true),
+    supabase.from("topics").select("id, name, sort_order, modules(sort_order)"),
+    Promise.all(KINDS.map((k) => draftTopics(k.table))),
   ]);
-  if (error) throw new Error(error.message);
 
-  const { data: topics } = counts?.length
-    ? await supabase.from("topics").select("id, name").in("id", counts.map((c) => c.topic_id!))
-    : { data: [] };
+  // Thema's in de volgorde van de modules; in de themakeuze alleen thema's met concepten.
+  const topics = (topicRows ?? []).sort(
+    (a, b) => (a.modules?.sort_order ?? 0) - (b.modules?.sort_order ?? 0) || a.sort_order - b.sort_order || a.name.localeCompare(b.name, "nl"),
+  );
+  const topicOrder = new Map(topics.map((t, i) => [t.id, i]));
+  const topicName = new Map(topics.map((t) => [t.id, t.name]));
+  const withDrafts = new Set(topicLists.flat().map((r) => r.topic_id));
+  const topicOptions = topics.filter((t) => withDrafts.has(t.id) || t.id === topicFilter).map((t) => ({ id: t.id, name: t.name }));
+  const byTopicOrder = <T extends { topicId: string }>(items: T[]) =>
+    items.map((item, i) => ({ item, i })).sort((a, b) => (topicOrder.get(a.item.topicId) ?? 0) - (topicOrder.get(b.item.topicId) ?? 0) || a.i - b.i).map((x) => x.item);
 
-  // Groeperen per thema.
-  const groups = new Map<string, { name: string; items: Draft[] }>();
-  for (const c of drafts ?? []) {
-    const g = groups.get(c.topic_id) ?? { name: c.topics?.name ?? "", items: [] };
-    g.items.push({
-      id: c.id,
-      type: c.type,
-      front: c.front,
-      back: c.back,
-      explanation: c.explanation,
-      origin: c.origin,
-      flag_note: c.flag_note,
-      source: c.sources
-        ? [c.sources.title, c.sources.chapter ? `h. ${c.sources.chapter}` : null, c.source_locator].filter(Boolean).join(", ")
-        : c.source_locator,
-      objectives: c.card_objectives.map((o) => o.learning_objectives?.code).filter((x): x is string => !!x),
-      needs_verification: c.needs_verification,
-    });
-    groups.set(c.topic_id, g);
+  const params = (extra: Record<string, string | null>) => {
+    const p = new URLSearchParams();
+    const all: Record<string, string | null> = {
+      soort: kind === "kaarten" ? null : kind,
+      thema: topicFilter,
+      controleren: verifyOnly ? "1" : null,
+      ...extra,
+    };
+    for (const [k, v] of Object.entries(all)) if (v) p.set(k, v);
+    return p;
+  };
+  const href = (extra: Record<string, string | null>) => {
+    const query = params(extra).toString();
+    return query ? `/goedkeuren?${query}` : "/goedkeuren";
+  };
+
+  const header = (
+    <div className="flex flex-col gap-2.5 border-b border-border px-4 pb-3 pt-2 md:p-4">
+      <Segmented
+        size="sm"
+        label="Soort concept"
+        value={kind}
+        items={KINDS.map((k, i) => ({
+          key: k.key,
+          href: href({ soort: k.key === "kaarten" ? null : k.key }),
+          label: (
+            <>
+              {k.label} <span className="tabular-nums">{counts[i]}</span>
+            </>
+          ),
+        }))}
+      />
+      {topicOptions.length > 1 || topicFilter || verifyCount > 0 || verifyOnly ? (
+        <div className="flex min-h-8 items-center justify-between gap-3">
+          {topicOptions.length > 1 || topicFilter ? (
+            <TopicSelect options={topicOptions} value={topicFilter} base={Object.fromEntries(params({ thema: null }))} />
+          ) : (
+            <span />
+          )}
+          {verifyCount > 0 || verifyOnly ? (
+            <Link
+              href={href({ controleren: verifyOnly ? null : "1" })}
+              aria-current={verifyOnly ? "page" : undefined}
+              className="rounded-md px-1.5 py-1 text-[13px] font-bold text-warn-text hover:bg-warn-bg aria-[current=page]:bg-warn-bg"
+            >
+              {verifyCount} te controleren
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+
+  let content: ReactNode;
+
+  if (kind === "kaarten") {
+    let q = supabase
+      .from("cards")
+      .select(
+        "id, topic_id, type, front, back, explanation, tags, origin, flag_note, source_locator, source_excerpt, needs_verification, sources(title, chapter, pages), card_objectives(learning_objectives(code, description, sort_order))",
+      )
+      .eq("status", "draft")
+      .order("created_at")
+      .order("external_id", { nullsFirst: false })
+      .limit(CARD_LIMIT);
+    if (topicFilter) q = q.eq("topic_id", topicFilter);
+    if (verifyOnly) q = q.eq("needs_verification", true);
+    const { data, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const items: DraftCardItem[] = byTopicOrder(
+      (data ?? []).map((c) => ({
+        id: c.id,
+        topicId: c.topic_id,
+        topicName: topicName.get(c.topic_id) ?? "",
+        type: c.type,
+        front: c.front,
+        back: c.back,
+        explanation: c.explanation,
+        tags: c.tags ?? [],
+        sourceLocator: c.source_locator,
+        sourceExcerpt: c.source_excerpt,
+        sourceLabel: sourceLabel(c.sources, c.source_locator),
+        origin: c.origin,
+        flagNote: c.flag_note,
+        needsVerification: c.needs_verification,
+        objectives: c.card_objectives
+          .map((o) => o.learning_objectives)
+          .filter((o): o is NonNullable<typeof o> => !!o)
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map((o) => ({ code: o.code, description: o.description })),
+      })),
+    );
+    // Sleutel per filter: een ander filter begint met een verse lijst.
+    content = <CardTriage key={`${topicFilter}-${verifyOnly}`} items={items} initialId={selectedId} header={header} />;
+  } else {
+    content = await otherKinds(kind);
   }
 
   return (
-    <>
-      <PageHeader title="Goedkeuren" />
-      <dl className="mb-6 grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
-        {[
-          ["Kaarten", cards.count],
-          ["Illness scripts", scripts.count],
-          ["Casussen", cases.count],
-          ["Vragen", questions.count],
-        ].map(([label, n]) => (
-          <div key={label as string} className="rounded-lg border border-border bg-surface p-2">
-            <dt className="text-xs text-muted">{label}</dt>
-            <dd className="text-xl font-semibold">{n ?? 0}</dd>
+    <div data-wide className="flex flex-col md:h-[calc(100dvh-108px)] md:flex-row">
+      <h1 className="sr-only max-md:hidden">Goedkeuren</h1>
+      {content}
+    </div>
+  );
+
+  /** Scripts, casussen en vragen: lijst links, alleen-lezenvoorbeeld rechts, "Openen" voor de volledige controle. */
+  async function otherKinds(kind: Exclude<Kind, "kaarten">) {
+    type Item = { id: string; topicId: string; title: string; meta: string; verify: boolean; open: string; checkbox?: string };
+    let items: Item[] = [];
+    let preview: ReactNode = null;
+    const sel = (list: { id: string }[]) => list.find((x) => x.id === selectedId)?.id ?? list[0]?.id ?? null;
+
+    if (kind === "scripts") {
+      let q = supabase
+        .from("illness_scripts")
+        .select("id, topic_id, condition, origin, needs_verification, source_locator, epidemiology, pathophysiology, presentation, findings, management, key_discriminators, sources(title, chapter, pages)")
+        .eq("status", "draft")
+        .order("condition")
+        .limit(LIST_LIMIT);
+      if (topicFilter) q = q.eq("topic_id", topicFilter);
+      if (verifyOnly) q = q.eq("needs_verification", true);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      const rows = byTopicOrder((data ?? []).map((s) => ({ ...s, topicId: s.topic_id })));
+      items = rows.map((s) => ({
+        id: s.id,
+        topicId: s.topicId,
+        title: s.condition,
+        meta: `Illness script · ${ORIGIN_LABELS[s.origin] ?? s.origin}`,
+        verify: s.needs_verification,
+        open: `/scripts/${s.id}`,
+      }));
+      const s = rows.find((x) => x.id === sel(rows));
+      if (s) {
+        // Onderscheidende kenmerken eerst (zoals bij Vergelijken).
+        const fields = [...SCRIPT_FIELDS].sort((a, b) => Number(b.key === "key_discriminators") - Number(a.key === "key_discriminators"));
+        preview = (
+          <Preview
+            title={s.condition}
+            meta={`${topicName.get(s.topicId) ?? ""} · ${ORIGIN_LABELS[s.origin] ?? s.origin}`}
+            source={sourceLabel(s.sources, s.source_locator)}
+            verify={s.needs_verification}
+            open={`/scripts/${s.id}`}
+            note="Openen om te controleren en goed te keuren; daarna komen er scriptkaarten bij."
+          >
+            <dl className="overflow-hidden rounded-2xl border border-border bg-surface">
+              {fields.map((f) => (
+                <div key={f.key} className="grid grid-cols-[150px_1fr] border-b border-border-subtle last:border-b-0 lg:grid-cols-[190px_1fr]">
+                  <dt className={`bg-surface-sunk px-4 py-3 text-xs font-bold tracking-[.04em] ${f.key === "key_discriminators" ? "text-accent-strong" : "text-muted"}`}>
+                    {f.label}
+                  </dt>
+                  <dd className="prose-card px-4 py-3 text-sm leading-[1.45]">{s[f.key] || <span className="text-muted">–</span>}</dd>
+                </div>
+              ))}
+            </dl>
+          </Preview>
+        );
+      }
+    } else if (kind === "casussen") {
+      let q = supabase
+        .from("cases")
+        .select("id, topic_id, title, vignette, question, origin, needs_verification, from_internship")
+        .eq("status", "draft")
+        .order("created_at")
+        .order("external_id", { nullsFirst: false })
+        .limit(LIST_LIMIT);
+      if (topicFilter) q = q.eq("topic_id", topicFilter);
+      if (verifyOnly) q = q.eq("needs_verification", true);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      const rows = byTopicOrder((data ?? []).map((c) => ({ ...c, topicId: c.topic_id })));
+      items = rows.map((c) => ({
+        id: c.id,
+        topicId: c.topicId,
+        title: c.title,
+        meta: `Casus · ${c.from_internship ? "stage" : (ORIGIN_LABELS[c.origin] ?? c.origin)}`,
+        verify: c.needs_verification,
+        open: `/casussen/${c.id}`,
+        checkbox: `${c.title} goedkeuren`,
+      }));
+      const c = rows.find((x) => x.id === sel(rows));
+      if (c) {
+        preview = (
+          <Preview
+            title={c.title}
+            meta={`${topicName.get(c.topicId) ?? ""} · ${ORIGIN_LABELS[c.origin] ?? c.origin}`}
+            verify={c.needs_verification}
+            open={`/casussen/${c.id}`}
+            note="De diagnose en de expert-uitwerking zie je bij Openen."
+          >
+            <div className="rounded-2xl border border-border bg-surface-sunk px-5 py-4">
+              <Eyebrow>Vignet</Eyebrow>
+              <p className="prose-card mt-2 font-serif text-[17px] leading-[1.6] text-text-2">{c.vignette}</p>
+            </div>
+            <p className="prose-card text-[15px] font-bold leading-[1.5]">{c.question}</p>
+          </Preview>
+        );
+      }
+    } else {
+      let q = supabase
+        .from("questions")
+        .select("id, topic_id, kind, format, stem, options, origin, needs_verification")
+        .eq("status", "draft")
+        .order("created_at")
+        .order("external_id", { nullsFirst: false })
+        .limit(LIST_LIMIT);
+      if (topicFilter) q = q.eq("topic_id", topicFilter);
+      if (verifyOnly) q = q.eq("needs_verification", true);
+      const { data, error } = await q;
+      if (error) throw new Error(error.message);
+      const rows = byTopicOrder((data ?? []).map((x) => ({ ...x, topicId: x.topic_id })));
+      const what = (x: { kind: string; format: string }) => `${x.kind === "pretest" ? "Pretest" : "Toets"} · ${x.format === "mcq" ? "MC" : "open"}`;
+      items = rows.map((x) => ({
+        id: x.id,
+        topicId: x.topicId,
+        title: x.stem,
+        meta: `${what(x)} · ${ORIGIN_LABELS[x.origin] ?? x.origin}`,
+        verify: x.needs_verification,
+        open: `/oefentoets/vraag/${x.id}`,
+        checkbox: `Vraag goedkeuren: ${x.stem.slice(0, 60)}`,
+      }));
+      const x = rows.find((r) => r.id === sel(rows));
+      if (x) {
+        const options = Array.isArray(x.options) ? x.options.filter((o): o is string => typeof o === "string") : [];
+        preview = (
+          <Preview
+            title={null}
+            meta={`${topicName.get(x.topicId) ?? ""} · ${what(x)} · ${ORIGIN_LABELS[x.origin] ?? x.origin}`}
+            verify={x.needs_verification}
+            open={`/oefentoets/vraag/${x.id}`}
+            note={x.format === "mcq" ? "Het juiste antwoord en de uitleg zie je bij Openen." : "Het modelantwoord zie je bij Openen."}
+          >
+            <p className="prose-card font-serif text-xl leading-[1.4]">{x.stem}</p>
+            {options.length ? (
+              <ol className="space-y-2">
+                {options.map((o, i) => (
+                  <li key={i} className="flex gap-3 rounded-xl border border-border bg-surface px-4 py-3 text-[15px]">
+                    <span className="font-bold text-muted">{String.fromCharCode(65 + i)}</span>
+                    <span className="prose-card">{o}</span>
+                  </li>
+                ))}
+              </ol>
+            ) : null}
+          </Preview>
+        );
+      }
+    }
+
+    const selected = items.find((i) => i.id === selectedId)?.id ?? items[0]?.id ?? null;
+    const groups: { topicId: string; items: Item[] }[] = [];
+    for (const item of items) {
+      const g = groups.find((x) => x.topicId === item.topicId);
+      if (g) g.items.push(item);
+      else groups.push({ topicId: item.topicId, items: [item] });
+    }
+    const bulk = kind === "casussen" ? { action: approveCases, label: "Geselecteerde casussen goedkeuren" } : kind === "vragen" ? { action: approveQuestions, label: "Geselecteerde vragen goedkeuren" } : null;
+    const empty = { scripts: "Geen conceptscripts om na te kijken.", casussen: "Geen conceptcasussen om na te kijken.", vragen: "Geen conceptvragen om na te kijken." }[kind];
+
+    const list = (
+      <nav aria-label="Concepten" className="min-h-0 flex-1 overflow-y-auto pb-28 md:pb-0">
+        {groups.map((g) => (
+          <div key={g.topicId}>
+            <Eyebrow className="px-4 pb-1.5 pt-3.5">
+              {topicName.get(g.topicId)} · {g.items.length}
+            </Eyebrow>
+            <ul>
+              {g.items.map((item) => {
+                const body = (
+                  <>
+                    <span className="line-clamp-2 text-sm leading-[1.4]">{item.title}</span>
+                    <span className="text-xs text-muted">
+                      {item.meta}
+                      {item.verify ? <span className="font-bold text-warn-text"> · Controleren</span> : null}
+                    </span>
+                  </>
+                );
+                return (
+                  <li key={item.id} className={`flex items-start gap-3 border-b border-border-subtle px-4 py-[11px] ${item.id === selected ? "md:bg-accent-soft" : ""}`}>
+                    {bulk ? <input type="checkbox" name="id" value={item.id} aria-label={item.checkbox} className="mt-0.5 h-5 w-5 shrink-0" /> : null}
+                    {/* Laptop: voorbeeld rechts. Telefoon: meteen openen. */}
+                    <Link
+                      href={href({ id: item.id })}
+                      aria-current={item.id === selected ? "true" : undefined}
+                      scroll={false}
+                      className="hidden min-w-0 flex-1 flex-col gap-1 hover:underline md:flex"
+                    >
+                      {body}
+                    </Link>
+                    <Link href={item.open} className="flex min-w-0 flex-1 flex-col gap-1 md:hidden">
+                      {body}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         ))}
-      </dl>
+        {items.length === 0 ? <p className="px-4 py-6 text-sm text-muted">{empty}</p> : null}
+      </nav>
+    );
 
-      {(topics ?? []).length > 1 ? (
-        <nav className="mb-4 flex flex-wrap gap-1 text-sm" aria-label="Filter op thema">
-          <Link href="/goedkeuren" aria-current={!topicFilter ? "page" : undefined} className="rounded-lg px-3 py-1.5 hover:bg-surface-2 aria-[current=page]:bg-surface-2 aria-[current=page]:font-semibold">
-            Alle
-          </Link>
-          {(topics ?? []).map((t) => (
-            <Link key={t.id} href={`/goedkeuren?thema=${t.id}`} aria-current={topicFilter === t.id ? "page" : undefined} className="rounded-lg px-3 py-1.5 hover:bg-surface-2 aria-[current=page]:bg-surface-2 aria-[current=page]:font-semibold">
-              {t.name}
-            </Link>
-          ))}
-        </nav>
-      ) : null}
-
-      {toVerify > 0 || verifyOnly ? (
-        <nav className="mb-4 flex flex-wrap gap-1 text-sm" aria-label="Filter op controleren">
-          <Link href={topicFilter ? `/goedkeuren?thema=${topicFilter}` : "/goedkeuren"} aria-current={!verifyOnly ? "page" : undefined} className="rounded-lg px-3 py-1.5 hover:bg-surface-2 aria-[current=page]:bg-surface-2 aria-[current=page]:font-semibold">
-            Alles
-          </Link>
-          <Link href={`/goedkeuren?controleren=1${topicFilter ? `&thema=${topicFilter}` : ""}`} aria-current={verifyOnly ? "page" : undefined} className="rounded-lg px-3 py-1.5 hover:bg-surface-2 aria-[current=page]:bg-surface-2 aria-[current=page]:font-semibold">
-            Te controleren ({toVerify})
-          </Link>
-        </nav>
-      ) : null}
-
-      <div className="mb-6">
-        <Notice>Zet het in je eigen woorden; dat onthoud je beter.</Notice>
-      </div>
-
-      {(draftScripts ?? []).length > 0 ? (
-        <section className="mb-8 space-y-2">
-          <h2 className="text-lg font-semibold">Illness scripts</h2>
-          <p className="text-sm text-muted">Controleer een script en keur het goed; dan komen er scriptkaarten bij.</p>
-          <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
-            {(draftScripts ?? []).map((s) => (
-              <li key={s.id}>
-                <Link href={`/scripts/${s.id}`} className="flex min-h-12 items-center justify-between gap-3 px-4 py-2 hover:bg-surface-2">
-                  <span>
-                    {s.condition}
-                    {s.needs_verification ? <span className="ml-2 text-xs font-semibold text-hard">Controleren</span> : null}
-                  </span>
-                  <span className="text-xs text-muted">
-                    {s.topics?.name}
-                    {s.origin === "ai" ? " · AI" : ""}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {(draftCases ?? []).length > 0 ? (
-        <section className="mb-8 space-y-2">
-          <h2 className="text-lg font-semibold">Casussen</h2>
-          <p className="text-sm text-muted">Open een casus om hem te controleren, of keur er meerdere tegelijk goed.</p>
-          <form action={approveCases} className="space-y-2">
-            <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
-              {(draftCases ?? []).map((c) => (
-                <li key={c.id} className="flex min-h-12 items-center gap-3 px-4 py-2">
-                  <input type="checkbox" name="id" value={c.id} aria-label={`${c.title} goedkeuren`} className="h-5 w-5 shrink-0" />
-                  <Link href={`/casussen/${c.id}`} className="flex-1 hover:underline">
-                    {c.title}
-                    {c.needs_verification ? <span className="ml-2 text-xs font-semibold text-hard">Controleren</span> : null}
-                  </Link>
-                  <span className="shrink-0 text-xs text-muted">
-                    {c.topics?.name}
-                    {c.origin === "ai" ? " · AI" : ""}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <Button>Geselecteerde casussen goedkeuren</Button>
-          </form>
-        </section>
-      ) : null}
-
-      {(draftQuestions ?? []).length > 0 ? (
-        <section className="mb-8 space-y-2">
-          <h2 className="text-lg font-semibold">Vragen</h2>
-          <p className="text-sm text-muted">Open een vraag om hem te controleren, of keur er meerdere tegelijk goed.</p>
-          <form action={approveQuestions} className="space-y-2">
-            <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
-              {(draftQuestions ?? []).map((q) => (
-                <li key={q.id} className="flex min-h-12 items-center gap-3 px-4 py-2">
-                  <input type="checkbox" name="id" value={q.id} aria-label={`Vraag goedkeuren: ${q.stem.slice(0, 60)}`} className="h-5 w-5 shrink-0" />
-                  <Link href={`/oefentoets/vraag/${q.id}`} className="line-clamp-2 flex-1 text-sm hover:underline">
-                    {q.needs_verification ? <span className="mr-2 text-xs font-semibold text-hard">Controleren</span> : null}
-                    {q.stem}
-                  </Link>
-                  <span className="shrink-0 text-xs text-muted">
-                    {q.kind === "pretest" ? "pretest" : "toets"} · {q.format === "mcq" ? "MC" : "open"}
-                    {q.origin === "ai" ? " · AI" : ""}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <Button>Geselecteerde vragen goedkeuren</Button>
-          </form>
-        </section>
-      ) : null}
-
-      {(drafts ?? []).length === 0 ? (
-        <Panel className="text-sm text-muted">Geen kaartconcepten om na te kijken.</Panel>
-      ) : (
-        <div className="space-y-8">
-          {[...groups.entries()].map(([topicId, g]) => (
-            <section key={topicId} className="space-y-3">
-              <h2 className="text-lg font-semibold">{g.name}</h2>
-              {g.items.map((d) => (
-                <DraftCard key={d.id} draft={d} />
-              ))}
-            </section>
-          ))}
-          {(cards.count ?? 0) > LIMIT ? (
-            <p className="text-sm text-muted">
-              De eerste {LIMIT} van {cards.count} concepten staan hier. Herlaad de pagina voor de volgende.
-            </p>
-          ) : null}
+    return (
+      <>
+        <PhoneHeader />
+        <div className="flex flex-col md:min-h-0 md:w-[330px] md:shrink-0 md:border-r md:border-border md:bg-surface">
+          {header}
+          {bulk && items.length ? (
+            <form action={bulk.action} className="flex min-h-0 flex-1 flex-col">
+              {list}
+              <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface px-4 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 md:static md:z-auto md:p-4">
+                <Button className="w-full">{bulk.label}</Button>
+              </div>
+            </form>
+          ) : (
+            list
+          )}
         </div>
-      )}
-    </>
+        <section aria-label="Voorbeeld" className="hidden min-h-0 flex-1 overflow-y-auto md:block">
+          {preview ?? <p className="p-8 text-center text-muted">{empty}</p>}
+        </section>
+      </>
+    );
+  }
+}
+
+function Preview({
+  title,
+  meta,
+  source,
+  verify,
+  open,
+  note,
+  children,
+}: {
+  title: string | null;
+  meta: string;
+  source?: string | null;
+  verify: boolean;
+  open: string;
+  note: string;
+  children: ReactNode;
+}) {
+  return (
+    <article className="mx-auto flex max-w-[760px] flex-col gap-4 px-[30px] py-7">
+      <div className="flex flex-wrap items-center gap-2 text-[13px] text-muted">
+        <span>{meta}</span>
+        {source ? <span>· {source}</span> : null}
+      </div>
+      {title ? <h2 className="font-serif text-[26px] leading-[1.25]">{title}</h2> : null}
+      {verify ? (
+        <p className="flex flex-wrap items-center gap-2 text-[13px] text-warn-text">
+          <Badge tone="warn">Controleren</Badge>
+          {VERIFY_TEXT}
+        </p>
+      ) : null}
+      {children}
+      <div className="flex flex-wrap items-center gap-3 pt-2">
+        <LinkButton variant="primary" href={open}>
+          Openen
+        </LinkButton>
+        <span className="text-[13px] text-muted">{note}</span>
+      </div>
+    </article>
   );
 }

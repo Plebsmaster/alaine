@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { admin, importExample, LOCAL, login, resetExample } from "./helpers";
+import { admin, approveDraft, draftsOpen, importExample, LOCAL, login, resetExample } from "./helpers";
 
 // Fase 6: overzicht per thema, dekking, werklast, lastige kaarten, streak.
 test.skip(!LOCAL, "De rooktest wist testdata en draait alleen tegen de lokale Supabase (supabase start).");
@@ -11,8 +11,8 @@ test("overzicht toont echte cijfers uit het logboek", async ({ page }) => {
   await importExample(page);
   await page.goto("/goedkeuren");
   // Alleen de eerste kaart goedkeuren: leerdoel V.2 blijft zonder dekking.
-  await page.getByRole("button", { name: "Goedkeuren", exact: true }).first().click();
-  await expect(page.getByRole("textbox", { name: "Voorkant" })).toHaveCount(2);
+  await approveDraft(page);
+  await expect.poll(() => draftsOpen(page)).toBe(2);
 
   await page.goto("/vandaag");
   await page.getByRole("button", { name: /Toon antwoord/ }).click();

@@ -173,3 +173,17 @@ describe("Aanvulling 01", () => {
     expect((await runJson({ fn: "stopcheck", system: "s", user: "u", schema: stopcheckOutput, api })).points).toHaveLength(1);
   });
 });
+
+import { draftCardsPrompt } from "@/lib/ai/prompts";
+import { draftCardsOutput } from "@/lib/ai/schemas";
+
+describe("draft_cards: brondeel (ontwerp 1n)", () => {
+  it("vraagt om een letterlijk citaat en eist het veld in de uitvoer", () => {
+    const p = draftCardsPrompt({ topic: "T", objectives: [], sourceText: "BRON", types: ["fact"], max: 5 });
+    expect(p.user).toContain('"source_excerpt": een letterlijk citaat');
+    expect(p.user).toContain('"source_excerpt"');
+    const card = { type: "fact", front: "V?", back: "A.", explanation: "", objectives: [], source_locator: "", needs_verification: false };
+    expect(draftCardsOutput.safeParse({ cards: [card] }).success).toBe(false);
+    expect(draftCardsOutput.safeParse({ cards: [{ ...card, source_excerpt: "" }] }).success).toBe(true);
+  });
+});

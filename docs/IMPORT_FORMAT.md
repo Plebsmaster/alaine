@@ -78,7 +78,8 @@ Kleine letters, cijfers en koppeltekens. Opbouw: `<module>-<thema>-<type>-<numme
       "source_locator": "p. 000",
       "objectives": ["m1-ritme-ld-01"],
       "tags": [],
-      "image": null                   // relatief pad in content/, alleen via het lokale importscript
+      "image": null,                  // relatief pad in content/, alleen via het lokale importscript
+      "source_excerpt": null          // optioneel: letterlijk brondeel (max. 600 tekens), getoond op Goedkeuren
     }
   ],
 
@@ -140,3 +141,8 @@ Alle lijsten zijn optioneel; een bestand met alleen `cards` is geldig zolang de 
 `image` is een pad relatief aan `content/`, bijvoorbeeld `module-1/06-dermatologie/beelden/plaque.jpg`. Alleen het lokale script (`npm run import`) uploadt afbeeldingen, naar bucket `card-images` op pad `<user_id>/<external_id>.<ext>`, en vult `image_path`. De upload via de app negeert `image` en meldt dat.
 
 Gebruik alleen afbeeldingen die je zelf mag gebruiken: eigen foto's zonder herkenbare patiënt, of open-access beeldbanken.
+
+## Brondeel (ontwerp 1n)
+
+- Optioneel `"source_excerpt"` bij `cards`: het letterlijke stuk brontekst (maximaal 600 tekens) waarop de kaart rust. Goedkeuren toont het naast het concept. Zonder excerpt toont het bronpaneel alleen de bronvermelding.
+- Neem het woord voor woord over uit de brontekst; parafraseer niet. Kun je geen letterlijk stuk aanwijzen, laat het veld dan weg en zet `needs_verification` op true.

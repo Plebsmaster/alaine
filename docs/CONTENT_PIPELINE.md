@@ -27,7 +27,7 @@ content/module-1/00-studiehandleiding/   toetsvorm en toetsdata
 
 ## Kwaliteitsregels
 
-- **Alleen uit de bron.** Elk item is herleidbaar tot een bron met pagina of dia (`source_locator`). Twijfel je, zet dan de tag `controleren` én `"needs_verification": true`, en noem het in de samenvatting. Doseringen, contra-indicaties en richtlijnadviezen krijgen altijd `"needs_verification": true`.
+- **Alleen uit de bron.** Elk item is herleidbaar tot een bron met pagina of dia (`source_locator`). Geef bij kaarten ook `source_excerpt`: het letterlijke stuk brontekst (max. 600 tekens) waarop de kaart rust; dat staat op Goedkeuren naast het concept. Twijfel je, zet dan de tag `controleren` én `"needs_verification": true`, en noem het in de samenvatting. Doseringen, contra-indicaties en richtlijnadviezen krijgen altijd `"needs_verification": true`.
 - **Mechanismen als keten.** Maak voor elk mechanisme een kaart van type `chain`. Farmacologie in vaste volgorde: geneesmiddelgroep en voorbeeldmiddel (fact), kernmechanisme (chain), belangrijkste effect en bijwerking (chain); interacties pas daarna.
 - **Eigen formulering.** Parafraseer kort; neem geen lange passages letterlijk over uit het boek.
 - **Eén idee per kaart.** Lijsten van meer dan drie punten splitsen.

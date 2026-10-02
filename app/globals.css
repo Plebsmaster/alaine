@@ -173,3 +173,15 @@ body:has([data-focus]) [data-shell-main] {
   max-width: none;
   padding: 0;
 }
+
+/* Brede werkruimte (Goedkeuren, 1n): inhoud over de volle breedte in plaats van de 1120-kolom.
+   Op de telefoon zonder app-navigatie; het scherm heeft een eigen kop en actiebalk. */
+body:has([data-wide]) [data-shell-main] {
+  max-width: none;
+  padding: 0;
+}
+@media (width < 48rem) {
+  body:has([data-wide]) [data-shell] {
+    display: none;
+  }
+}

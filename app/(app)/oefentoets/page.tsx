@@ -43,7 +43,7 @@ export default async function ExamPage({ searchParams }: PageProps<"/oefentoets"
         {error ? <Notice tone="error">{error}</Notice> : null}
         {drafts > 0 ? (
           <Notice>
-            {drafts} conceptvra(a)g(en) wachten op <Link className="underline" href="/goedkeuren">Goedkeuren</Link>.
+            {drafts} conceptvra(a)g(en) wachten op <Link className="underline" href="/goedkeuren?soort=vragen">Goedkeuren</Link>.
           </Notice>
         ) : null}
 

@@ -168,6 +168,7 @@ Regels voor goede kaarten:
 - Zet bij "explanation" het waarom, als de bron dat geeft.
 - Koppel elke kaart aan de leerdoelen die hij afdekt (gebruik de gegeven ids). Kaarten die bij geen enkel leerdoel passen maak je niet.
 - Geef bij elke kaart "source_locator" (pagina of paragraaf) als die in de tekst staat.
+- Geef bij elke kaart "source_excerpt": een letterlijk citaat van maximaal ongeveer 400 tekens uit de BRONTEKST waarop de kaart rust. Kopieer woord voor woord; parafraseer niet. Vind je geen passend citaat, laat het dan leeg ("") en zet needs_verification op true.
 - Typen: fact = feit of definitie; explain = waarom-vraag; chain = mechanisme als keten; skill = stappen van een handeling; communication = gespreksvoering.
 - Ketenkaart (chain): maak er één voor elk mechanisme in de bron. Voorkant: begin en eind van de keten ("ACE-remmer → serumkalium: leg de keten uit."). Achterkant: de stappen gescheiden door " → ".
 - Bij farmacologie in deze volgorde: geneesmiddelgroep en voorbeeldmiddel (fact), kernmechanisme (chain), belangrijkste effect en bijwerking (chain). Interacties pas daarna.
@@ -175,7 +176,7 @@ Regels voor goede kaarten:
 - Gebruik alleen deze typen: ${input.types.join(", ")}. Maak maximaal ${input.max} kaarten.
 LEERDOELEN: ${JSON.stringify(input.objectives)}
 BRONTEKST: """${input.sourceText}"""
-Geef JSON: {"cards": [{"type","front","back","explanation","objectives","source_locator","needs_verification"}]}`,
+Geef JSON: {"cards": [{"type","front","back","explanation","objectives","source_locator","source_excerpt","needs_verification"}]}`,
   };
 }
 

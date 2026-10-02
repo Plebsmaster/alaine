@@ -1,6 +1,6 @@
 import http from "node:http";
 import { expect, test } from "@playwright/test";
-import { admin, cardsLeft, importExample, LOCAL, login, resetExample } from "./helpers";
+import { admin, approveDraft, cardsLeft, draftsOpen, importExample, LOCAL, login, resetExample } from "./helpers";
 
 // Fase 2 (AI): geplakte tekst levert concepten op die pas na goedkeuren in de herhaling
 // komen; AI-feedback is pas beschikbaar na het tonen van het antwoord.
@@ -18,11 +18,11 @@ function reply(user: string): unknown {
     const v1 = objectives.find((o) => o.code === "V.1")!.id;
     return {
       cards: [
-        { type: "fact", front: "Wat is het slagvolume?", back: "EDV min ESV.", explanation: "", objectives: [v1], source_locator: "p. 12", needs_verification: false },
+        { type: "fact", front: "Wat is het slagvolume?", back: "EDV min ESV.", explanation: "", objectives: [v1], source_locator: "p. 12", source_excerpt: "Het slagvolume is EDV min ESV.", needs_verification: false },
         // Ketenkaart met een dosering: altijd te controleren.
-        { type: "chain", front: "ACE-remmer → serumkalium: leg de keten uit.", back: "ACE-remming → minder angiotensine II → minder aldosteron → minder K⁺-uitscheiding → hoger serum-K⁺", explanation: "Start met 2,5 mg.", objectives: [v1], source_locator: "", needs_verification: true },
+        { type: "chain", front: "ACE-remmer → serumkalium: leg de keten uit.", back: "ACE-remming → minder angiotensine II → minder aldosteron → minder K⁺-uitscheiding → hoger serum-K⁺", explanation: "Start met 2,5 mg.", objectives: [v1], source_locator: "", source_excerpt: "ACE-remmers verhogen het serumkalium.", needs_verification: true },
         // Zonder leerdoel: moet worden overgeslagen.
-        { type: "fact", front: "Losse kaart", back: "x", explanation: "", objectives: ["onbekend"], source_locator: "", needs_verification: false },
+        { type: "fact", front: "Losse kaart", back: "x", explanation: "", objectives: ["onbekend"], source_locator: "", source_excerpt: "", needs_verification: false },
       ],
     };
   }
@@ -137,27 +137,40 @@ test("draft_cards, controleren, nakijken met hint, ketenkaart, fouttype en stopc
   await page.getByRole("textbox", { name: /^Brontekst/ }).fill("Het slagvolume is EDV min ESV. ACE-remmers ...");
   await page.getByRole("button", { name: "Maak conceptkaarten" }).click();
   await expect(page).toHaveURL(/\/goedkeuren\?thema=/);
-  const fronts = page.getByRole("textbox", { name: "Voorkant" });
-  await expect(fronts).toHaveCount(5); // 3 geïmporteerd + 2 AI (kaart zonder leerdoel overgeslagen)
+  await expect.poll(() => draftsOpen(page)).toBe(5); // 3 geïmporteerd + 2 AI (kaart zonder leerdoel overgeslagen)
   expect(requests[0].system).toContain("Farmacotherapeutisch Kompas");
+  const front = page.getByRole("textbox", { name: "Voorkant" });
+  const list = page.getByRole("navigation", { name: "Concepten" });
+
+  // Brondeel (1n): een letterlijk citaat staat naast het concept; een verzonnen citaat wordt
+  // niet bewaard en de kaart moet gecontroleerd worden.
+  await list.getByRole("button", { name: /^Wat is het slagvolume\?/ }).click();
+  await expect(front).toHaveValue("Wat is het slagvolume?");
+  await expect(page.getByText("Het slagvolume is EDV min ESV.", { exact: true })).toBeVisible();
+  const { data: aiCards } = await admin()
+    .from("cards")
+    .select("front, source_excerpt, needs_verification")
+    .in("front", ["Wat is het slagvolume?", "ACE-remmer → serumkalium: leg de keten uit."])
+    .order("front");
+  expect(aiCards).toEqual([
+    { front: "ACE-remmer → serumkalium: leg de keten uit.", source_excerpt: null, needs_verification: true },
+    { front: "Wat is het slagvolume?", source_excerpt: "Het slagvolume is EDV min ESV.", needs_verification: false },
+  ]);
 
   // A7: de ketenkaart met dosering is te controleren en filterbaar.
-  await page.getByRole("link", { name: "Te controleren (1)" }).click();
-  await expect(fronts).toHaveCount(1);
-  await expect(fronts.first()).toHaveValue("ACE-remmer → serumkalium: leg de keten uit.");
+  await page.getByRole("link", { name: "1 te controleren" }).click();
+  await expect(page).toHaveURL(/controleren=1/);
+  await expect.poll(() => draftsOpen(page)).toBe(1);
+  await expect(front).toHaveValue("ACE-remmer → serumkalium: leg de keten uit.");
   await expect(page.getByText("Controleren", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Goedkeuren", exact: true }).click(); // zonder "gecontroleerd"
-  await expect(fronts).toHaveCount(0);
+  await expect(page.getByText("Brontekst niet bewaard bij dit concept.")).toBeVisible();
+  await approveDraft(page); // zonder "gecontroleerd"
 
   // Ook de uitlegkaart over Frank-Starling goedkeuren.
   await page.goto("/goedkeuren");
-  for (let i = 0; i < 4; i++) {
-    if ((await fronts.nth(i).inputValue()).startsWith("Waarom neemt het slagvolume toe")) {
-      await page.getByRole("button", { name: "Goedkeuren", exact: true }).nth(i).click();
-      break;
-    }
-  }
-  await expect(fronts).toHaveCount(3);
+  await expect.poll(() => draftsOpen(page)).toBe(4);
+  await list.getByRole("button", { name: /^Waarom neemt het slagvolume toe/ }).click();
+  await approveDraft(page);
 
   // Herhalen: beide kaarten, in willekeurige volgorde.
   await page.goto("/vandaag");
@@ -256,8 +269,7 @@ test("draft_script, draft_compare, draft_cases, case_hint, case_feedback, draft_
   await page.getByRole("button", { name: "Vergelijk geselecteerde" }).click();
   await page.getByRole("button", { name: "Maak vergelijkingskaart" }).click();
   await expect(page).toHaveURL(/\/goedkeuren/);
-  const fronts = page.getByRole("textbox", { name: "Voorkant" });
-  await expect(fronts).toHaveCount(3 + 6 + 1);
+  await expect.poll(() => draftsOpen(page)).toBe(3 + 6 + 1);
 
   // Casussen: twee geldige, de ongeldige wordt overgeslagen.
   await page.goto("/casussen");

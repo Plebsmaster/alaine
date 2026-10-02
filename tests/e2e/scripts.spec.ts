@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { importExample, LOCAL, login, resetExample } from "./helpers";
+import { draftsOpen, importExample, LOCAL, login, resetExample } from "./helpers";
 
 // Fase 3: een goedgekeurd script levert per gevuld veld één conceptkaart op;
 // twee scripts staan naast elkaar.
@@ -61,7 +61,7 @@ test("script goedkeuren maakt kaarten per gevuld veld; vergelijken naast elkaar"
   // De scriptkaarten staan als concept op Goedkeuren, nog niet in de herhaling.
   await page.goto("/goedkeuren");
   // 3 kaarten uit de voorbeeldimport + 4 scriptkaarten (3 van Hartfalen, 1 van COPD).
-  await expect(page.getByRole("textbox", { name: "Voorkant" })).toHaveCount(7);
+  await expect.poll(() => draftsOpen(page)).toBe(7);
   await page.goto("/vandaag");
   await expect(page.getByText("Niets te herhalen vandaag")).toBeVisible();
 });

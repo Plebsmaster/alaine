@@ -74,7 +74,7 @@ export default async function CasesPage({ searchParams }: PageProps<"/casussen">
         <div className="flex flex-wrap gap-2">
           <LinkButton href="/casussen/nieuw?stage=1">Nieuwe casus uit stage</LinkButton>
           <LinkButton href="/casussen/nieuw">Nieuwe casus</LinkButton>
-          {drafts > 0 ? <LinkButton href="/goedkeuren">{drafts} concept(en) nakijken</LinkButton> : null}
+          {drafts > 0 ? <LinkButton href="/goedkeuren?soort=casussen">{drafts} concept(en) nakijken</LinkButton> : null}
         </div>
 
         {topicOptions.length > 0 ? (

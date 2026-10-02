@@ -86,6 +86,8 @@ export const draftCardsOutput = z.object({
         explanation: z.string(),
         objectives: z.array(z.string()),
         source_locator: z.string(),
+        /** Letterlijk citaat uit de brontekst; de server controleert of het er echt staat. */
+        source_excerpt: z.string(),
         needs_verification: z.boolean(),
       }),
     )

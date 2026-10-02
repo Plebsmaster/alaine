@@ -110,3 +110,24 @@ async function progress(page: Page) {
 }
 export const cardsLeft = async (page: Page) => (await progress(page)).left;
 export const cardsDone = async (page: Page) => (await progress(page)).done;
+
+/**
+ * Goedkeuren (ontwerp 1n): aantal open kaartconcepten uit "i van n". 0 zodra de lege staat er
+ * is; die verschijnt pas als ook het laatste goedkeuren is opgeslagen.
+ */
+export async function draftsOpen(page: Page): Promise<number> {
+  const position = page.getByText(/^\d+ van \d+$/).filter({ visible: true });
+  if ((await position.count()) > 0) return Number((await position.first().textContent())?.match(/van (\d+)/)?.[1]);
+  return (await page.getByText("Geen kaartconcepten om na te kijken.").isVisible()) ? 0 : NaN;
+}
+
+/** Keurt het geopende kaartconcept goed en wacht tot dat is opgeslagen. */
+export async function approveDraft(page: Page) {
+  await expect.poll(() => draftsOpen(page)).toBeGreaterThan(0);
+  const open = await draftsOpen(page);
+  const button = page.getByRole("button", { name: "Goedkeuren", exact: true });
+  await button.click();
+  await expect.poll(() => draftsOpen(page)).toBe(open - 1);
+  // Tijdens het opslaan staan de knoppen uit.
+  if (open > 1) await expect(button).toBeEnabled();
+}

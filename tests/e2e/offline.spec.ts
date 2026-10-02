@@ -1,5 +1,5 @@
 import { expect, test, type BrowserContext } from "@playwright/test";
-import { admin, cardsLeft, importExample, LOCAL, login, resetExample } from "./helpers";
+import { admin, approveDraft, cardsLeft, importExample, LOCAL, login, resetExample } from "./helpers";
 
 // Fase 6: herhalen in vliegtuigmodus werkt en na herverbinden staan alle
 // beoordelingen in de database. Vraagt een productiebuild (service worker).
@@ -23,10 +23,7 @@ test("offline herhalen en synchroniseren", async ({ page, context }) => {
   await login(page);
   await importExample(page);
   await page.goto("/goedkeuren");
-  for (let left = 2; left >= 0; left--) {
-    await page.getByRole("button", { name: "Goedkeuren", exact: true }).first().click();
-    await expect(page.getByRole("textbox", { name: "Voorkant" })).toHaveCount(left);
-  }
+  for (let i = 0; i < 3; i++) await approveDraft(page);
 
   // Online openen: service worker actief en /vandaag in de cache.
   await page.goto("/vandaag");

@@ -101,6 +101,8 @@ export const cardSchema = z.object({
   objectives: refList,
   tags: z.array(z.string().trim().min(1)).default([]),
   image: z.string().trim().min(1).nullish(),
+  /** Letterlijk brondeel waarop de kaart rust (getoond op Goedkeuren). */
+  source_excerpt: z.string().trim().max(600).nullish(),
   needs_verification: needsVerification,
 });
 

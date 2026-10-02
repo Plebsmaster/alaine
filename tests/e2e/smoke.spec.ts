@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { admin, cardsDone, cardsLeft, importExample, LOCAL, login, newPage, resetExample } from "./helpers";
+import { admin, approveDraft, cardsDone, cardsLeft, draftsOpen, importExample, LOCAL, login, newPage, resetExample } from "./helpers";
 
 // Fase 0 + 1: inloggen (alleen ALLOWED_EMAIL), voorbeeld importeren, goedkeuren,
 // herhalen op de telefoon en direct zien op de laptop.
@@ -29,13 +29,11 @@ test("importeren, goedkeuren, herhalen op telefoon, zichtbaar op laptop", async 
 
   // Goedkeuren, één kaart herschreven in eigen woorden.
   await laptop.goto("/goedkeuren");
-  const first = laptop.getByRole("textbox", { name: "Voorkant" }).first();
-  await first.fill("Wat is de formule voor de ejectiefractie?");
-  // Na elke goedkeuring ververst de lijst; de goedgekeurde kaart verdwijnt eruit.
-  for (let left = 2; left >= 0; left--) {
-    await laptop.getByRole("button", { name: "Goedkeuren", exact: true }).first().click();
-    await expect(laptop.getByRole("textbox", { name: "Voorkant" })).toHaveCount(left);
-  }
+  await expect.poll(() => draftsOpen(laptop)).toBe(3);
+  await laptop.getByRole("textbox", { name: "Voorkant" }).fill("Wat is de formule voor de ejectiefractie?");
+  await expect(laptop.getByText("Herschreven")).toBeVisible();
+  // Na elke goedkeuring staat meteen het volgende concept open.
+  for (let i = 0; i < 3; i++) await approveDraft(laptop);
   await expect(laptop.getByText("Geen kaartconcepten om na te kijken.")).toBeVisible();
 
   // Op de telefoon: drie kaarten, eentje beoordelen.

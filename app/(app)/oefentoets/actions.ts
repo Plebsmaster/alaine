@@ -331,5 +331,5 @@ export async function draftQuestionsAction(_prev: FormState, fd: FormData): Prom
   }
   if (saved === 0) return { error: "De AI leverde geen bruikbare vragen op. Probeer het opnieuw." };
   revalidatePath("/goedkeuren");
-  redirect(`/goedkeuren?thema=${topicId}`);
+  redirect(`/goedkeuren?soort=vragen&thema=${topicId}`);
 }

@@ -19,3 +19,6 @@ export type ErrorType = (typeof ERROR_TYPES)[number]["value"];
 
 /** A7: verwijzing bij te controleren inhoud. */
 export const VERIFY_TEXT = "Controleer in het Farmacotherapeutisch Kompas, de NHG-Standaard of de FMS-richtlijn.";
+
+/** Herkomst van een concept, kort voor lijsten en chips. */
+export const ORIGIN_LABELS: Record<string, string> = { ai: "AI", import: "import", manual: "eigen" };

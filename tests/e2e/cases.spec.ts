@@ -12,7 +12,7 @@ test("casussessie van drie casussen uit drie thema's", async ({ page }) => {
   await importExample(page, "tests/e2e/fixtures/casussen-import.json");
 
   // Conceptcasussen in één keer goedkeuren.
-  await page.goto("/goedkeuren");
+  await page.goto("/goedkeuren?soort=casussen");
   for (const title of ["Kortademige man van 72", "Hoestende vrouw van 58", "Schilferende plekken"]) {
     await page.getByRole("checkbox", { name: `${title} goedkeuren` }).check();
   }

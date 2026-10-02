@@ -340,5 +340,5 @@ export async function draftCasesAction(_prev: FormState, fd: FormData): Promise<
   }
   if (saved === 0) return { error: "De AI leverde geen bruikbare casussen op. Probeer het opnieuw." };
   revalidatePath("/goedkeuren");
-  redirect(`/goedkeuren?thema=${topicId}`);
+  redirect(`/goedkeuren?soort=casussen&thema=${topicId}`);
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MORE_LINKS } from "@/components/nav";
+import { LogoutButton } from "@/components/logout-button";
 import { PageHeader } from "@/components/ui";
 import { signOut } from "../actions";
 
@@ -18,9 +19,7 @@ export default function MorePage() {
           </li>
         ))}
         <li>
-          <form action={signOut}>
-            <button className="flex min-h-12 w-full items-center px-4 text-left text-muted hover:bg-surface-2">Uitloggen</button>
-          </form>
+          <LogoutButton signOut={signOut} className="flex min-h-12 w-full items-center px-4 text-left text-muted hover:bg-surface-2" />
         </li>
       </ul>
     </>

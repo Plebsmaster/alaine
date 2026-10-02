@@ -8,7 +8,7 @@ import { ReviewSession } from "./review-session";
 export const metadata: Metadata = { title: "Vandaag" };
 
 export default async function TodayPage() {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const settings = await getSettings(supabase);
   const today = await loadToday(supabase, settings);
   const total = today.queue.length + today.pending.length;
@@ -28,6 +28,8 @@ export default async function TodayPage() {
         initialPending={today.pending}
         settings={{ desired_retention: settings.desired_retention, fsrs_params: settings.fsrs_params }}
         endOfDay={today.endOfDay}
+        userId={user.id}
+        generatedAt={today.generatedAt}
       />
     </>
   );

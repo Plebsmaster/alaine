@@ -64,6 +64,8 @@ export type TodayData = {
   counts: DailyQueue["counts"];
   estimateMinutes: number;
   endOfDay: string;
+  /** Moment van opbouwen (ms); de client vergelijkt dit met een lokaal bewaarde stand. */
+  generatedAt: number;
 };
 
 export async function loadToday(
@@ -133,6 +135,7 @@ export async function loadToday(
     counts: daily.counts,
     estimateMinutes: Math.max(total > 0 ? 1 : 0, Math.round((total * perCard * 1.3) / 60_000)),
     endOfDay: end.toISOString(),
+    generatedAt: now.getTime(),
   };
 }
 

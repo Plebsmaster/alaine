@@ -6,6 +6,7 @@ import { Badge, Button, Notice, Panel, Textarea } from "@/components/ui";
 import type { ReviewCard } from "@/lib/data/review";
 import { CARD_TYPE_LABELS } from "@/lib/labels";
 import { preview, rate, RATINGS, STATE, type FsrsSettings, type RatingValue } from "@/lib/fsrs";
+import { available as idbAvailable, loadSnapshot, outboxAdd, outboxAll, outboxRemove, saveSnapshot } from "@/lib/offline/idb";
 import { pickNext, requeue } from "@/lib/queue";
 import {
   flagCardAction,
@@ -25,17 +26,34 @@ const RATING_STYLES: Record<RatingValue, string> = {
 const MAX_DURATION_MS = 5 * 60_000;
 const RETRY_DELAYS = [1_000, 3_000, 9_000];
 
+type SaveState = "idle" | "saving" | "offline" | "error";
+type Result = { rating: RatingValue; wasReview: boolean };
+
+/** Wachtrij en voortgang van vandaag, voor heropenen zonder verbinding. */
+type Snapshot = {
+  userId: string;
+  endOfDay: string;
+  savedAt: number;
+  queue: ReviewCard[];
+  pending: ReviewCard[];
+  results: Result[];
+  sessionId: string;
+};
+
 type Props = {
   initialQueue: ReviewCard[];
   initialPending: ReviewCard[];
   settings: FsrsSettings;
   endOfDay: string;
+  userId: string;
+  /** Moment waarop de server deze wachtrij maakte; een nieuwere lokale stand wint. */
+  generatedAt: number;
 };
 
 type Current = { card: ReviewCard; source: "queue" | "pending" } | null;
 
-export function ReviewSession({ initialQueue, initialPending, settings, endOfDay }: Props) {
-  const [sessionId] = useState(() => crypto.randomUUID());
+export function ReviewSession({ initialQueue, initialPending, settings, endOfDay, userId, generatedAt }: Props) {
+  const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
   const [queue, setQueue] = useState(initialQueue);
   const [pending, setPending] = useState(initialPending);
   const [current, setCurrent] = useState<Current>(() => {
@@ -46,40 +64,47 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
   const [answer, setAnswer] = useState("");
   const shownAt = useRef(0);
   const [startedAt] = useState(() => Date.now());
-  const [results, setResults] = useState<{ rating: RatingValue; wasReview: boolean }[]>([]);
+  const [results, setResults] = useState<Result[]>([]);
   const [menu, setMenu] = useState<"closed" | "open" | "flag">("closed");
   const [flagNote, setFlagNote] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
   const [, setTick] = useState(0);
 
-  // Uitgaande beoordelingen: één voor één, in volgorde, met nieuwe pogingen bij een fout.
-  const outbox = useRef<RateInput[]>([]);
+  // Uitgaande beoordelingen: in IndexedDB, één voor één in volgorde. Zonder verbinding
+  // blijven ze staan tot de browser weer online is (ook na sluiten en heropenen).
   const [outboxCount, setOutboxCount] = useState(0);
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "error">("idle");
+  const [saveState, setSaveState] = useState<SaveState>("idle");
   const sending = useRef(false);
 
   const flush = useCallback(async () => {
     if (sending.current) return;
     sending.current = true;
-    setSaveState("saving");
     try {
-      while (outbox.current.length > 0) {
-        const item = outbox.current[0];
-        let ok = false;
-        for (let attempt = 0; attempt <= RETRY_DELAYS.length && !ok; attempt++) {
-          if (attempt > 0) await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt - 1]));
-          try {
-            ok = (await rateCardAction(item)).ok;
-          } catch {
-            ok = false;
-          }
-        }
-        if (!ok) {
-          setSaveState("error");
+      let items = await outboxAll();
+      setOutboxCount(items.length);
+      while (items.length > 0) {
+        if (typeof navigator !== "undefined" && !navigator.onLine) {
+          setSaveState("offline");
           return;
         }
-        outbox.current.shift();
-        setOutboxCount(outbox.current.length);
+        setSaveState("saving");
+        const item = items[0];
+        let result: "ok" | "rejected" | "network" = "network";
+        for (let attempt = 0; attempt <= RETRY_DELAYS.length && result === "network"; attempt++) {
+          if (attempt > 0) await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt - 1]));
+          try {
+            result = (await rateCardAction(item.payload)).ok ? "ok" : "rejected";
+          } catch {
+            result = "network"; // geen verbinding of server onbereikbaar
+          }
+        }
+        if (result !== "ok") {
+          setSaveState(result === "network" ? "offline" : "error");
+          return;
+        }
+        await outboxRemove(item.key);
+        items = await outboxAll();
+        setOutboxCount(items.length);
       }
       setSaveState("idle");
     } finally {
@@ -88,9 +113,10 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
   }, []);
 
   const enqueue = useCallback(
-    (item: RateInput) => {
-      outbox.current.push(item);
-      setOutboxCount(outbox.current.length);
+    async (payload: RateInput) => {
+      // Teller meteen ophogen: het sessie-einde wacht hierop voordat het "morgen" telt.
+      setOutboxCount((n) => n + 1);
+      await outboxAdd({ key: `${payload.cardId}|${payload.reviewedAt}`, createdAt: Date.now(), payload });
       void flush();
     },
     [flush],
@@ -98,12 +124,65 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
 
   const retry = useCallback(() => void flush(), [flush]);
 
+  // Bij openen (rij van een eerdere offline sessie) en zodra de verbinding terug is.
+  useEffect(() => {
+    void flush();
+    const online = () => void flush();
+    window.addEventListener("online", online);
+    return () => window.removeEventListener("online", online);
+  }, [flush]);
+
   useEffect(() => {
     if (outboxCount === 0) return;
     const warn = (e: BeforeUnloadEvent) => e.preventDefault();
-    window.addEventListener("beforeunload", warn);
+    // Met IndexedDB gaat er niets verloren; alleen waarschuwen als het geheugen de enige opslag is.
+    if (!idbAvailable()) window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [outboxCount]);
+
+  // Lokale stand: een nieuwere (bijv. offline bijgehouden) stand van dezelfde dag wint
+  // van wat de server meegaf; anders slaan we de verse wachtrij op.
+  const restored = useRef(false);
+  useEffect(() => {
+    let cancelled = false;
+    void Promise.all([loadSnapshot<Snapshot>(), outboxAll()]).then(([snap, unsent]) => {
+      if (cancelled) return;
+      restored.current = true;
+      // Staan er nog niet-verstuurde beoordelingen, dan kent de server die nog niet en is
+      // zijn wachtrij verouderd: dan wint de lokale stand, ook als die ouder lijkt.
+      const sameDay = snap && snap.userId === userId && snap.endOfDay === endOfDay;
+      if (snap && sameDay && (snap.savedAt > generatedAt || unsent.length > 0)) {
+        setQueue(snap.queue);
+        setPending(snap.pending);
+        setResults(snap.results);
+        setSessionId(snap.sessionId);
+        const next = pickNext(snap.queue, snap.pending, new Date());
+        setCurrent(next ? { card: next.item as ReviewCard, source: next.source } : null);
+      } else {
+        // Zonder bruikbare lokale stand: kaarten die nog in de uitgaande rij staan niet opnieuw tonen.
+        const sent = new Set(unsent.map((u) => u.payload.cardId));
+        const q = initialQueue.filter((c) => !sent.has(c.card_id));
+        const p = initialPending.filter((c) => !sent.has(c.card_id));
+        if (sent.size > 0) {
+          setQueue(q);
+          setPending(p);
+          const next = pickNext(q, p, new Date());
+          setCurrent(next ? { card: next.item as ReviewCard, source: next.source } : null);
+        }
+        void saveSnapshot<Snapshot>({ userId, endOfDay, savedAt: Date.now(), queue: q, pending: p, results: [], sessionId });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // Alleen bij openen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!restored.current) return;
+    void saveSnapshot<Snapshot>({ userId, endOfDay, savedAt: Date.now(), queue, pending, results, sessionId });
+  }, [queue, pending, results, sessionId, userId, endOfDay]);
 
   // Nieuwe kaart in beeld: timer starten.
   useEffect(() => {
@@ -148,7 +227,7 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
       const card = current.card;
       const { schedule } = rate(card.schedule, rating, now, settings);
       setResults((r) => [...r, { rating, wasReview: card.schedule.state === STATE.Review }]);
-      enqueue({
+      void enqueue({
         cardId: card.card_id,
         rating,
         reviewedAt: now.toISOString(),
@@ -208,7 +287,7 @@ export function ReviewSession({ initialQueue, initialPending, settings, endOfDay
     const waiting = pending.length > 0;
     return (
       <>
-        <SessionEnd results={results} startedAt={startedAt} waiting={waiting} pending={pending} saved={outboxCount === 0} />
+        <SessionEnd results={results} startedAt={startedAt} waiting={waiting} pending={pending} saved={outboxCount === 0} offline={saveState === "offline"} />
         <SaveStatus state={saveState} count={outboxCount} onRetry={retry} />
       </>
     );
@@ -340,11 +419,18 @@ function SaveStatus({
   onRetry,
   compact = false,
 }: {
-  state: "idle" | "saving" | "error";
+  state: SaveState;
   count: number;
   onRetry: () => void;
   compact?: boolean;
 }) {
+  if (state === "offline" && count > 0) {
+    return (
+      <span role="status" className="text-sm">
+        Offline · {count} {count === 1 ? "beoordeling wacht" : "beoordelingen wachten"} op verbinding
+      </span>
+    );
+  }
   if (state === "error") {
     return (
       <span role="alert" className="text-sm text-danger">
@@ -365,12 +451,14 @@ function SessionEnd({
   waiting,
   pending,
   saved,
+  offline,
 }: {
-  results: { rating: RatingValue; wasReview: boolean }[];
+  results: Result[];
   startedAt: number;
   waiting: boolean;
   pending: ReviewCard[];
   saved: boolean;
+  offline: boolean;
 }) {
   const [tomorrow, setTomorrow] = useState<{ due: number; fresh: number } | null>(null);
   const [endedAt] = useState(() => Date.now());
@@ -425,7 +513,11 @@ function SessionEnd({
       </p>
       <p className="text-sm">
         Morgen:{" "}
-        {tomorrow ? `${tomorrow.due} herhalingen en tot ${tomorrow.fresh} nieuwe kaarten` : "bezig met tellen…"}
+        {tomorrow
+          ? `${tomorrow.due} herhalingen en tot ${tomorrow.fresh} nieuwe kaarten`
+          : offline
+            ? "wordt geteld zodra je weer online bent"
+            : "bezig met tellen…"}
       </p>
     </Panel>
   );

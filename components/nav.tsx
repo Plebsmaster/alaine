@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoutButton } from "./logout-button";
 
 const MAIN = [
   { href: "/vandaag", label: "Vandaag" },
@@ -44,9 +45,9 @@ export function SideNav({ signOut }: { signOut: () => Promise<void> }) {
           </li>
         ))}
       </ul>
-      <form action={signOut} className="mt-auto">
-        <button className="w-full rounded-lg px-3 py-2 text-left text-sm text-muted hover:bg-surface-2">Uitloggen</button>
-      </form>
+      <div className="mt-auto">
+        <LogoutButton signOut={signOut} className="w-full rounded-lg px-3 py-2 text-left text-sm text-muted hover:bg-surface-2" />
+      </div>
     </nav>
   );
 }

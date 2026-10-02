@@ -32,6 +32,7 @@ content/module-1/00-studiehandleiding/   toetsvorm en toetsdata
 - **Eigen formulering.** Parafraseer kort; neem geen lange passages letterlijk over uit het boek.
 - **Eén idee per kaart.** Lijsten van meer dan drie punten splitsen.
 - **Ophalen afdwingen.** Geen ja/nee-vragen; het antwoord staat niet in de vraag.
+- **Vraag naar de kennis, niet naar de bron.** Noem in een voorkant, toetsvraag, vignet of antwoord nooit het college, het RC-nummer, de dia, de PowerPoint of de docent ("volgens RC 4.2", "uit het college"). Op de toets en in de praktijk staat die er ook niet, en de vraag test dan het onthouden van de les in plaats van de stof. De vindplaats hoort in `source_id` en `source_locator`. Notities voor jezelf ("het antwoord staat niet in de tekst") horen niet in de stof maar in de samenvatting.
 - **Toepassing boven reproductie.** Casussen en toetsvragen vragen om redeneren, niet om herkennen.
 - **Nederlands**, met gangbare Latijnse of Engelse termen tussen haakjes.
 - **Geen patiëntgegevens**, ook niet uit aantekeningen van stage.

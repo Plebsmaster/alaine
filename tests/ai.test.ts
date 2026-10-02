@@ -187,3 +187,10 @@ describe("draft_cards: brondeel (ontwerp 1n)", () => {
     expect(draftCardsOutput.safeParse({ cards: [{ ...card, source_excerpt: "" }] }).success).toBe(true);
   });
 });
+
+describe("BASE_RULES", () => {
+  it("vraagt naar de kennis, niet naar de bron (geen RC-nummer of college in de vraag)", () => {
+    expect(BASE_RULES).toContain("niet naar de bron");
+    expect(BASE_RULES).toContain("source_locator");
+  });
+});

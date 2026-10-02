@@ -24,13 +24,22 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
     .limit(LIMIT);
   if (topicFilter) draftsQuery = draftsQuery.eq("topic_id", topicFilter);
 
-  const [cards, scripts, cases, questions, { data: drafts, error }, { data: counts }] = await Promise.all([
+  let scriptsQuery = supabase
+    .from("illness_scripts")
+    .select("id, condition, origin, topics(name)")
+    .eq("status", "draft")
+    .order("condition")
+    .limit(100);
+  if (topicFilter) scriptsQuery = scriptsQuery.eq("topic_id", topicFilter);
+
+  const [cards, scripts, cases, questions, { data: drafts, error }, { data: counts }, { data: draftScripts }] = await Promise.all([
     count("cards"),
     count("illness_scripts"),
     count("cases"),
     count("questions"),
     draftsQuery,
     supabase.from("topic_card_counts").select("topic_id, draft").gt("draft", 0),
+    scriptsQuery,
   ]);
   if (error) throw new Error(error.message);
 
@@ -91,6 +100,26 @@ export default async function ApprovePage({ searchParams }: PageProps<"/goedkeur
       <div className="mb-6">
         <Notice>Zet het in je eigen woorden; dat onthoud je beter.</Notice>
       </div>
+
+      {(draftScripts ?? []).length > 0 ? (
+        <section className="mb-8 space-y-2">
+          <h2 className="text-lg font-semibold">Illness scripts</h2>
+          <p className="text-sm text-muted">Controleer een script en keur het goed; dan komen er scriptkaarten bij.</p>
+          <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
+            {(draftScripts ?? []).map((s) => (
+              <li key={s.id}>
+                <Link href={`/scripts/${s.id}`} className="flex min-h-12 items-center justify-between gap-3 px-4 py-2 hover:bg-surface-2">
+                  <span>{s.condition}</span>
+                  <span className="text-xs text-muted">
+                    {s.topics?.name}
+                    {s.origin === "ai" ? " · AI" : ""}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {(drafts ?? []).length === 0 ? (
         <Panel className="text-sm text-muted">Geen kaartconcepten om na te kijken.</Panel>

@@ -70,12 +70,26 @@ supabase/migrations/
 
 ## Commando's
 
-- `npm run dev`, `npm run build`, `npm run lint`, `npm test`
-- `npm run import -- <pad-naar-json>`: importeert een bestand volgens `docs/IMPORT_FORMAT.md`
+- `npm run dev`, `npm run build`, `npm run lint`, `npm run typecheck`, `npm test`
+- `npm run test:e2e`: Playwright-rooktest tegen de lokale Supabase (`supabase start`); wist de voorbeeldmodule
+- `npm run import -- [--dry-run] <pad-naar-json>`: importeert een bestand volgens `docs/IMPORT_FORMAT.md`
+- `npm run db:types`: `lib/supabase/database.types.ts` opnieuw genereren na een migratie (lokale stack)
 - Migraties: `supabase link` en `supabase db push`, of via de Supabase MCP als die verbonden is
+
+## Stand en afspraken in de code
+
+- Fase 0 en 1 zijn gebouwd. Van fase 2 bestaat `/goedkeuren` voor kaarten en de leerdoelendekking op `/thema/[id]`; de AI-functies nog niet. Fase 3–6 zijn plaatshouders.
+- Next.js 16: `proxy.ts` (vroeger middleware), async `params`/`searchParams`/`cookies()`. Lees `AGENTS.md`.
+- Database: schrijfacties die samen moeten slagen lopen via Postgres-functies in `supabase/migrations/0002_phase1.sql`: `rate_card` (planning + log, idempotent per reviewmoment), `approve_card`, `import_bundle` (hele importbestand in één transactie). Allemaal `security invoker`, dus RLS geldt.
+- Views met `security_invoker`: `review_queue` (wachtrij), `topic_card_counts`, `objective_coverage`.
+- Elke pagina en Server Action begint met `requireUser()` uit `lib/auth.ts` (controleert ook `ALLOWED_EMAIL`).
+- Inloggen gaat met een code uit de mail (`verifyOtp`), zodat het ook werkt in de PWA op het beginscherm; de link in de mail werkt via `/auth/confirm`.
+- Het herhaalscherm rekent intervallen op de client uit voor de weergave; de server rekent bij opslaan opnieuw vanaf de stand in de database.
 
 ## Werkwijze
 
 - Kleine commits per onderdeel, met een duidelijke boodschap.
 - Schrijf eerst tests voor `lib/fsrs.ts`, `lib/queue.ts` en de importer; die moeten kloppen.
 - Twijfel je over een keuze die de leermethode raakt, vraag het dan in plaats van te gokken.
+
+@AGENTS.md

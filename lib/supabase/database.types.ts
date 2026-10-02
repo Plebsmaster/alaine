@@ -188,6 +188,7 @@ export type Database = {
           id: string;
           illness_script_id: string | null;
           image_path: string | null;
+          needs_verification: boolean;
           origin: string;
           rewritten: boolean;
           script_field: string | null;
@@ -210,6 +211,7 @@ export type Database = {
           id?: string;
           illness_script_id?: string | null;
           image_path?: string | null;
+          needs_verification?: boolean;
           origin?: string;
           rewritten?: boolean;
           script_field?: string | null;
@@ -232,6 +234,7 @@ export type Database = {
           id?: string;
           illness_script_id?: string | null;
           image_path?: string | null;
+          needs_verification?: boolean;
           origin?: string;
           rewritten?: boolean;
           script_field?: string | null;
@@ -276,6 +279,7 @@ export type Database = {
           created_at: string;
           cued: boolean;
           duration_ms: number | null;
+          error_type: string | null;
           final_ranking: string[];
           hints_used: number;
           id: string;
@@ -292,6 +296,7 @@ export type Database = {
           created_at?: string;
           cued?: boolean;
           duration_ms?: number | null;
+          error_type?: string | null;
           final_ranking?: string[];
           hints_used?: number;
           id?: string;
@@ -308,6 +313,7 @@ export type Database = {
           created_at?: string;
           cued?: boolean;
           duration_ms?: number | null;
+          error_type?: string | null;
           final_ranking?: string[];
           hints_used?: number;
           id?: string;
@@ -376,6 +382,7 @@ export type Database = {
           external_id: string | null;
           from_internship: boolean;
           id: string;
+          needs_verification: boolean;
           origin: string;
           question: string;
           source_id: string | null;
@@ -395,6 +402,7 @@ export type Database = {
           external_id?: string | null;
           from_internship?: boolean;
           id?: string;
+          needs_verification?: boolean;
           origin?: string;
           question?: string;
           source_id?: string | null;
@@ -414,6 +422,7 @@ export type Database = {
           external_id?: string | null;
           from_internship?: boolean;
           id?: string;
+          needs_verification?: boolean;
           origin?: string;
           question?: string;
           source_id?: string | null;
@@ -452,6 +461,7 @@ export type Database = {
           id: string;
           key_discriminators: string | null;
           management: string | null;
+          needs_verification: boolean;
           origin: string;
           pathophysiology: string | null;
           presentation: string | null;
@@ -472,6 +482,7 @@ export type Database = {
           id?: string;
           key_discriminators?: string | null;
           management?: string | null;
+          needs_verification?: boolean;
           origin?: string;
           pathophysiology?: string | null;
           presentation?: string | null;
@@ -492,6 +503,7 @@ export type Database = {
           id?: string;
           key_discriminators?: string | null;
           management?: string | null;
+          needs_verification?: boolean;
           origin?: string;
           pathophysiology?: string | null;
           presentation?: string | null;
@@ -601,6 +613,7 @@ export type Database = {
           chosen_option: number | null;
           correct: boolean | null;
           created_at: string;
+          error_type: string | null;
           id: string;
           question_id: string;
           session_id: string | null;
@@ -612,6 +625,7 @@ export type Database = {
           chosen_option?: number | null;
           correct?: boolean | null;
           created_at?: string;
+          error_type?: string | null;
           id?: string;
           question_id: string;
           session_id?: string | null;
@@ -623,6 +637,7 @@ export type Database = {
           chosen_option?: number | null;
           correct?: boolean | null;
           created_at?: string;
+          error_type?: string | null;
           id?: string;
           question_id?: string;
           session_id?: string | null;
@@ -688,6 +703,7 @@ export type Database = {
           id: string;
           kind: string;
           model_answer: string | null;
+          needs_verification: boolean;
           options: Json | null;
           origin: string;
           source_id: string | null;
@@ -705,6 +721,7 @@ export type Database = {
           id?: string;
           kind: string;
           model_answer?: string | null;
+          needs_verification?: boolean;
           options?: Json | null;
           origin?: string;
           source_id?: string | null;
@@ -722,6 +739,7 @@ export type Database = {
           id?: string;
           kind?: string;
           model_answer?: string | null;
+          needs_verification?: boolean;
           options?: Json | null;
           origin?: string;
           source_id?: string | null;
@@ -756,6 +774,7 @@ export type Database = {
           due: string;
           duration_ms: number | null;
           elapsed_days: number;
+          error_type: string | null;
           id: number;
           last_elapsed_days: number;
           learning_steps: number;
@@ -775,6 +794,7 @@ export type Database = {
           due: string;
           duration_ms?: number | null;
           elapsed_days?: number;
+          error_type?: string | null;
           id?: never;
           last_elapsed_days?: number;
           learning_steps?: number;
@@ -794,6 +814,7 @@ export type Database = {
           due?: string;
           duration_ms?: number | null;
           elapsed_days?: number;
+          error_type?: string | null;
           id?: never;
           last_elapsed_days?: number;
           learning_steps?: number;
@@ -1003,6 +1024,7 @@ export type Database = {
           last_review: string | null;
           learning_steps: number | null;
           module_sort: number | null;
+          needs_verification: boolean | null;
           objective_sort: number | null;
           reps: number | null;
           scheduled_days: number | null;
@@ -1079,6 +1101,7 @@ export type Database = {
           p_answer_text?: string;
           p_card_id: string;
           p_duration_ms?: number;
+          p_error_type?: string;
           p_log: Json;
           p_schedule: Json;
           p_session_id?: string;

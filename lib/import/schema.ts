@@ -15,6 +15,8 @@ const requiredText = z
 
 const optionalText = z.string().trim().max(10_000).nullish();
 const refList = z.array(externalId).default([]);
+/** A7: true als (een deel van) het item niet uit de bron komt; dan eerst controleren. */
+const needsVerification = z.boolean().default(false);
 
 export const CARD_TYPES = [
   "fact",
@@ -24,6 +26,7 @@ export const CARD_TYPES = [
   "image",
   "skill",
   "communication",
+  "chain",
 ] as const;
 
 export const SOURCE_KINDS = [
@@ -83,6 +86,7 @@ export const illnessScriptSchema = z.object({
   management: optionalText,
   key_discriminators: optionalText,
   similar_conditions: z.array(z.string().trim().min(1)).default([]),
+  needs_verification: needsVerification,
 });
 
 export const cardSchema = z.object({
@@ -97,6 +101,7 @@ export const cardSchema = z.object({
   objectives: refList,
   tags: z.array(z.string().trim().min(1)).default([]),
   image: z.string().trim().min(1).nullish(),
+  needs_verification: needsVerification,
 });
 
 const reflectionSchema = z.object({
@@ -122,6 +127,7 @@ export const caseSchema = z
     teaching_points: optionalText,
     difficulty: z.number().int().min(1).max(3).nullish(),
     objectives: refList,
+    needs_verification: needsVerification,
   })
   .superRefine((c, ctx) => {
     const first = c.expert_reflection.filter((r) => r.rank === 1);
@@ -153,6 +159,7 @@ export const questionSchema = z
     model_answer: optionalText,
     explanation: optionalText,
     objectives: refList,
+    needs_verification: needsVerification,
   })
   .superRefine((q, ctx) => {
     if (q.format !== "mcq") return;

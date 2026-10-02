@@ -197,3 +197,16 @@ describe("hulpfuncties", () => {
     expect(payload.cards[1].image_path).toBeNull();
   });
 });
+
+describe("Aanvulling 01 in het importformaat", () => {
+  it("accepteert ketenkaarten en needs_verification, standaard false", () => {
+    const raw = clone();
+    raw.cards[0].type = "chain";
+    raw.cards[0].needs_verification = true;
+    const bundle = parseOk(raw);
+    expect(bundle.cards[0].type).toBe("chain");
+    expect(bundle.cards[0].needs_verification).toBe(true);
+    expect(bundle.cards[1].needs_verification).toBe(false);
+    expect(toPayload(bundle).cards[0].needs_verification).toBe(true);
+  });
+});

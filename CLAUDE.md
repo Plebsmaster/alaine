@@ -78,9 +78,11 @@ supabase/migrations/
 
 ## Stand en afspraken in de code
 
-- Fase 0 en 1 zijn gebouwd. Van fase 2 bestaat `/goedkeuren` voor kaarten en de leerdoelendekking op `/thema/[id]`; de AI-functies nog niet. Fase 3–6 zijn plaatshouders.
+- Fase 0, 1 en 3 zijn gebouwd. Van fase 2 bestaat `/goedkeuren` (kaarten en conceptscripts) en de leerdoelendekking op `/thema/[id]`; `draft_cards` en `explain_feedback` nog niet. Fase 4–6 zijn plaatshouders.
+- AI: `lib/ai/client.ts` (`runJson`: structured output met zod, één herkansing, logging in `ai_usage`), prompts in `lib/ai/prompts.ts`, schema's in `lib/ai/schemas.ts`. Modellen via `ANTHROPIC_MODEL` en `ANTHROPIC_MODEL_FAST`. Zonder key tonen de schermen een melding in plaats van een knop die faalt.
+- Illness scripts: `approve_illness_script` (migratie 0003) zet het script actief en maakt per gevuld veld één conceptkaart (`cards.script_field`), idempotent.
 - Next.js 16: `proxy.ts` (vroeger middleware), async `params`/`searchParams`/`cookies()`. Lees `AGENTS.md`.
-- Database: schrijfacties die samen moeten slagen lopen via Postgres-functies in `supabase/migrations/0002_phase1.sql`: `rate_card` (planning + log, idempotent per reviewmoment), `approve_card`, `import_bundle` (hele importbestand in één transactie). Allemaal `security invoker`, dus RLS geldt.
+- Database: schrijfacties die samen moeten slagen lopen via Postgres-functies in `supabase/migrations/`: `rate_card` (planning + log, idempotent per reviewmoment), `approve_card`, `import_bundle` (hele importbestand in één transactie). Allemaal `security invoker`, dus RLS geldt.
 - Views met `security_invoker`: `review_queue` (wachtrij), `topic_card_counts`, `objective_coverage`.
 - Elke pagina en Server Action begint met `requireUser()` uit `lib/auth.ts` (controleert ook `ALLOWED_EMAIL`).
 - Inloggen gaat met een code uit de mail (`verifyOtp`), zodat het ook werkt in de PWA op het beginscherm; de link in de mail werkt via `/auth/confirm`.

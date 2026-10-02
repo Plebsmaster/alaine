@@ -1,57 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
-import { config } from "dotenv";
-import { devices, expect, test, type Browser, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { admin, importExample, LOCAL, login, newPage, resetExample } from "./helpers";
 
 // Fase 0 + 1: inloggen (alleen ALLOWED_EMAIL), voorbeeld importeren, goedkeuren,
 // herhalen op de telefoon en direct zien op de laptop.
-config({ path: ".env.local", quiet: true });
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const EMAIL = (process.env.ALLOWED_EMAIL ?? "").toLowerCase();
-const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:54324";
-const LOCAL = /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?/.test(SUPABASE_URL);
-
 test.skip(!LOCAL, "De rooktest wist testdata en draait alleen tegen de lokale Supabase (supabase start).");
 
-async function latestCode(after: number): Promise<string> {
-  for (let i = 0; i < 30; i++) {
-    const res = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${EMAIL}"`)}`);
-    const { messages } = (await res.json()) as { messages: { ID: string; Created: string }[] };
-    const fresh = messages.find((m) => new Date(m.Created).getTime() >= after - 1000);
-    if (fresh) {
-      const msg = (await (await fetch(`${MAILPIT}/api/v1/message/${fresh.ID}`)).json()) as { HTML: string; Text: string };
-      const code = (msg.HTML || msg.Text).match(/\b(\d{6,10})\b/);
-      if (code) return code[1];
-    }
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  throw new Error("Geen inlogmail gevonden in Mailpit");
-}
-
-async function login(page: Page) {
-  await page.goto("/vandaag");
-  await expect(page).toHaveURL(/\/login/);
-  const sentAt = Date.now();
-  await page.getByLabel("E-mailadres").fill(EMAIL);
-  await page.getByRole("button", { name: "Stuur inlogcode" }).click();
-  await expect(page.getByLabel("Code uit de e-mail")).toBeVisible();
-  await page.getByLabel("Code uit de e-mail").fill(await latestCode(sentAt));
-  await page.getByRole("button", { name: "Inloggen" }).click();
-  await expect(page).toHaveURL(/\/vandaag/);
-}
-
-async function newPage(browser: Browser, device: keyof typeof devices) {
-  const { defaultBrowserType: _ignored, ...options } = devices[device];
-  void _ignored;
-  const context = await browser.newContext(options);
-  return context.newPage();
-}
-
-test.beforeAll(async () => {
-  // Schone start: verwijder de voorbeeldmodule (cascade) van de testgebruiker.
-  const admin = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
-  await admin.from("modules").delete().eq("external_id", "voorbeeld");
-});
+test.beforeAll(resetExample);
 
 test("ander e-mailadres wordt geweigerd", async ({ page }) => {
   await page.goto("/login");
@@ -64,16 +18,10 @@ test("importeren, goedkeuren, herhalen op telefoon, zichtbaar op laptop", async 
   const laptop = await newPage(browser, "Desktop Chrome");
   const phone = await newPage(browser, "Pixel 7");
   await login(laptop);
-  await new Promise((r) => setTimeout(r, 1500)); // Supabase staat één inlogmail per interval toe
   await login(phone);
 
   // Import via /instellingen: eerst controle, dan importeren.
-  await laptop.goto("/instellingen");
-  await laptop.getByLabel("Importbestand (JSON)").setInputFiles("content/voorbeeld-import.json");
-  await expect(laptop.getByText("Controle geslaagd")).toBeVisible();
-  await expect(laptop.getByRole("cell", { name: "3 / 0 / 0" })).toBeVisible(); // 3 nieuwe kaarten
-  await laptop.getByRole("button", { name: /Importeer voorbeeld-import\.json/ }).click();
-  await expect(laptop.getByText("Import klaar")).toBeVisible();
+  await importExample(laptop);
 
   // Concepten staan nog niet in de herhaling.
   await laptop.goto("/vandaag");
@@ -115,7 +63,6 @@ test("importeren, goedkeuren, herhalen op telefoon, zichtbaar op laptop", async 
   await expect(laptop.getByText(/Morgen: \d+ herhalingen/)).toBeVisible();
 
   // Logboek in de database: telefoon (1) + laptop (2 nieuwe + de learning-kaart van de telefoon).
-  const admin = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } });
-  const { count } = await admin.from("review_logs").select("id", { count: "exact", head: true });
+  const { count } = await admin().from("review_logs").select("id", { count: "exact", head: true });
   expect(count).toBe(4);
 });

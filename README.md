@@ -8,10 +8,11 @@ Dit pakket is alles wat Claude Code nodig heeft om je studie-app te bouwen: een 
 | --- | --- | --- |
 | 0 | Fundament: Next.js, Supabase, inloggen met code (alleen `ALLOWED_EMAIL`), PWA | Gebouwd |
 | 1 | Herhalen: beheer, import, FSRS, dagelijkse wachtrij, herhaalscherm, sneltoetsen | Gebouwd |
-| 2 | Goedkeuren met AI-concepten en AI-feedback | Goedkeuren van kaarten staat er al; AI volgt |
-| 3–6 | Illness scripts, casussen, oefentoets, overzicht en offline | Nog te bouwen |
+| 2 | Goedkeuren met AI-concepten en AI-feedback | Goedkeuren van kaarten staat er al; `draft_cards` en `explain_feedback` volgen |
+| 3 | Illness scripts: scriptkaarten bij goedkeuren, naast elkaar vergelijken, `draft_script`, `draft_compare` | Gebouwd (AI getest zonder echte API-aanroep) |
+| 4–6 | Casussen, oefentoets, overzicht en offline | Nog te bouwen |
 
-Getest met een lokale Supabase: 36 unit tests (FSRS, wachtrij, importer) en een rooktest in de browser (inloggen, voorbeeld importeren, goedkeuren, herhalen op de telefoon en direct zien op de laptop). De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
+Getest met een lokale Supabase: 44 unit tests (FSRS, wachtrij, importer, AI-laag met een nagebootste API) en rooktests in de browser voor fase 0–1 (inloggen, importeren, goedkeuren, herhalen op telefoon en laptop) en fase 3 (scriptkaarten, vergelijken). De studiestof zelf ontbreekt nog; die komt via `content/` en de contentpipeline.
 
 ## Wat er in deze repo zit
 
@@ -71,6 +72,11 @@ Start Claude Code in de projectmap en geef per fase één prompt. Test na elke f
 4. **Vandaag**: herhaal op je telefoon en kijk of de laptop het direct ziet.
 5. Verwijder daarna de module "VOORBEELD" via **Thema's**.
 
+**Fase 3: illness scripts**: gebouwd. Test zelf:
+1. **Illness scripts → Nieuw script**: maak een script, vul een paar velden en kies **Opslaan en goedkeuren**. Per gevuld veld (presentatie, pathofysiologie, bevindingen, beleid) staat er een conceptkaart op **Goedkeuren**.
+2. Vink twee goedgekeurde scripts aan en kies **Vergelijk geselecteerde**.
+3. Met een `ANTHROPIC_API_KEY`: laat een script maken uit geplakte brontekst, en maak vanuit het vergelijkscherm een vergelijkingskaart. Beide komen binnen als concept.
+
 **Fase 2: goedkeuren en AI-concepten**
 ```
 Bouw fase 2 uit docs/SPEC.md. Gebruik de prompts en vangrails uit docs/AI_PROMPTS.md.
@@ -82,7 +88,7 @@ Volg docs/CONTENT_PIPELINE.md voor thema <naam> in content/module-1/.
 Maak het importbestand en laat me de samenvatting zien voordat je importeert.
 ```
 
-**Fase 3 tot en met 6**
+**Fase 4 tot en met 6**
 ```
 Bouw fase <n> uit docs/SPEC.md.
 ```

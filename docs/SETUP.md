@@ -8,7 +8,7 @@ Dit doe je één keer zelf. Claude Code kan het niet voor je doen, omdat het om 
 2. Noteer onder **Project Settings → API** de project-URL, de `anon`/publishable key en de `service_role`/secret key.
 3. **Database klaarzetten.** Kies één van twee manieren:
    - Met de terminal: `npx supabase login`, `npx supabase link --project-ref <ref>` en `npx supabase db push`.
-   - Of in het dashboard: **SQL Editor**, plak `supabase/migrations/0001_init.sql`, voer uit, en daarna `0002_phase1.sql`.
+   - Of in het dashboard: **SQL Editor**: voer de bestanden in `supabase/migrations/` één voor één uit, in volgorde (`0001_init.sql`, `0002_phase1.sql`, `0003_phase3.sql`, …). Komt er later een nieuw bestand bij, voer dan alleen dat uit.
 4. **Authentication → URL Configuration**
    - *Site URL*: je Vercel-adres (bijv. `https://pa-studie.vercel.app`). Zolang je die nog niet hebt: `http://localhost:3000`.
    - *Redirect URLs*: `http://localhost:3000/**` en `https://<jouw-vercel-adres>/**`.

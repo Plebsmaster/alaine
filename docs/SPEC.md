@@ -60,7 +60,7 @@ Navigatie: onderbalk op telefoon (Vandaag, Casussen, Overzicht, Meer), zijbalk o
 2. **Nieuw:** actieve kaarten met `state = 0` en `reps = 0`, maximaal `max_new_per_day` min het aantal nieuwe dat vandaag al is gestart.
 3. **Mengen:** voeg samen en interleave zodat geen twee opeenvolgende kaarten uit hetzelfde thema komen, waar dat kan. Nieuwe kaarten worden verspreid door de sessie, niet allemaal aan het eind.
 4. **Binnen de sessie:** kaarten die na "Opnieuw" of een learning-stap binnen de sessie due worden, komen terug in de rij op hun due-tijd.
-5. **Volgorde van nieuwe kaarten:** eerst thema's met een naderende toetsdatum, binnen een thema de volgorde van de leerdoelen.
+5. **Volgorde van nieuwe kaarten:** om en om verdeeld over de thema's, zodat alle thema's tegelijk starten (keuze van de student, 2 oktober 2026). In elke ronde komen thema's met een naderende toetsdatum eerst; binnen een thema de volgorde van de leerdoelen. Raakt een thema op, dan vullen de andere aan.
 
 Unit tests voor mengen, limiet nieuwe kaarten en tijdzonegrens.
 

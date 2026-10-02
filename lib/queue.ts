@@ -58,6 +58,31 @@ function compareNew(today: string) {
     a.card_id.localeCompare(b.card_id);
 }
 
+/**
+ * Kies de nieuwe kaarten van vandaag, om en om over de thema's verdeeld, zodat alle
+ * thema's tegelijk starten. Thema's met een naderende toets komen in elke ronde eerst;
+ * binnen een thema gaat het op leerdoelvolgorde. Raakt een thema op, dan vullen de
+ * andere aan.
+ */
+export function pickNew(fresh: QueueItem[], room: number, today: string): QueueItem[] {
+  const byTopic = new Map<string, QueueItem[]>();
+  for (const item of [...fresh].sort(compareNew(today))) {
+    const list = byTopic.get(item.topic_id);
+    if (list) list.push(item);
+    else byTopic.set(item.topic_id, [item]);
+  }
+  const lists = [...byTopic.values()];
+  const out: QueueItem[] = [];
+  for (let round = 0; out.length < room; round++) {
+    const before = out.length;
+    for (const list of lists) {
+      if (out.length < room && round < list.length) out.push(list[round]);
+    }
+    if (out.length === before) break;
+  }
+  return out;
+}
+
 /** Verspreid `inserts` gelijkmatig door `base`, met behoud van beider volgorde. */
 export function spread<T>(base: T[], inserts: T[]): T[] {
   if (base.length === 0) return [...inserts];
@@ -109,7 +134,7 @@ export function buildDailyQueue(items: QueueItem[], opts: QueueOptions): DailyQu
   pending.sort((a, b) => dueTime(a) - dueTime(b));
 
   const room = Math.max(0, opts.maxNewPerDay - opts.newStartedToday);
-  const newToday = fresh.sort(compareNew(opts.today)).slice(0, room);
+  const newToday = pickNew(fresh, room, opts.today);
 
   return {
     queue: interleave(spread(due, newToday), (i) => i.topic_id),

@@ -3,6 +3,7 @@ import { newSchedule, rate, STATE, type Schedule } from "@/lib/fsrs";
 import {
   buildDailyQueue,
   interleave,
+  pickNew,
   pickNext,
   requeue,
   spread,
@@ -100,14 +101,37 @@ describe("buildDailyQueue", () => {
     expect(buildDailyQueue(fresh, opts({ maxNewPerDay: 10, newStartedToday: 12 })).counts.new).toBe(0);
   });
 
-  it("kiest nieuwe kaarten eerst uit thema's met een naderende toets, dan op leerdoelvolgorde", () => {
+  it("verdeelt nieuwe kaarten om en om over de thema's, naderende toets eerst", () => {
     const later = item("A", newSchedule(now), { exam_date: "2026-12-01", objective_sort: 1 });
-    const soonB = item("B", newSchedule(now), { exam_date: "2026-10-20", objective_sort: 2 });
-    const soonA = item("B", newSchedule(now), { exam_date: "2026-10-20", objective_sort: 1 });
+    const soonB2 = item("B", newSchedule(now), { exam_date: "2026-10-20", objective_sort: 2 });
+    const soonB1 = item("B", newSchedule(now), { exam_date: "2026-10-20", objective_sort: 1 });
     const past = item("C", newSchedule(now), { exam_date: "2026-09-01", objective_sort: 1 });
-    const { queue } = buildDailyQueue([later, soonB, past, soonA], opts({ maxNewPerDay: 3 }));
-    expect(queue.map((q) => q.card_id).sort()).toEqual([later, soonA, soonB].map((c) => c.card_id).sort());
-    expect(queue).not.toContainEqual(past);
+    // Ronde 1: B (toets 20 okt), A (toets 1 dec), C (toets voorbij). Ronde 2: B.
+    const picked = pickNew([later, soonB2, past, soonB1], 4, "2026-10-02");
+    expect(picked.map((q) => q.card_id)).toEqual([soonB1, later, past, soonB2].map((c) => c.card_id));
+    // Met ruimte voor 2 krijgt elk thema met de vroegste toets er één.
+    expect(pickNew([later, soonB2, past, soonB1], 2, "2026-10-02")).toEqual([soonB1, later]);
+  });
+
+  it("laat alle thema's tegelijk starten en vult aan als een thema op is", () => {
+    const fresh = [
+      ...Array.from({ length: 10 }, (_, i) => item("A", newSchedule(now), { topic_sort: 1, objective_sort: i })),
+      ...Array.from({ length: 10 }, (_, i) => item("B", newSchedule(now), { topic_sort: 2, objective_sort: i })),
+      ...Array.from({ length: 2 }, (_, i) => item("C", newSchedule(now), { topic_sort: 3, objective_sort: i })),
+    ];
+    const count = (items: QueueItem[], topic: string) => items.filter((i) => i.topic_id === topic).length;
+
+    const six = pickNew(fresh, 6, "2026-10-02");
+    expect([count(six, "A"), count(six, "B"), count(six, "C")]).toEqual([2, 2, 2]);
+
+    const twelve = pickNew(fresh, 12, "2026-10-02");
+    expect([count(twelve, "A"), count(twelve, "B"), count(twelve, "C")]).toEqual([5, 5, 2]);
+
+    // Binnen een thema blijft de leerdoelvolgorde.
+    const a = twelve.filter((i) => i.topic_id === "A").map((i) => i.objective_sort);
+    expect(a).toEqual([0, 1, 2, 3, 4]);
+
+    expect(pickNew(fresh, 100, "2026-10-02")).toHaveLength(22);
   });
 
   it("houdt learning-kaarten die later vandaag due zijn apart tot hun due-tijd", () => {

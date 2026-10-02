@@ -97,7 +97,8 @@ export async function loadToday(
       .order("topic_sort")
       .order("objective_sort", { ascending: true, nullsFirst: false })
       .order("created_at")
-      .limit(settings.max_new_per_day),
+      // Alle nieuwe kaarten: lib/queue.ts verdeelt de dagelijkse limiet over de thema's.
+      .limit(5000),
     supabase
       .from("review_logs")
       .select("id", { count: "exact", head: true })
@@ -115,16 +116,27 @@ export async function loadToday(
   }
 
   const rows = [...(dueRes.data ?? []), ...(newRes.data ?? [])] as Row[];
-  const imageUrls = await signImages(supabase, rows);
-  const cards = rows.map((r) => toCard(r, imageUrls));
+  const rowById = new Map(rows.map((r) => [r.card_id!, r]));
 
-  const daily = buildDailyQueue(cards, {
-    now,
-    endOfDay: end,
-    today,
-    maxNewPerDay: settings.max_new_per_day,
-    newStartedToday: startedRes.count ?? 0,
-  });
+  const planned = buildDailyQueue(
+    rows.map((r) => toCard(r, new Map())),
+    {
+      now,
+      endOfDay: end,
+      today,
+      maxNewPerDay: settings.max_new_per_day,
+      newStartedToday: startedRes.count ?? 0,
+    },
+  );
+
+  // Afbeeldingen alleen ondertekenen voor kaarten die vandaag echt aan de beurt komen.
+  const selected = (items: QueueItem[]) => items.map((i) => rowById.get(i.card_id)!);
+  const imageUrls = await signImages(supabase, [...selected(planned.queue), ...selected(planned.pending)]);
+  const daily = {
+    ...planned,
+    queue: selected(planned.queue).map((r) => toCard(r, imageUrls)),
+    pending: selected(planned.pending).map((r) => toCard(r, imageUrls)),
+  };
 
   const durations = (durRes.data ?? []).map((d) => d.duration_ms!).sort((a, b) => a - b);
   const median = durations.length ? durations[Math.floor(durations.length / 2)] : 12_000;

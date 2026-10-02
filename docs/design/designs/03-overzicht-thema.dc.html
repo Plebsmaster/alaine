@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E7E6DF;font-family:"Atkinson Hyperlegible Next",system-ui,sans-serif;color:#1A1C19;-webkit-font-smoothing:antialiased}a{color:#2F6F62;text-decoration:none}a:hover{color:#1F5248;text-decoration:underline}</style>
+</helmet>
+<section id="ronde-1" style="padding:72px 80px 140px;display:flex;flex-direction:column;gap:80px">
+  <header style="display:flex;flex-direction:column;gap:16px;max-width:1100px">
+    <div style="font-size:13px;font-weight:700;letter-spacing:.08em;color:#5C5F58">PA STUDIE · HERONTWERP · RONDE 1 · DEEL 3 VAN 5</div>
+    <h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:60px;line-height:1.05;letter-spacing:-.01em">Overzicht en thema</h1>
+    <p style="margin:0;font-size:19px;line-height:1.55;color:#3E413B;max-width:860px;text-wrap:pretty">Echte cijfers uit het logboek, geen schattingen. <b>a · Verfijnd</b> ordent wat er is. <b>b · Herzien</b> zet retentie tegenover je doel en bundelt wat aandacht nodig heeft.</p>
+    <nav style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+      <a href="01-shell-inloggen.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">1 · Shell en inloggen</a>
+      <a href="02-vandaag-sessie-einde.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">2 · Vandaag en sessie-einde</a>
+      <a href="03-overzicht-thema.dc.html" style="padding:8px 14px;border-radius:999px;background:#1A1C19;color:#fff;font-size:14px;font-weight:700">3 · Overzicht en thema</a>
+      <a href="04-goedkeuren-scripts.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">4 · Goedkeuren en scripts</a>
+      <a href="05-casus-oefentoets.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">5 · Casus en oefentoets</a>
+    </nav>
+  </header>
+
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:6px"><h2 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:40px">Overzicht (dashboard)</h2><p style="margin:0;font-size:17px;color:#3E413B">Retentie, werklast, studietijd, per thema, leerdoelen zonder dekking, lastige kaarten.</p></div>
+    <div style="display:flex;gap:96px;align-items:flex-start">
+      <sc-if value="{{ showA }}" hint-placeholder-val="{{ true }}">
+      <div id="1i" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1i</span><span style="font-size:22px;font-weight:700">Verfijnd</span><span style="font-size:16px;color:#5C5F58">Zelfde blokken, strakkere tabel; op de telefoon thema's als lijst in plaats van tabel.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <aside style="width:240px;flex:none;background:#fff;border-right:1px solid #E1DFD6;display:flex;flex-direction:column;padding:22px 12px;gap:18px">
+              <div style="display:flex;align-items:center;gap:10px;padding:0 8px 6px"><div style="width:32px;height:32px;border-radius:9px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">PA</div><div style="display:flex;flex-direction:column;line-height:1.25"><span style="font-size:15px;font-weight:700">PA Studie</span><span style="font-size:12px;color:#5C5F58">Master PA · HU</span></div></div>
+              <nav style="display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:6px 10px">LEREN</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Vandaag<span style="margin-left:auto;font-size:12px;font-weight:700;color:#2F6F62;background:#E3EEEA;padding:1px 7px;border-radius:999px">18</span></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Casussen</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Oefentoets</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:14px 10px 6px">STUDIESTOF</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Goedkeuren<span style="margin-left:auto;font-size:12px;font-weight:700;color:#5C5F58">12</span></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Thema's</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Illness scripts</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:14px 10px 6px">INZICHT</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px;background:#E3EEEA;color:#1F5248;font-weight:700">Overzicht</div>
+              </nav>
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:2px">
+                <div style="margin:0 4px 10px;padding:12px;border-radius:10px;background:#F5F4EF;font-size:13px;line-height:1.4"><div style="color:#5C5F58">Toets module 1</div><div style="font-weight:700">over 23 dagen · 25 okt</div></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Instellingen</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px;color:#5C5F58">Uitloggen</div>
+              </div>
+            </aside>
+            <main style="flex:1;overflow:hidden;padding:36px 48px;display:flex;flex-direction:column;gap:20px">
+              <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#5C5F58">INZICHT</span><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:34px;line-height:1.1">Overzicht</h1></div>
+              <dl style="margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:14px 18px"><dt style="font-size:13px;color:#5C5F58">Vandaag</dt><dd style="margin:2px 0 0;font-size:28px;font-weight:700">18</dd><dd style="margin:0;font-size:12px;color:#5C5F58">14 herhalen · 4 nieuw</dd></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:14px 18px"><dt style="font-size:13px;color:#5C5F58">Studiestreak</dt><dd style="margin:2px 0 0;font-size:28px;font-weight:700">12 dagen</dd></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:14px 18px"><dt style="font-size:13px;color:#5C5F58">Minuten vandaag</dt><dd style="margin:2px 0 0;font-size:28px;font-weight:700">14</dd></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:14px 18px"><dt style="font-size:13px;color:#5C5F58">Retentie, 30 dagen</dt><dd style="margin:2px 0 0;font-size:28px;font-weight:700">89%</dd><dd style="margin:0;font-size:12px;color:#5C5F58">412 herhalingen</dd></div>
+              </dl>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <figure style="margin:0;background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+                  <figcaption style="font-size:14px;font-weight:700">Werklast komende 14 dagen <span style="font-weight:400;color:#5C5F58">· herhalingen per dag</span></figcaption>
+                  <div style="position:relative;height:120px;display:flex;align-items:flex-end;gap:3px;border-bottom:1px solid #D2D0C6;margin-left:26px"><span style="position:absolute;left:-26px;top:-2px;font-size:11px;color:#5C5F58">{{ work.top }}</span>
+                    <sc-for list="{{ work.cols }}" as="c" hint-placeholder-count="14"><div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px"><span style="font-size:11px;color:#5C5F58;font-variant-numeric:tabular-nums">{{ c.peak }}</span><div style="width:100%;max-width:20px;border-radius:4px 4px 0 0;background:#1BAF7A;height:{{ c.h }}"></div></div></sc-for>
+                  </div>
+                  <div style="display:flex;gap:3px;font-size:11px;color:#5C5F58;margin-top:-4px;margin-left:26px"><sc-for list="{{ work.cols }}" as="c" hint-placeholder-count="14"><span style="flex:1;text-align:center;font-variant-numeric:tabular-nums">{{ c.l }}</span></sc-for></div>
+                </figure>
+                <figure style="margin:0;background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:10px">
+                  <figcaption style="font-size:14px;font-weight:700">Studietijd afgelopen 14 dagen <span style="font-weight:400;color:#5C5F58">· minuten per dag</span></figcaption>
+                  <div style="position:relative;height:120px;display:flex;align-items:flex-end;gap:3px;border-bottom:1px solid #D2D0C6;margin-left:26px"><span style="position:absolute;left:-26px;top:-2px;font-size:11px;color:#5C5F58">{{ mins.top }}</span>
+                    <sc-for list="{{ mins.cols }}" as="c" hint-placeholder-count="14"><div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px"><span style="font-size:11px;color:#5C5F58;font-variant-numeric:tabular-nums">{{ c.peak }}</span><div style="width:100%;max-width:20px;border-radius:4px 4px 0 0;background:#1BAF7A;height:{{ c.h }}"></div></div></sc-for>
+                  </div>
+                  <div style="display:flex;gap:3px;font-size:11px;color:#5C5F58;margin-top:-4px;margin-left:26px"><sc-for list="{{ mins.cols }}" as="c" hint-placeholder-count="14"><span style="flex:1;text-align:center;font-variant-numeric:tabular-nums">{{ c.l }}</span></sc-for></div>
+                </figure>
+              </div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;overflow:hidden;flex:none">
+                <div style="display:grid;grid-template-columns:1.4fr 64px 70px 70px 96px 92px 1.3fr;gap:12px;padding:10px 20px;font-size:12px;font-weight:700;color:#5C5F58;border-bottom:1px solid #E1DFD6"><span>Thema</span><span style="text-align:right">Actief</span><span style="text-align:right">Concept</span><span style="text-align:right">Vandaag</span><span style="text-align:right">Retentie 30 d</span><span style="text-align:right">Laatste casus</span><span>Fouttypes, 30 d <span style="font-weight:400">· kennis · redenering · slordig</span></span></div>
+                <sc-for list="{{ themes }}" as="r" hint-placeholder-count="6">
+                  <div style="display:grid;grid-template-columns:1.4fr 64px 70px 70px 96px 92px 1.3fr;gap:12px;align-items:center;padding:0 20px;height:46px;border-bottom:1px solid #EEEDE6;font-size:14px;font-variant-numeric:tabular-nums">
+                    <span style="font-weight:500">{{ r.name }}</span><span style="text-align:right">{{ r.active }}</span><span style="text-align:right;color:#5C5F58">{{ r.draft }}</span><span style="text-align:right">{{ r.due }}</span><span style="text-align:right">{{ r.ret }} <span style="font-size:12px;color:#5C5F58">n={{ r.n }}</span></span><span style="text-align:right">{{ r.casus }}</span>
+                    <div style="display:flex;align-items:center;gap:10px"><div style="width:90px;display:flex;height:8px;border-radius:4px;overflow:hidden;gap:1px"><div style="flex:{{ r.e1 }};background:#3E413B"></div><div style="flex:{{ r.e2 }};background:#8A8C85"></div><div style="flex:{{ r.e3 }};background:#C9C7BD"></div></div><span style="font-size:12px;color:#5C5F58">{{ r.e1 }} · {{ r.e2 }} · {{ r.e3 }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:16px 20px"><div style="font-size:15px;font-weight:700">Leerdoelen zonder dekking <span style="color:#B3261E">· 2</span></div></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:16px 20px"><div style="font-size:15px;font-weight:700">Lastige kaarten <span style="color:#5C5F58;font-weight:400">· 3</span></div></div>
+              </div>
+            </main>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:1;overflow:hidden;padding:8px 16px;display:flex;flex-direction:column;gap:12px">
+              <h1 style="margin:0 4px;font-family:Newsreader,serif;font-weight:500;font-size:30px">Overzicht</h1>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:12px;padding:10px 14px"><div style="font-size:12px;color:#5C5F58">Vandaag</div><div style="font-size:22px;font-weight:700">18</div><div style="font-size:11px;color:#5C5F58">14 herhalen · 4 nieuw</div></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:12px;padding:10px 14px"><div style="font-size:12px;color:#5C5F58">Retentie, 30 d</div><div style="font-size:22px;font-weight:700">89%</div><div style="font-size:11px;color:#5C5F58">412 herhalingen</div></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:12px;padding:10px 14px"><div style="font-size:12px;color:#5C5F58">Studiestreak</div><div style="font-size:22px;font-weight:700">12 dagen</div></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:12px;padding:10px 14px"><div style="font-size:12px;color:#5C5F58">Minuten vandaag</div><div style="font-size:22px;font-weight:700">14</div></div>
+              </div>
+              <figure style="margin:0;background:#fff;border:1px solid #E1DFD6;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+                <figcaption style="font-size:13px;font-weight:700">Werklast komende 14 dagen</figcaption>
+                <div style="position:relative;height:80px;display:flex;align-items:flex-end;gap:3px;border-bottom:1px solid #D2D0C6;margin-left:22px"><span style="position:absolute;left:-22px;top:-2px;font-size:10px;color:#5C5F58">{{ work.top }}</span><sc-for list="{{ work.cols }}" as="c" hint-placeholder-count="14"><div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px"><span style="font-size:10px;color:#5C5F58">{{ c.peak }}</span><div style="width:100%;max-width:14px;border-radius:3px 3px 0 0;background:#1BAF7A;height:{{ c.h }}"></div></div></sc-for></div>
+              </figure>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 4px 0"><span style="font-size:15px;font-weight:700">Per thema</span><span style="font-size:12px;color:#5C5F58">retentie 30 d</span></div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:12px">
+                <sc-for list="{{ themes }}" as="r" hint-placeholder-count="6">
+                  <div style="display:flex;flex-direction:column;gap:2px;padding:9px 14px;border-bottom:1px solid #EEEDE6">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:500">{{ r.name }}</span><span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">{{ r.ret }}</span></div>
+                    <span style="font-size:12px;color:#5C5F58;font-variant-numeric:tabular-nums">{{ r.active }} actief · {{ r.due }} vandaag · casus {{ r.casus }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <nav style="flex:none;background:#fff;border-top:1px solid #E1DFD6;padding-bottom:22px">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);height:60px">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Vandaag</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5zM9 9h6M9 13h6"></path></svg>Casussen</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#2F6F62;font-weight:700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"></path></svg>Overzicht</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg>Meer</div>
+              </div>
+            </nav>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ showB }}" hint-placeholder-val="{{ true }}">
+      <div id="1j" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1j</span><span style="font-size:22px;font-weight:700">Herzien</span><span style="font-size:16px;color:#5C5F58">Retentie per thema tegenover je doel van 90%; één lijst met wat aandacht nodig heeft.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <header style="height:60px;flex:none;background:#fff;border-bottom:1px solid #E1DFD6;display:flex;align-items:stretch;padding:0 28px;gap:36px">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:30px;height:30px;border-radius:8px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">PA</div><span style="font-size:15px;font-weight:700">PA Studie</span></div>
+              <nav style="display:flex;gap:4px">
+                <div style="display:flex;align-items:center;gap:8px;padding:0 14px;font-size:15px;color:#5C5F58">Vandaag<span style="font-size:12px;font-weight:700;color:#fff;background:#2F6F62;padding:1px 7px;border-radius:999px">18</span></div>
+                <div style="display:flex;align-items:center;padding:0 14px;font-size:15px;color:#5C5F58">Leren</div>
+                <div style="display:flex;align-items:center;padding:0 14px;font-size:15px;color:#5C5F58">Studiestof</div>
+                <div style="display:flex;align-items:center;padding:0 14px;font-size:15px;font-weight:700;box-shadow:inset 0 -2px 0 #2F6F62">Inzicht</div>
+              </nav>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:14px"><span style="font-size:13px;color:#3E413B;background:#F5F4EF;border:1px solid #E1DFD6;padding:6px 12px;border-radius:999px">Toets module 1 · 23 dagen</span><div style="width:34px;height:34px;border-radius:50%;background:#EEEDE6"></div></div>
+            </header>
+            <main style="flex:1;overflow:hidden;display:flex;justify-content:center;padding-top:32px">
+              <div style="width:1120px;display:flex;flex-direction:column;gap:24px">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px">
+                  <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#5C5F58">AFGELOPEN 30 DAGEN</span><span style="font-family:Newsreader,serif;font-size:40px;font-weight:500;line-height:1.1">Retentie 89%, bij een doel van 90%.</span></div>
+                  <div style="display:flex;gap:28px;font-size:14px;color:#5C5F58;padding-bottom:6px;font-variant-numeric:tabular-nums"><span><b style="color:#1A1C19;font-size:18px">412</b> herhalingen</span><span><b style="color:#1A1C19;font-size:18px">12</b> dagen streak</span><span><b style="color:#1A1C19;font-size:18px">14</b> min vandaag</span></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 400px;gap:20px">
+                  <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:20px 24px;display:flex;flex-direction:column">
+                    <div style="display:grid;grid-template-columns:210px 1fr 90px;gap:20px;font-size:12px;font-weight:700;color:#5C5F58;padding-bottom:10px"><span>Thema</span><div style="position:relative;height:16px"><span style="position:absolute;left:0">70%</span><span style="position:absolute;left:66.6%;transform:translateX(-50%)">doel 90%</span><span style="position:absolute;right:0">100%</span></div><span style="text-align:right">Leerdoelen</span></div>
+                    <sc-for list="{{ themes }}" as="r" hint-placeholder-count="6">
+                      <div style="display:grid;grid-template-columns:210px 1fr 90px;gap:20px;align-items:center;padding:13px 0;border-top:1px solid #EEEDE6">
+                        <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:700">{{ r.name }}</span><span style="font-size:12px;color:#5C5F58">{{ r.advice }}</span></div>
+                        <div style="position:relative;height:22px"><div style="position:absolute;left:0;right:0;top:10px;height:3px;border-radius:2px;background:#EEEDE6"></div><div style="position:absolute;left:66.6%;top:2px;width:2px;height:18px;background:#1A1C19;opacity:.35"></div><div style="position:absolute;top:4px;left:{{ r.pos }};margin-left:-7px;width:14px;height:14px;border-radius:50%;background:{{ r.dot }};border:2px solid #fff;box-shadow:0 0 0 1px {{ r.dot }}"></div><span style="position:absolute;top:-1px;left:{{ r.pos }};margin-left:14px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:{{ r.dot }}">{{ r.ret }}</span></div>
+                        <span style="text-align:right;font-size:14px;font-variant-numeric:tabular-nums">{{ r.cov }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:16px">
+                    <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:20px 22px;display:flex;flex-direction:column;gap:4px">
+                      <span style="font-size:15px;font-weight:700;padding-bottom:8px">Aandacht nodig</span>
+                      <div style="display:flex;gap:12px;padding:10px 0;border-top:1px solid #EEEDE6"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:#B3261E;margin-top:6px"></span><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;line-height:1.4"><b>6.4</b> Kent de indicaties voor verwijzing bij verdachte pigmentlaesies.</span><span style="font-size:12px;color:#5C5F58">Dermatologie · geen kaart of casus</span></div></div>
+                      <div style="display:flex;gap:12px;padding:10px 0;border-top:1px solid #EEEDE6"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:#B3261E;margin-top:6px"></span><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;line-height:1.4"><b>6.6</b> Licht de werking en bijwerkingen van lokale corticosteroïden toe.</span><span style="font-size:12px;color:#5C5F58">Dermatologie · geen kaart of casus</span></div></div>
+                      <div style="display:flex;gap:12px;padding:10px 0;border-top:1px solid #EEEDE6"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:#9A6700;margin-top:6px"></span><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;line-height:1.4">Welk ECG-kenmerk onderscheidt atriumflutter van atriumfibrilleren?</span><span style="font-size:12px;color:#5C5F58">Ritmestoornissen · 5× vergeten · herschrijf of splits</span></div></div>
+                      <div style="display:flex;gap:12px;padding:10px 0;border-top:1px solid #EEEDE6"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:#9A6700;margin-top:6px"></span><div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;line-height:1.4">Noem de rode vlaggen bij lage rugklachten.</span><span style="font-size:12px;color:#5C5F58">Lage rugklachten · 4× vergeten</span></div></div>
+                    </div>
+                    <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+                      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700">Werklast, 14 dagen</span><span style="font-size:12px;color:#5C5F58">herhalingen per dag</span></div>
+                      <div style="position:relative;height:70px;display:flex;align-items:flex-end;gap:3px;border-bottom:1px solid #D2D0C6"><sc-for list="{{ work.cols }}" as="c" hint-placeholder-count="14"><div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px"><span style="font-size:10px;color:#5C5F58">{{ c.peak }}</span><div style="width:100%;max-width:14px;border-radius:3px 3px 0 0;background:#1BAF7A;height:{{ c.h }}"></div></div></sc-for></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:1;overflow:hidden;padding:8px 16px;display:flex;flex-direction:column;gap:14px">
+              <div style="padding:0 4px;display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58">INZICHT · 30 DAGEN</span><div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:Newsreader,serif;font-size:56px;font-weight:500;line-height:1">89%</span><span style="font-size:14px;color:#3E413B;line-height:1.35">retentie<br>doel 90%</span></div><span style="font-size:13px;color:#5C5F58;margin-top:4px">412 herhalingen · 12 dagen streak · 14 min vandaag</span></div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column">
+                <span style="font-size:14px;font-weight:700;padding-bottom:6px">Aandacht nodig</span>
+                <div style="display:flex;gap:10px;padding:8px 0;border-top:1px solid #EEEDE6;align-items:center"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:#B3261E"></span><span style="flex:1;font-size:13px;line-height:1.35">2 leerdoelen zonder dekking · Dermatologie</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8C85" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></div>
+                <div style="display:flex;gap:10px;padding:8px 0;border-top:1px solid #EEEDE6;align-items:center"><span style="flex:none;width:8px;height:8px;border-radius:50%;background:#9A6700"></span><span style="flex:1;font-size:13px;line-height:1.35">3 lastige kaarten om te herschrijven</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8C85" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"></path></svg></div>
+              </div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:#5C5F58;padding-bottom:4px"><span style="font-size:14px;font-weight:700;color:#1A1C19">Per thema</span><span>70% · doel · 100%</span></div>
+                <sc-for list="{{ themes }}" as="r" hint-placeholder-count="6">
+                  <div style="display:flex;flex-direction:column;gap:4px;padding:8px 0;border-top:1px solid #EEEDE6">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:14px;font-weight:500">{{ r.name }}</span><span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;color:{{ r.dot }}">{{ r.ret }}</span></div>
+                    <div style="position:relative;height:12px"><div style="position:absolute;left:0;right:0;top:5px;height:3px;border-radius:2px;background:#EEEDE6"></div><div style="position:absolute;left:66.6%;top:0;width:2px;height:12px;background:#1A1C19;opacity:.35"></div><div style="position:absolute;top:1px;left:{{ r.pos }};margin-left:-5px;width:10px;height:10px;border-radius:50%;background:{{ r.dot }}"></div></div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <nav style="flex:none;background:#fff;border-top:1px solid #E1DFD6;padding-bottom:22px">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);height:60px">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58;position:relative"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Vandaag<span style="position:absolute;top:6px;left:56%;font-size:10px;font-weight:700;color:#fff;background:#2F6F62;padding:0 5px;border-radius:999px">18</span></div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-4 9 4-9 4-9-4zM7 10v5c1.5 1.5 3 2 5 2s3.5-.5 5-2v-5"></path></svg>Leren</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6zM9 11h6M9 15h6"></path></svg>Studiestof</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#2F6F62;font-weight:700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"></path></svg>Inzicht</div>
+              </div>
+            </nav>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:6px"><h2 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:40px">Thema-pagina</h2><p style="margin:0;font-size:17px;color:#3E413B">Dermatologie: leerdoelen, dekking en kaarten.</p></div>
+    <div style="display:flex;gap:96px;align-items:flex-start">
+      <sc-if value="{{ showA }}" hint-placeholder-val="{{ true }}">
+      <div id="1k" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1k</span><span style="font-size:22px;font-weight:700">Verfijnd</span><span style="font-size:16px;color:#5C5F58">Acties in de kop; ongedekte leerdoelen vallen op zonder rode kaders.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <aside style="width:240px;flex:none;background:#fff;border-right:1px solid #E1DFD6;display:flex;flex-direction:column;padding:22px 12px;gap:18px">
+              <div style="display:flex;align-items:center;gap:10px;padding:0 8px 6px"><div style="width:32px;height:32px;border-radius:9px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">PA</div><div style="display:flex;flex-direction:column;line-height:1.25"><span style="font-size:15px;font-weight:700">PA Studie</span><span style="font-size:12px;color:#5C5F58">Master PA · HU</span></div></div>
+              <nav style="display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:6px 10px">LEREN</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Vandaag<span style="margin-left:auto;font-size:12px;font-weight:700;color:#2F6F62;background:#E3EEEA;padding:1px 7px;border-radius:999px">18</span></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Casussen</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Oefentoets</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:14px 10px 6px">STUDIESTOF</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Goedkeuren<span style="margin-left:auto;font-size:12px;font-weight:700;color:#5C5F58">12</span></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px;background:#E3EEEA;color:#1F5248;font-weight:700">Thema's</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Illness scripts</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:14px 10px 6px">INZICHT</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Overzicht</div>
+              </nav>
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:2px">
+                <div style="margin:0 4px 10px;padding:12px;border-radius:10px;background:#F5F4EF;font-size:13px;line-height:1.4"><div style="color:#5C5F58">Toets module 1</div><div style="font-weight:700">over 23 dagen · 25 okt</div></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Instellingen</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px;color:#5C5F58">Uitloggen</div>
+              </div>
+            </aside>
+            <main style="flex:1;overflow:hidden;padding:36px 56px;display:flex;flex-direction:column;gap:22px">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <span style="font-size:13px;color:#5C5F58"><span style="color:#2F6F62">Thema's</span> · PA de eerste stap</span>
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px">
+                  <div style="display:flex;align-items:baseline;gap:16px"><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:36px;line-height:1.1">Dermatologie</h1><span style="font-size:14px;color:#5C5F58;font-variant-numeric:tabular-nums">73 actief · 9 concept</span></div>
+                  <div style="display:flex;gap:8px"><div style="height:40px;padding:0 16px;border-radius:10px;border:1px solid #D2D0C6;background:#fff;display:flex;align-items:center;font-size:14px;font-weight:500">Kaarten maken uit brontekst (AI)</div><div style="height:40px;padding:0 16px;border-radius:10px;background:#2F6F62;color:#fff;display:flex;align-items:center;font-size:14px;font-weight:700">Eigen kaart</div></div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17px;font-weight:700">Leerdoelen en dekking</span><span style="font-size:14px;color:#B3261E">2 van 12 leerdoelen hebben nog geen actieve kaart of casus</span></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px">
+                  <sc-for list="{{ objectives }}" as="ob" hint-placeholder-count="6">
+                    <div style="display:flex;align-items:center;gap:16px;padding:0 20px;height:52px;border-bottom:1px solid #EEEDE6">
+                      <span style="width:30px;font-size:14px;font-weight:700;color:#3E413B">{{ ob.code }}</span><span style="flex:1;font-size:15px">{{ ob.desc }}</span>
+                      <sc-if value="{{ ob.covered }}" hint-placeholder-val="{{ true }}"><span style="font-size:13px;color:#5C5F58;font-variant-numeric:tabular-nums">{{ ob.cards }} kaarten · {{ ob.cases }} casussen</span></sc-if>
+                      <sc-if value="{{ ob.uncovered }}" hint-placeholder-val="{{ false }}"><span style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#B3261E"><span style="width:7px;height:7px;border-radius:50%;background:#B3261E"></span>Geen dekking</span></sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:17px;font-weight:700">Kaarten</span><div style="display:flex;background:#EEEDE6;border-radius:10px;padding:3px;gap:2px;font-size:13px"><span style="padding:5px 12px;border-radius:8px;background:#fff;font-weight:700">Actief 73</span><span style="padding:5px 12px;color:#3E413B">Concept 9</span><span style="padding:5px 12px;color:#3E413B">Geschorst 2</span></div></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px">
+                  <div style="display:flex;align-items:center;gap:12px;padding:0 20px;height:50px;border-bottom:1px solid #EEEDE6;font-size:15px"><span style="flex:1">Leg uit waarom psoriasisplaques schilferen.</span><span style="font-size:12px;padding:2px 9px;border-radius:999px;background:#EEEDE6;color:#3E413B">Uitleg</span><span style="font-size:12px;padding:2px 9px;border-radius:999px;background:#FBF1DC;color:#7A5300">lastig</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:0 20px;height:50px;font-size:15px"><span style="flex:1">Wat onderscheidt een basaalcelcarcinoom van een plaveiselcelcarcinoom?</span><span style="font-size:12px;padding:2px 9px;border-radius:999px;background:#EEEDE6;color:#3E413B">Vergelijken</span></div>
+                </div>
+              </div>
+            </main>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:1;overflow:hidden;padding:4px 16px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;flex-direction:column;gap:4px;padding:0 4px"><span style="font-size:13px;color:#2F6F62">‹ Thema's</span><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:30px">Dermatologie</h1><span style="font-size:13px;color:#5C5F58">PA de eerste stap · 73 actief · 9 concept</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="height:44px;border-radius:10px;border:1px solid #D2D0C6;background:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500">Uit brontekst (AI)</div><div style="height:44px;border-radius:10px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">Eigen kaart</div></div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 4px 0"><span style="font-size:15px;font-weight:700">Leerdoelen</span><span style="font-size:13px;color:#B3261E;font-weight:700">2 zonder dekking</span></div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px">
+                <sc-for list="{{ objectives }}" as="ob" hint-placeholder-count="6">
+                  <div style="display:flex;flex-direction:column;gap:4px;padding:11px 14px;border-bottom:1px solid #EEEDE6">
+                    <span style="font-size:14px;line-height:1.4"><b>{{ ob.code }}</b> {{ ob.desc }}</span>
+                    <sc-if value="{{ ob.covered }}" hint-placeholder-val="{{ true }}"><span style="font-size:12px;color:#5C5F58">{{ ob.cards }} kaarten · {{ ob.cases }} casussen</span></sc-if>
+                    <sc-if value="{{ ob.uncovered }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700;color:#B3261E">Geen dekking · maak een kaart</span></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <nav style="flex:none;background:#fff;border-top:1px solid #E1DFD6;padding-bottom:22px">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);height:60px">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Vandaag</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5zM9 9h6M9 13h6"></path></svg>Casussen</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"></path></svg>Overzicht</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#2F6F62;font-weight:700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg>Meer</div>
+              </div>
+            </nav>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ showB }}" hint-placeholder-val="{{ true }}">
+      <div id="1l" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1l</span><span style="font-size:22px;font-weight:700">Herzien</span><span style="font-size:16px;color:#5C5F58">Thema als werkplek: tabbladen voor alles van dit thema, en de volgende stap (pretest) ernaast.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <header style="height:60px;flex:none;background:#fff;border-bottom:1px solid #E1DFD6;display:flex;align-items:stretch;padding:0 28px;gap:36px">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:30px;height:30px;border-radius:8px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">PA</div><span style="font-size:15px;font-weight:700">PA Studie</span></div>
+              <nav style="display:flex;gap:4px">
+                <div style="display:flex;align-items:center;gap:8px;padding:0 14px;font-size:15px;color:#5C5F58">Vandaag<span style="font-size:12px;font-weight:700;color:#fff;background:#2F6F62;padding:1px 7px;border-radius:999px">18</span></div>
+                <div style="display:flex;align-items:center;padding:0 14px;font-size:15px;color:#5C5F58">Leren</div>
+                <div style="display:flex;align-items:center;padding:0 14px;font-size:15px;font-weight:700;box-shadow:inset 0 -2px 0 #2F6F62">Studiestof</div>
+                <div style="display:flex;align-items:center;padding:0 14px;font-size:15px;color:#5C5F58">Inzicht</div>
+              </nav>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:14px"><span style="font-size:13px;color:#3E413B;background:#F5F4EF;border:1px solid #E1DFD6;padding:6px 12px;border-radius:999px">Toets module 1 · 23 dagen</span><div style="width:34px;height:34px;border-radius:50%;background:#EEEDE6"></div></div>
+            </header>
+            <main style="flex:1;overflow:hidden;display:flex;justify-content:center;padding-top:28px">
+              <div style="width:1120px;display:flex;flex-direction:column;gap:20px">
+                <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;color:#5C5F58"><span style="color:#2F6F62">Thema's</span> · PA de eerste stap · toets over 23 dagen</span><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:42px;line-height:1.1">Dermatologie</h1></div>
+                <div style="display:flex;gap:4px;border-bottom:1px solid #E1DFD6;font-size:15px">
+                  <span style="padding:10px 14px;font-weight:700;box-shadow:inset 0 -2px 0 #2F6F62">Leerdoelen <span style="color:#B3261E">· 2 open</span></span>
+                  <span style="padding:10px 14px;color:#3E413B">Kaarten <span style="color:#5C5F58">73</span></span>
+                  <span style="padding:10px 14px;color:#3E413B">Illness scripts <span style="color:#5C5F58">6</span></span>
+                  <span style="padding:10px 14px;color:#3E413B">Casussen <span style="color:#5C5F58">4</span></span>
+                  <span style="padding:10px 14px;color:#3E413B">Vragen <span style="color:#5C5F58">18</span></span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 340px;gap:24px">
+                  <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px">
+                    <sc-for list="{{ objectives }}" as="ob" hint-placeholder-count="6">
+                      <div style="display:grid;grid-template-columns:36px 1fr 200px;gap:14px;align-items:center;padding:14px 20px;border-bottom:1px solid #EEEDE6">
+                        <span style="font-size:14px;font-weight:700;color:#3E413B">{{ ob.code }}</span><span style="font-size:15px;line-height:1.4">{{ ob.desc }}</span>
+                        <div style="display:flex;justify-content:flex-end;gap:6px">
+                          <sc-if value="{{ ob.covered }}" hint-placeholder-val="{{ true }}"><span style="font-size:12px;padding:3px 9px;border-radius:999px;background:#E3EEEA;color:#1F5248;font-variant-numeric:tabular-nums">{{ ob.cards }} kaarten</span><span style="font-size:12px;padding:3px 9px;border-radius:999px;background:#EEEDE6;color:#3E413B;font-variant-numeric:tabular-nums">{{ ob.cases }} casussen</span></sc-if>
+                          <sc-if value="{{ ob.uncovered }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:700;color:#2F6F62;border:1px solid #2F6F62;border-radius:9px;padding:6px 12px">+ Kaart maken</span></sc-if>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:14px">
+                    <div style="background:#1F4A41;color:#fff;border-radius:16px;padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+                      <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#CFE3DC">VOLGENDE STAP</span>
+                      <span style="font-family:Newsreader,serif;font-size:24px;font-weight:500;line-height:1.2">Pretest Dermatologie</span>
+                      <span style="font-size:14px;line-height:1.5;color:#E4F0EC">9 vragen, geen score. Proberen helpt je de stof daarna beter te onthouden.</span>
+                      <div style="height:44px;border-radius:10px;background:#fff;color:#1F4A41;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;margin-top:4px">Start pretest</div>
+                    </div>
+                    <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:8px">
+                      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700">Concepten</span><span style="font-size:13px;color:#2F6F62;font-weight:700">Nakijken →</span></div>
+                      <span style="font-size:14px;color:#3E413B;line-height:1.45">9 kaarten wachten op goedkeuring, waarvan 3 te controleren.</span>
+                    </div>
+                    <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:8px">
+                      <span style="font-size:15px;font-weight:700">Bronnen</span>
+                      <span style="font-size:14px;color:#3E413B">Huidziekten, h. 5–9</span>
+                      <span style="font-size:14px;color:#3E413B">Collegeslides dermatologie, week 6</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:none;padding:4px 20px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;color:#2F6F62">‹ Studiestof</span><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:32px">Dermatologie</h1></div>
+            <div style="flex:none;display:flex;gap:2px;padding:8px 12px 0;border-bottom:1px solid #E1DFD6;font-size:14px;white-space:nowrap;overflow:hidden">
+              <span style="padding:9px 10px;font-weight:700;box-shadow:inset 0 -2px 0 #2F6F62">Leerdoelen</span><span style="padding:9px 10px;color:#3E413B">Kaarten 73</span><span style="padding:9px 10px;color:#3E413B">Scripts 6</span><span style="padding:9px 10px;color:#3E413B">Casussen 4</span>
+            </div>
+            <div style="flex:1;overflow:hidden;padding:14px 16px;display:flex;flex-direction:column;gap:12px">
+              <div style="background:#1F4A41;color:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#CFE3DC">VOLGENDE STAP</span><span style="font-size:15px;font-weight:700">Pretest · 9 vragen</span></div><span style="height:40px;padding:0 14px;border-radius:10px;background:#fff;color:#1F4A41;display:flex;align-items:center;font-size:14px;font-weight:700">Start</span></div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px">
+                <sc-for list="{{ objectives }}" as="ob" hint-placeholder-count="6">
+                  <div style="display:flex;flex-direction:column;gap:6px;padding:11px 14px;border-bottom:1px solid #EEEDE6">
+                    <span style="font-size:14px;line-height:1.4"><b>{{ ob.code }}</b> {{ ob.desc }}</span>
+                    <div style="display:flex;gap:6px">
+                      <sc-if value="{{ ob.covered }}" hint-placeholder-val="{{ true }}"><span style="font-size:11px;padding:2px 8px;border-radius:999px;background:#E3EEEA;color:#1F5248">{{ ob.cards }} kaarten</span><span style="font-size:11px;padding:2px 8px;border-radius:999px;background:#EEEDE6;color:#3E413B">{{ ob.cases }} casussen</span></sc-if>
+                      <sc-if value="{{ ob.uncovered }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700;color:#2F6F62">+ Kaart maken</span></sc-if>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <nav style="flex:none;background:#fff;border-top:1px solid #E1DFD6;padding-bottom:22px">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);height:60px">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58;position:relative"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Vandaag<span style="position:absolute;top:6px;left:56%;font-size:10px;font-weight:700;color:#fff;background:#2F6F62;padding:0 5px;border-radius:999px">18</span></div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-4 9 4-9 4-9-4zM7 10v5c1.5 1.5 3 2 5 2s3.5-.5 5-2v-5"></path></svg>Leren</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#2F6F62;font-weight:700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6zM9 11h6M9 15h6"></path></svg>Studiestof</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"></path></svg>Inzicht</div>
+              </div>
+            </nav>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;devices&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Beide&quot;,&quot;Laptop&quot;,&quot;Telefoon&quot;],&quot;default&quot;:&quot;Beide&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Weergave&quot;},&quot;options&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Beide&quot;,&quot;Verfijnd (a)&quot;,&quot;Herzien (b)&quot;],&quot;default&quot;:&quot;Herzien (b)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Weergave&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const d = this.props.devices ?? "Beide";
+    const o = this.props.options ?? "Herzien (b)";
+    const niceMax = (n) => {
+      if (n <= 0) return 0;
+      const mag = 10 ** Math.floor(Math.log10(n));
+      for (const s of [1, 2, 2.5, 5, 10]) if (s * mag >= n) return s * mag;
+      return 10 * mag;
+    };
+    const chart = (vals, days) => {
+      const max = Math.max(...vals);
+      const top = niceMax(max);
+      const peak = max !== top ? vals.indexOf(max) : -1;
+      return { top, cols: vals.map((v, i) => ({ h: v ? `${Math.max(2, (v / top) * 100)}%` : "0", l: i % 2 === 0 ? String(days[i]) : "", peak: i === peak ? String(v) : "" })) };
+    };
+    const themes = [
+      ["Geneeskundig proces", 64, 3, 6, 91, 88, "4/5", 3, 1, 2, "11/12", ""],
+      ["Ritmestoornissen", 48, 12, 5, 82, 61, "3/5", 6, 4, 1, "7/10", "Veel redeneerfouten: oefen een casus"],
+      ["KNO", 31, 0, 3, 93, 40, "–", 1, 0, 1, "9/9", ""],
+      ["Lage rugklachten", 22, 8, 2, 88, 25, "4/5", 2, 1, 0, "5/9", "4 leerdoelen zonder dekking"],
+      ["Bloeddruk en hypertensie", 57, 4, 7, 90, 79, "3/5", 3, 2, 2, "10/11", ""],
+      ["Dermatologie", 73, 9, 9, 87, 119, "4/5", 7, 2, 3, "10/12", "Vooral kennisgaten: herschrijf of splits"],
+    ].map(([name, active, draft, due, ret, n, casus, e1, e2, e3, cov, advice]) => ({
+      name, active, draft, due, ret: `${ret}%`, n, casus, e1, e2, e3, cov, advice,
+      pos: `${((ret - 70) / 30) * 100}%`,
+      dot: ret >= 90 ? "#2F6F62" : "#9A6700",
+    }));
+    const objectives = [
+      ["6.1", "Beschrijft efflorescenties volgens de vaste terminologie.", 14, 2],
+      ["6.2", "Herkent de kenmerken van eczeem, psoriasis en acne.", 21, 3],
+      ["6.3", "Onderscheidt benigne van maligne huidafwijkingen.", 9, 1],
+      ["6.4", "Kent de indicaties voor verwijzing bij verdachte pigmentlaesies.", 0, 0],
+      ["6.5", "Stelt een behandelplan op voor veelvoorkomende huidinfecties.", 6, 0],
+      ["6.6", "Licht de werking en bijwerkingen van lokale corticosteroïden toe.", 0, 0],
+    ].map(([code, desc, cards, cases]) => ({ code, desc, cards, cases, covered: cards + cases > 0, uncovered: cards + cases === 0 }));
+    return {
+      work: chart([23, 18, 12, 15, 9, 20, 14, 11, 8, 16, 10, 7, 12, 9], [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]),
+      mins: chart([12, 18, 0, 22, 15, 14, 9, 20, 16, 0, 11, 19, 17, 14], [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 1, 2]),
+      themes,
+      objectives,
+      showLaptop: d !== "Telefoon",
+      showPhone: d !== "Laptop",
+      showA: o !== "Herzien (b)",
+      showB: o !== "Verfijnd (a)",
+    };
+  }
+}
+</script>
+</body>
+</html>

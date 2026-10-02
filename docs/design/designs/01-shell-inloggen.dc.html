@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E7E6DF;font-family:"Atkinson Hyperlegible Next",system-ui,sans-serif;color:#1A1C19;-webkit-font-smoothing:antialiased}a{color:#2F6F62;text-decoration:none}a:hover{color:#1F5248;text-decoration:underline}</style>
+</helmet>
+<section id="ronde-1" style="padding:72px 80px 140px;display:flex;flex-direction:column;gap:80px">
+  <header style="display:flex;flex-direction:column;gap:16px;max-width:1100px">
+    <div style="font-size:13px;font-weight:700;letter-spacing:.08em;color:#5C5F58">PA STUDIE · HERONTWERP · RONDE 1 · DEEL 1 VAN 5</div>
+    <h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:60px;line-height:1.05;letter-spacing:-.01em">Systeem, shell en inloggen</h1>
+    <p style="margin:0;font-size:19px;line-height:1.55;color:#3E413B;max-width:860px;text-wrap:pretty">Per scherm twee opties. <b>a · Verfijnd</b> houdt de huidige structuur en verbetert hiërarchie, typografie en ritme. <b>b · Herzien</b> verandert indeling of flow waar dat het leren helpt. Elke optie op laptop (1280 × 800) en telefoon (390 × 844).</p>
+    <nav style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+      <a href="01-shell-inloggen.dc.html" style="padding:8px 14px;border-radius:999px;background:#1A1C19;color:#fff;font-size:14px;font-weight:700">1 · Shell en inloggen</a>
+      <a href="02-vandaag-sessie-einde.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">2 · Vandaag en sessie-einde</a>
+      <a href="03-overzicht-thema.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">3 · Overzicht en thema</a>
+      <a href="04-goedkeuren-scripts.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">4 · Goedkeuren en scripts</a>
+      <a href="05-casus-oefentoets.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">5 · Casus en oefentoets</a>
+    </nav>
+  </header>
+
+  <div style="background:#fff;border:1px solid #D9D7CD;border-radius:20px;padding:40px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:48px;max-width:1700px">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.08em;color:#5C5F58">KLEUR · globals.css</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:#F5F4EF;border:1px solid #E1DFD6"></div><span style="font-size:13px;font-weight:700">--bg</span><span style="font-size:12px;color:#5C5F58">#F5F4EF</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:#FFFFFF;border:1px solid #E1DFD6"></div><span style="font-size:13px;font-weight:700">--surface</span><span style="font-size:12px;color:#5C5F58">#FFFFFF</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:#EEEDE6"></div><span style="font-size:13px;font-weight:700">--surface-2</span><span style="font-size:12px;color:#5C5F58">#EEEDE6</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:#E1DFD6"></div><span style="font-size:13px;font-weight:700">--border</span><span style="font-size:12px;color:#5C5F58">#E1DFD6</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:#1A1C19"></div><span style="font-size:13px;font-weight:700">--text</span><span style="font-size:12px;color:#5C5F58">#1A1C19</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:#5C5F58"></div><span style="font-size:13px;font-weight:700">--muted</span><span style="font-size:12px;color:#5C5F58">#5C5F58</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:#2F6F62"></div><span style="font-size:13px;font-weight:700">--accent</span><span style="font-size:12px;color:#5C5F58">#2F6F62</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:10px;background:#E3EEEA"></div><span style="font-size:13px;font-weight:700">--accent-soft</span><span style="font-size:12px;color:#5C5F58">#E3EEEA</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="width:14px;height:14px;border-radius:4px;background:#B3261E"></span>again</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="width:14px;height:14px;border-radius:4px;background:#9A6700"></span>hard</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="width:14px;height:14px;border-radius:4px;background:#2F6F62"></span>good</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="width:14px;height:14px;border-radius:4px;background:#2D5F9A"></span>easy</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.08em;color:#5C5F58">TYPE</div>
+      <div style="font-family:Newsreader,serif;font-size:40px;font-weight:500;line-height:1.1">Newsreader</div>
+      <div style="font-size:14px;color:#3E413B;line-height:1.5">Leestekst: kaartvragen, vignetten, scripts, paginatitels. 22–34 px, gewicht 500.</div>
+      <div style="font-size:30px;font-weight:700;line-height:1.1;margin-top:8px">Atkinson Hyperlegible Next</div>
+      <div style="font-size:14px;color:#3E413B;line-height:1.5">Interface: labels, knoppen, cijfers (tabular-nums). Ontworpen voor leesbaarheid. 13–16 px.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.08em;color:#5C5F58">AFSPRAKEN</div>
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:15px;line-height:1.45">
+        <div style="display:flex;gap:10px"><span style="color:#2F6F62;font-weight:700">01</span>Eén primaire knop per scherm, onderin op de telefoon.</div>
+        <div style="display:flex;gap:10px"><span style="color:#2F6F62;font-weight:700">02</span>Kleur alleen voor betekenis: beoordeling, dekking, controleren.</div>
+        <div style="display:flex;gap:10px"><span style="color:#2F6F62;font-weight:700">03</span>Knoppen ≥ 44 px, beoordelen 56 px. Radius 10 voor knoppen, 14 voor panelen.</div>
+        <div style="display:flex;gap:10px"><span style="color:#2F6F62;font-weight:700">04</span>Geen schaduwen in de app; vlakken scheiden met --border.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:6px"><h2 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:40px">Navigatie en app-shell</h2><p style="margin:0;font-size:17px;color:#3E413B">Laptop: Thema's. Telefoon: Meer (a) en Studiestof (b).</p></div>
+    <div style="display:flex;gap:96px;align-items:flex-start">
+      <sc-if value="{{ showA }}" hint-placeholder-val="{{ true }}">
+      <div id="1a" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1a</span><span style="font-size:22px;font-weight:700">Verfijnd</span><span style="font-size:16px;color:#5C5F58">Zijbalk in drie groepen met tellers; tabel met dekking per thema.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <aside style="width:240px;flex:none;background:#fff;border-right:1px solid #E1DFD6;display:flex;flex-direction:column;padding:22px 12px;gap:18px">
+              <div style="display:flex;align-items:center;gap:10px;padding:0 8px 6px"><div style="width:32px;height:32px;border-radius:9px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">PA</div><div style="display:flex;flex-direction:column;line-height:1.25"><span style="font-size:15px;font-weight:700">PA Studie</span><span style="font-size:12px;color:#5C5F58">Master PA · HU</span></div></div>
+              <nav style="display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:6px 10px">LEREN</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px">Vandaag<span style="margin-left:auto;font-size:12px;font-weight:700;color:#2F6F62;background:#E3EEEA;padding:1px 7px;border-radius:999px">18</span></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px">Casussen</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px">Oefentoets</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:14px 10px 6px">STUDIESTOF</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px">Goedkeuren<span style="margin-left:auto;font-size:12px;font-weight:700;color:#5C5F58">12</span></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px;background:#E3EEEA;color:#1F5248;font-weight:700">Thema's</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px">Illness scripts</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:14px 10px 6px">INZICHT</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px">Overzicht</div>
+              </nav>
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:2px">
+                <div style="margin:0 4px 10px;padding:12px;border-radius:10px;background:#F5F4EF;font-size:13px;line-height:1.4"><div style="color:#5C5F58">Toets module 1</div><div style="font-weight:700">over 23 dagen · 25 okt</div></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Instellingen</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px;color:#5C5F58">Uitloggen</div>
+              </div>
+            </aside>
+            <main style="flex:1;overflow:hidden;padding:44px 56px;display:flex;flex-direction:column;gap:28px">
+              <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:16px">
+                <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#5C5F58">STUDIESTOF</span><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:34px;line-height:1.1">Modules en thema's</h1></div>
+                <div style="display:flex;gap:8px"><div style="height:40px;padding:0 16px;border-radius:10px;border:1px solid #D2D0C6;background:#fff;display:flex;align-items:center;font-size:14px;font-weight:500">Studiestof importeren</div><div style="height:40px;padding:0 16px;border-radius:10px;border:1px solid #D2D0C6;background:#fff;display:flex;align-items:center;font-size:14px;font-weight:500">Nieuwe module</div></div>
+              </div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #E1DFD6">
+                  <div><div style="font-size:18px;font-weight:700">PA de eerste stap</div><div style="font-size:13px;color:#5C5F58;margin-top:2px">Module 1 · studiejaar 1 · 6 thema's</div></div>
+                  <div style="font-size:14px;color:#3E413B">Toets over <b style="color:#1A1C19">23 dagen</b> · 25 oktober</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 84px 84px 84px 220px;gap:16px;padding:10px 24px;font-size:12px;font-weight:700;color:#5C5F58;letter-spacing:.02em;border-bottom:1px solid #E1DFD6"><span>Thema</span><span style="text-align:right">Actief</span><span style="text-align:right">Concept</span><span style="text-align:right">Vandaag</span><span>Leerdoelen gedekt</span></div>
+                <sc-for list="{{ topics }}" as="t" hint-placeholder-count="6">
+                  <div style="display:grid;grid-template-columns:1fr 84px 84px 84px 220px;gap:16px;align-items:center;padding:0 24px;height:52px;border-bottom:1px solid #EEEDE6;font-size:15px;font-variant-numeric:tabular-nums">
+                    <span style="font-weight:500">{{ t.name }}</span><span style="text-align:right">{{ t.active }}</span><span style="text-align:right;color:#5C5F58">{{ t.draft }}</span><span style="text-align:right">{{ t.due }}</span>
+                    <div style="display:flex;align-items:center;gap:12px"><div style="flex:1;height:6px;border-radius:3px;background:#EEEDE6;overflow:hidden"><div style="height:100%;background:#2F6F62;width:{{ t.covPct }}"></div></div><span style="font-size:13px;width:40px;text-align:right">{{ t.cov }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;display:flex;align-items:center;justify-content:space-between;padding:18px 24px">
+                <div><div style="font-size:18px;font-weight:700">Interne geneeskunde</div><div style="font-size:13px;color:#5C5F58;margin-top:2px">Module 2 · nog geen thema's</div></div>
+                <div style="font-size:14px;color:#5C5F58">Toetsdatum nog niet ingesteld</div>
+              </div>
+            </main>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:1;overflow:hidden;padding:16px 20px;display:flex;flex-direction:column;gap:22px">
+              <h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:32px">Meer</h1>
+              <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding-left:4px">STUDIESTOF</div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px">
+                  <div style="display:flex;align-items:center;height:54px;padding:0 16px;font-size:16px;border-bottom:1px solid #EEEDE6">Goedkeuren<span style="margin-left:auto;font-size:13px;font-weight:700;color:#2F6F62;background:#E3EEEA;padding:2px 8px;border-radius:999px">12</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8C85" stroke-width="2" stroke-linecap="round" style="margin-left:8px"><path d="M9 6l6 6-6 6"></path></svg></div>
+                  <div style="display:flex;align-items:center;height:54px;padding:0 16px;font-size:16px;border-bottom:1px solid #EEEDE6">Thema's<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8C85" stroke-width="2" stroke-linecap="round" style="margin-left:auto"><path d="M9 6l6 6-6 6"></path></svg></div>
+                  <div style="display:flex;align-items:center;height:54px;padding:0 16px;font-size:16px">Illness scripts<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8C85" stroke-width="2" stroke-linecap="round" style="margin-left:auto"><path d="M9 6l6 6-6 6"></path></svg></div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding-left:4px">OEFENEN</div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px"><div style="display:flex;align-items:center;height:54px;padding:0 16px;font-size:16px">Oefentoets<span style="margin-left:auto;font-size:13px;color:#5C5F58">pretest KNO open</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8C85" stroke-width="2" stroke-linecap="round" style="margin-left:8px"><path d="M9 6l6 6-6 6"></path></svg></div></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding-left:4px">ACCOUNT</div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px">
+                  <div style="display:flex;align-items:center;height:54px;padding:0 16px;font-size:16px;border-bottom:1px solid #EEEDE6">Instellingen<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8C85" stroke-width="2" stroke-linecap="round" style="margin-left:auto"><path d="M9 6l6 6-6 6"></path></svg></div>
+                  <div style="display:flex;align-items:center;height:54px;padding:0 16px;font-size:16px;color:#5C5F58">Uitloggen</div>
+                </div>
+              </div>
+              <div style="font-size:13px;color:#5C5F58;text-align:center;margin-top:auto">Toets module 1 over 23 dagen</div>
+            </div>
+            <nav style="flex:none;background:#fff;border-top:1px solid #E1DFD6;padding-bottom:22px">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);height:60px">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Vandaag</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5zM9 9h6M9 13h6"></path></svg>Casussen</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"></path></svg>Overzicht</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#2F6F62;font-weight:700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg>Meer</div>
+              </div>
+            </nav>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ showB }}" hint-placeholder-val="{{ true }}">
+      <div id="1b" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1b</span><span style="font-size:22px;font-weight:700">Herzien</span><span style="font-size:16px;color:#5C5F58">Vier werkruimtes in de bovenbalk: Vandaag, Leren, Studiestof, Inzicht. Meer verdwijnt.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <header style="height:60px;flex:none;background:#fff;border-bottom:1px solid #E1DFD6;display:flex;align-items:stretch;padding:0 28px;gap:36px">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:30px;height:30px;border-radius:8px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">PA</div><span style="font-size:15px;font-weight:700">PA Studie</span></div>
+              <nav style="display:flex;gap:4px">
+                <div style="display:flex;align-items:center;gap:8px;padding:0 14px;font-size:15px;color:#5C5F58">Vandaag<span style="font-size:12px;font-weight:700;color:#fff;background:#2F6F62;padding:1px 7px;border-radius:999px">18</span></div>
+                <div style="display:flex;align-items:center;padding:0 14px;font-size:15px;color:#5C5F58">Leren</div>
+                <div style="display:flex;align-items:center;padding:0 14px;font-size:15px;font-weight:700;box-shadow:inset 0 -2px 0 #2F6F62">Studiestof</div>
+                <div style="display:flex;align-items:center;padding:0 14px;font-size:15px;color:#5C5F58">Inzicht</div>
+              </nav>
+              <div style="margin-left:auto;display:flex;align-items:center;gap:14px"><span style="font-size:13px;color:#3E413B;background:#F5F4EF;border:1px solid #E1DFD6;padding:6px 12px;border-radius:999px">Toets module 1 · 23 dagen</span><div style="width:34px;height:34px;border-radius:50%;background:#EEEDE6;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3E413B" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4"></path></svg></div></div>
+            </header>
+            <div style="height:48px;flex:none;border-bottom:1px solid #E1DFD6;display:flex;align-items:center;gap:6px;padding:0 28px;background:#FBFAF7">
+              <span style="padding:6px 12px;border-radius:8px;font-size:14px;font-weight:700;background:#E3EEEA;color:#1F5248">Thema's</span>
+              <span style="padding:6px 12px;border-radius:8px;font-size:14px;color:#3E413B">Illness scripts</span>
+              <span style="padding:6px 12px;border-radius:8px;font-size:14px;color:#3E413B;display:flex;gap:6px;align-items:center">Goedkeuren<span style="font-size:12px;font-weight:700;color:#5C5F58">12</span></span>
+            </div>
+            <main style="flex:1;overflow:hidden;padding:36px 0;display:flex;justify-content:center">
+              <div style="width:1040px;display:flex;flex-direction:column;gap:22px">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between">
+                  <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#5C5F58">MODULE 1 · STUDIEJAAR 1</span><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:34px;line-height:1.1">PA de eerste stap</h1></div>
+                  <div style="display:flex;align-items:center;gap:16px"><span style="font-size:14px;color:#3E413B">Toets 25 oktober · <b style="color:#1A1C19">over 23 dagen</b></span><div style="height:40px;padding:0 16px;border-radius:10px;border:1px solid #D2D0C6;background:#fff;display:flex;align-items:center;font-size:14px;font-weight:500">Module bewerken</div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+                  <sc-for list="{{ topics }}" as="t" hint-placeholder-count="6">
+                    <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;min-height:150px">
+                      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px"><span style="font-family:Newsreader,serif;font-size:23px;font-weight:500;line-height:1.2">{{ t.name }}</span><span style="flex:none;font-size:12px;font-weight:700;color:#1F5248;background:#E3EEEA;padding:3px 9px;border-radius:999px;font-variant-numeric:tabular-nums">{{ t.due }} vandaag</span></div>
+                      <div style="font-size:14px;color:#5C5F58;font-variant-numeric:tabular-nums">{{ t.active }} actieve kaarten · {{ t.draft }} concept</div>
+                      <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px"><div style="height:6px;border-radius:3px;background:#EEEDE6;overflow:hidden"><div style="height:100%;background:#2F6F62;width:{{ t.covPct }}"></div></div><span style="font-size:13px;color:#3E413B;font-variant-numeric:tabular-nums">{{ t.cov }} leerdoelen gedekt</span></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </main>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:1;overflow:hidden;padding:12px 20px;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:32px">Studiestof</h1><div style="width:40px;height:40px;border-radius:50%;background:#EEEDE6;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3E413B" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4"></path></svg></div></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:#EEEDE6;border-radius:12px;padding:4px;gap:4px">
+                <div style="height:38px;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.06)">Thema's</div>
+                <div style="height:38px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#3E413B">Scripts</div>
+                <div style="height:38px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:14px;color:#3E413B">Goedkeuren<span style="font-size:11px;font-weight:700;color:#fff;background:#2F6F62;padding:0 6px;border-radius:999px">12</span></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 2px"><span style="font-size:15px;font-weight:700">PA de eerste stap</span><span style="font-size:13px;color:#5C5F58">toets over 23 dagen</span></div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px">
+                <sc-for list="{{ topics }}" as="t" hint-placeholder-count="6">
+                  <div style="display:flex;flex-direction:column;gap:8px;padding:13px 16px;border-bottom:1px solid #EEEDE6">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:16px;font-weight:500">{{ t.name }}</span><span style="font-size:13px;color:#5C5F58;font-variant-numeric:tabular-nums">{{ t.active }} actief</span></div>
+                    <div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:5px;border-radius:3px;background:#EEEDE6;overflow:hidden"><div style="height:100%;background:#2F6F62;width:{{ t.covPct }}"></div></div><span style="font-size:12px;color:#5C5F58;font-variant-numeric:tabular-nums">{{ t.cov }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <nav style="flex:none;background:#fff;border-top:1px solid #E1DFD6;padding-bottom:22px">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);height:60px">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58;position:relative"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Vandaag<span style="position:absolute;top:6px;left:56%;font-size:10px;font-weight:700;color:#fff;background:#2F6F62;padding:0 5px;border-radius:999px">18</span></div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-4 9 4-9 4-9-4zM7 10v5c1.5 1.5 3 2 5 2s3.5-.5 5-2v-5"></path></svg>Leren</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#2F6F62;font-weight:700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6zM9 11h6M9 15h6"></path></svg>Studiestof</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"></path></svg>Inzicht</div>
+              </div>
+            </nav>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:6px"><h2 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:40px">Inloggen</h2><p style="margin:0;font-size:17px;color:#3E413B">Laptop: e-mailstap. Telefoon: codestap.</p></div>
+    <div style="display:flex;gap:96px;align-items:flex-start">
+      <sc-if value="{{ showA }}" hint-placeholder-val="{{ true }}">
+      <div id="1c" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1c</span><span style="font-size:22px;font-weight:700">Verfijnd</span><span style="font-size:16px;color:#5C5F58">Zelfde twee stappen; rustiger kader, knoppen onderin op de telefoon.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="width:400px;display:flex;flex-direction:column;gap:28px">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:10px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">PA</div><span style="font-size:17px;font-weight:700">PA Studie</span></div>
+              <div style="display:flex;flex-direction:column;gap:8px"><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:36px;line-height:1.1">Inloggen</h1><p style="margin:0;font-size:16px;line-height:1.5;color:#3E413B">Je krijgt een inlogcode per e-mail. Alleen het vastgelegde adres kan inloggen.</p></div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:18px">
+                <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:700">E-mailadres</span><div style="height:48px;border-radius:10px;border:2px solid #2F6F62;padding:0 14px;display:flex;align-items:center;font-size:16px">naam@student.hu.nl<span style="width:1.5px;height:20px;background:#1A1C19;margin-left:1px"></span></div></label>
+                <div style="height:48px;border-radius:10px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">Stuur inlogcode</div>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:1;padding:36px 24px 0;display:flex;flex-direction:column;gap:24px">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border-radius:10px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">PA</div><span style="font-size:16px;font-weight:700">PA Studie</span></div>
+              <h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:34px;line-height:1.1">Inloggen</h1>
+              <div style="border:1px solid #2F6F62;background:#E3EEEA;border-radius:10px;padding:12px 14px;font-size:15px;line-height:1.45;color:#1F5248">Code verstuurd naar naam@student.hu.nl.</div>
+              <label style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:700">Code uit de e-mail</span><div style="height:64px;border-radius:12px;border:2px solid #2F6F62;background:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;letter-spacing:.32em;font-variant-numeric:tabular-nums;font-weight:500">48291<span style="width:2px;height:30px;background:#1A1C19"></span></div><span style="font-size:13px;line-height:1.45;color:#5C5F58">Werkt ook in de app op je beginscherm. Je kunt ook op de link in de mail tikken.</span></label>
+            </div>
+            <div style="flex:none;padding:16px 24px 34px;display:flex;flex-direction:column;gap:8px">
+              <div style="height:54px;border-radius:12px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700">Inloggen</div>
+              <div style="height:48px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#3E413B">Ander e-mailadres of nieuwe code</div>
+            </div>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ showB }}" hint-placeholder-val="{{ true }}">
+      <div id="1d" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1d</span><span style="font-size:22px;font-weight:700">Herzien</span><span style="font-size:16px;color:#5C5F58">De leermethode als welkom; code in zes vakjes met automatisch doorspringen.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="width:560px;flex:none;background:#1F4A41;color:#fff;padding:48px 56px;display:flex;flex-direction:column">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border-radius:10px;background:#fff;color:#1F4A41;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">PA</div><span style="font-size:16px;font-weight:700">PA Studie</span></div>
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:28px">
+                <div style="font-size:12px;font-weight:700;letter-spacing:.1em;color:#CFE3DC">MASTER PHYSICIAN ASSISTANT · HU</div>
+                <div style="font-family:Newsreader,serif;font-size:48px;font-weight:500;line-height:1.08">Eerst ophalen, dan pas zien.</div>
+                <div style="display:flex;flex-direction:column;gap:14px;font-size:16px;line-height:1.45;color:#E4F0EC">
+                  <div style="display:flex;gap:14px"><span style="color:#8FCBB9;font-weight:700">01</span>FSRS plant je herhalingen; jij plant niets.</div>
+                  <div style="display:flex;gap:14px"><span style="color:#8FCBB9;font-weight:700">02</span>Thema's worden door elkaar gehaald, zoals op de toets.</div>
+                  <div style="display:flex;gap:14px"><span style="color:#8FCBB9;font-weight:700">03</span>AI maakt alleen concepten; jij keurt goed.</div>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;display:flex;align-items:center;justify-content:center">
+              <div style="width:380px;display:flex;flex-direction:column;gap:26px">
+                <div style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700"><span style="width:24px;height:24px;border-radius:50%;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">1</span>E-mail<span style="width:32px;height:1px;background:#D2D0C6"></span><span style="width:24px;height:24px;border-radius:50%;border:1.5px solid #D2D0C6;color:#5C5F58;display:flex;align-items:center;justify-content:center;font-size:12px">2</span><span style="color:#5C5F58">Code</span></div>
+                <h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:36px;line-height:1.1">Inloggen</h1>
+                <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:700">E-mailadres</span><div style="height:50px;border-radius:10px;border:2px solid #2F6F62;background:#fff;padding:0 14px;display:flex;align-items:center;font-size:16px">naam@student.hu.nl</div></label>
+                <div style="height:50px;border-radius:10px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">Stuur inlogcode</div>
+                <p style="margin:0;font-size:14px;line-height:1.5;color:#5C5F58">Alleen het vastgelegde adres kan inloggen.</p>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:1;padding:16px 24px 0;display:flex;flex-direction:column;gap:22px">
+              <div style="display:flex;align-items:center;gap:4px;font-size:15px;color:#2F6F62;font-weight:500;height:44px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"></path></svg>E-mailadres</div>
+              <div style="display:flex;flex-direction:column;gap:10px"><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:34px;line-height:1.1">Vul je code in</h1><p style="margin:0;font-size:16px;line-height:1.5;color:#3E413B">We stuurden een code van zes cijfers naar <b style="color:#1A1C19">naam@student.hu.nl</b>.</p></div>
+              <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:8px">
+                <div style="height:62px;border-radius:12px;background:#fff;border:1.5px solid #D2D0C6;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:500">4</div>
+                <div style="height:62px;border-radius:12px;background:#fff;border:1.5px solid #D2D0C6;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:500">8</div>
+                <div style="height:62px;border-radius:12px;background:#fff;border:1.5px solid #D2D0C6;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:500">2</div>
+                <div style="height:62px;border-radius:12px;background:#fff;border:1.5px solid #D2D0C6;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:500">9</div>
+                <div style="height:62px;border-radius:12px;background:#fff;border:2px solid #2F6F62;display:flex;align-items:center;justify-content:center"><span style="width:2px;height:28px;background:#1A1C19"></span></div>
+                <div style="height:62px;border-radius:12px;background:#fff;border:1.5px solid #D2D0C6"></div>
+              </div>
+              <p style="margin:0;font-size:14px;line-height:1.5;color:#5C5F58">Werkt ook in de app op je beginscherm. Je kunt ook op de link in de mail tikken.</p>
+            </div>
+            <div style="flex:none;padding:16px 24px 34px;display:flex;flex-direction:column;gap:8px">
+              <div style="height:54px;border-radius:12px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700">Inloggen</div>
+              <div style="height:48px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#3E413B">Nieuwe code sturen</div>
+            </div>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;devices&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Beide&quot;,&quot;Laptop&quot;,&quot;Telefoon&quot;],&quot;default&quot;:&quot;Beide&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Weergave&quot;},&quot;options&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Beide&quot;,&quot;Verfijnd (a)&quot;,&quot;Herzien (b)&quot;],&quot;default&quot;:&quot;Herzien (b)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Weergave&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const d = this.props.devices ?? "Beide";
+    const o = this.props.options ?? "Herzien (b)";
+    const topics = [
+      ["Geneeskundig proces", 64, 3, 6, 11, 12],
+      ["Ritmestoornissen", 48, 12, 5, 7, 10],
+      ["KNO", 31, 0, 3, 9, 9],
+      ["Lage rugklachten", 22, 8, 2, 5, 9],
+      ["Bloeddruk en hypertensie", 57, 4, 7, 10, 11],
+      ["Dermatologie", 73, 9, 9, 10, 12],
+    ].map(([name, active, draft, due, c, n]) => ({ name, active, draft, due, cov: `${c}/${n}`, covPct: `${Math.round((c / n) * 100)}%` }));
+    return {
+      topics,
+      showLaptop: d !== "Telefoon",
+      showPhone: d !== "Laptop",
+      showA: o !== "Herzien (b)",
+      showB: o !== "Verfijnd (a)",
+    };
+  }
+}
+</script>
+</body>
+</html>

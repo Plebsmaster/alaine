@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;500;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#E7E6DF;font-family:"Atkinson Hyperlegible Next",system-ui,sans-serif;color:#1A1C19;-webkit-font-smoothing:antialiased}a{color:#2F6F62;text-decoration:none}a:hover{color:#1F5248;text-decoration:underline}</style>
+</helmet>
+<section id="ronde-1" style="padding:72px 80px 140px;display:flex;flex-direction:column;gap:80px">
+  <header style="display:flex;flex-direction:column;gap:16px;max-width:1100px">
+    <div style="font-size:13px;font-weight:700;letter-spacing:.08em;color:#5C5F58">PA STUDIE · HERONTWERP · RONDE 1 · DEEL 2 VAN 5</div>
+    <h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:60px;line-height:1.05;letter-spacing:-.01em">Vandaag en sessie-einde</h1>
+    <p style="margin:0;font-size:19px;line-height:1.55;color:#3E413B;max-width:860px;text-wrap:pretty">Het hart van de app. <b>a · Verfijnd</b> houdt de navigatie in beeld. <b>b · Herzien</b> opent herhalen als focusmodus zonder menu, met de beoordeling als vaste balk onderin.</p>
+    <nav style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+      <a href="01-shell-inloggen.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">1 · Shell en inloggen</a>
+      <a href="02-vandaag-sessie-einde.dc.html" style="padding:8px 14px;border-radius:999px;background:#1A1C19;color:#fff;font-size:14px;font-weight:700">2 · Vandaag en sessie-einde</a>
+      <a href="03-overzicht-thema.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">3 · Overzicht en thema</a>
+      <a href="04-goedkeuren-scripts.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">4 · Goedkeuren en scripts</a>
+      <a href="05-casus-oefentoets.dc.html" style="padding:8px 14px;border-radius:999px;background:#fff;color:#1A1C19;font-size:14px;border:1px solid #D9D7CD">5 · Casus en oefentoets</a>
+    </nav>
+  </header>
+
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:6px"><h2 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:40px">Vandaag (herhalen)</h2><p style="margin:0;font-size:17px;color:#3E413B">Laptop: vraag met getypt antwoord. Telefoon: a toont het antwoord met beoordeling, b de hint en herstelvraag na een deels goed antwoord.</p></div>
+    <div style="display:flex;gap:96px;align-items:flex-start">
+      <sc-if value="{{ showA }}" hint-placeholder-val="{{ true }}">
+      <div id="1e" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1e</span><span style="font-size:22px;font-weight:700">Verfijnd</span><span style="font-size:16px;color:#5C5F58">Voortgangsbalk, vraag in leesletter, sneltoetsen zichtbaar.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <aside style="width:240px;flex:none;background:#fff;border-right:1px solid #E1DFD6;display:flex;flex-direction:column;padding:22px 12px;gap:18px">
+              <div style="display:flex;align-items:center;gap:10px;padding:0 8px 6px"><div style="width:32px;height:32px;border-radius:9px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">PA</div><div style="display:flex;flex-direction:column;line-height:1.25"><span style="font-size:15px;font-weight:700">PA Studie</span><span style="font-size:12px;color:#5C5F58">Master PA · HU</span></div></div>
+              <nav style="display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:6px 10px">LEREN</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px;background:#E3EEEA;color:#1F5248;font-weight:700">Vandaag<span style="margin-left:auto;font-size:12px;font-weight:700;color:#fff;background:#2F6F62;padding:1px 7px;border-radius:999px">11</span></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Casussen</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Oefentoets</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:14px 10px 6px">STUDIESTOF</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Goedkeuren<span style="margin-left:auto;font-size:12px;font-weight:700;color:#5C5F58">12</span></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Thema's</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Illness scripts</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:14px 10px 6px">INZICHT</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Overzicht</div>
+              </nav>
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:2px">
+                <div style="margin:0 4px 10px;padding:12px;border-radius:10px;background:#F5F4EF;font-size:13px;line-height:1.4"><div style="color:#5C5F58">Toets module 1</div><div style="font-weight:700">over 23 dagen · 25 okt</div></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Instellingen</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px;color:#5C5F58">Uitloggen</div>
+              </div>
+            </aside>
+            <main style="flex:1;overflow:hidden;padding:44px 0;display:flex;justify-content:center">
+              <div style="width:720px;display:flex;flex-direction:column;gap:22px">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between">
+                  <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#5C5F58">DONDERDAG 2 OKTOBER</span><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:34px;line-height:1.1">Vandaag</h1></div>
+                  <span style="font-size:14px;color:#3E413B;font-variant-numeric:tabular-nums">18 kaarten · ongeveer 12 min · 4 nieuw</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;justify-content:space-between;font-size:13px;color:#5C5F58;font-variant-numeric:tabular-nums"><span>Nog <b style="color:#1A1C19">11</b> kaarten · 7 gedaan</span><span style="display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2F6F62" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Opgeslagen</span></div>
+                  <div style="height:6px;border-radius:3px;background:#E1DFD6;overflow:hidden"><div style="width:39%;height:100%;background:#2F6F62"></div></div>
+                </div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:28px 32px 32px;display:flex;flex-direction:column;gap:22px">
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div style="display:flex;gap:6px"><span style="font-size:13px;padding:3px 10px;border-radius:999px;background:#EEEDE6;color:#3E413B">Dermatologie</span><span style="font-size:13px;padding:3px 10px;border-radius:999px;background:#EEEDE6;color:#3E413B">Uitleg</span></div>
+                    <div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#5C5F58;font-size:20px">⋯</div>
+                  </div>
+                  <p style="margin:0;font-family:Newsreader,serif;font-size:30px;font-weight:500;line-height:1.25;text-wrap:pretty">Leg uit waarom psoriasisplaques schilferen.</p>
+                  <div style="display:flex;flex-direction:column;gap:6px">
+                    <div style="min-height:120px;border-radius:12px;border:2px solid #2F6F62;padding:14px 16px;font-size:16px;line-height:1.55">Door de snelle celdeling bereiken keratinocyten de hoornlaag voordat ze volledig zijn uitgerijpt<span style="display:inline-block;width:1.5px;height:18px;background:#1A1C19;vertical-align:-3px;margin-left:1px"></span></div>
+                    <span style="font-size:13px;color:#5C5F58">Optioneel. Typen helpt ophalen; de AI kijkt na vóór je het antwoord ziet.</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                    <div style="height:54px;border-radius:12px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:700">Nakijken<span style="font-size:12px;font-weight:500;opacity:.8;border:1px solid rgba(255,255,255,.4);border-radius:5px;padding:1px 6px">⌘ ↵</span></div>
+                    <div style="height:54px;border-radius:12px;border:1px solid #D2D0C6;background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:500">Toon antwoord<span style="font-size:12px;color:#5C5F58;border:1px solid #D2D0C6;border-radius:5px;padding:1px 6px">spatie</span></div>
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:center;gap:20px;font-size:13px;color:#5C5F58"><span>spatie · antwoord tonen</span><span>1–4 · beoordelen</span><span>⋯ · bewerken, schorsen, klopt niet</span></div>
+              </div>
+            </main>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:none;padding:4px 20px 12px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:Newsreader,serif;font-size:24px;font-weight:500">Vandaag</span><span style="font-size:13px;color:#5C5F58;font-variant-numeric:tabular-nums">Nog 11 · 7 gedaan</span></div>
+              <div style="height:5px;border-radius:3px;background:#E1DFD6;overflow:hidden"><div style="width:39%;height:100%;background:#2F6F62"></div></div>
+            </div>
+            <div style="flex:1;overflow:hidden;padding:0 16px">
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;gap:6px"><span style="font-size:12px;padding:3px 9px;border-radius:999px;background:#EEEDE6;color:#3E413B">Dermatologie</span><span style="font-size:12px;padding:3px 9px;border-radius:999px;background:#EEEDE6;color:#3E413B">Uitleg</span></div><span style="color:#5C5F58;font-size:18px;width:44px;text-align:right">⋯</span></div>
+                <p style="margin:0;font-family:Newsreader,serif;font-size:22px;font-weight:500;line-height:1.3">Leg uit waarom psoriasisplaques schilferen.</p>
+                <div style="height:1px;background:#E1DFD6"></div>
+                <div style="background:#F5F4EF;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px"><span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#5C5F58">JOUW ANTWOORD</span><span style="font-size:14px;line-height:1.5;color:#3E413B">Door de snelle celdeling bereiken keratinocyten de hoornlaag voordat ze volledig zijn uitgerijpt.</span></div>
+                <p style="margin:0;font-size:16px;line-height:1.55">Versnelde epidermale turnover (± 4 dagen in plaats van 28) → onvolledige verhoorning met kernresten (parakeratose) → losse, luchthoudende schilfers die zilverwit ogen.</p>
+                <span style="font-size:12px;color:#5C5F58">Bron: Huidziekten, h. 7, p. 112</span>
+                <div style="background:#E3EEEA;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5;color:#1A1C19"><span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#1F5248">NAKIJKEN DOOR AI</span><span>Goed. Je noemt de versnelde deling; benoem ook de parakeratose.</span><span style="font-size:13px;color:#1F5248">Voorstel: Goed. Je kiest zelf.</span></div>
+              </div>
+            </div>
+            <div style="flex:none;padding:10px 12px;border-top:1px solid #E1DFD6;background:#F5F4EF;display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+              <div style="height:58px;border-radius:12px;border:2px solid #B3261E;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"><span style="font-size:14px;font-weight:700;color:#B3261E">Opnieuw</span><span style="font-size:12px;color:#5C5F58">&lt;10 min</span></div>
+              <div style="height:58px;border-radius:12px;border:2px solid #9A6700;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"><span style="font-size:14px;font-weight:700;color:#9A6700">Moeilijk</span><span style="font-size:12px;color:#5C5F58">1 d</span></div>
+              <div style="height:58px;border-radius:12px;border:2px solid #2F6F62;background:#E3EEEA;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;box-shadow:0 0 0 2px #F5F4EF,0 0 0 4px #2D5F9A"><span style="font-size:14px;font-weight:700;color:#1F5248">Goed</span><span style="font-size:12px;color:#3E413B">3 d</span></div>
+              <div style="height:58px;border-radius:12px;border:2px solid #2D5F9A;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"><span style="font-size:14px;font-weight:700;color:#2D5F9A">Makkelijk</span><span style="font-size:12px;color:#5C5F58">8 d</span></div>
+            </div>
+            <nav style="flex:none;background:#fff;border-top:1px solid #E1DFD6;padding-bottom:22px">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);height:60px">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#2F6F62;font-weight:700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Vandaag</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5zM9 9h6M9 13h6"></path></svg>Casussen</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"></path></svg>Overzicht</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg>Meer</div>
+              </div>
+            </nav>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ showB }}" hint-placeholder-val="{{ true }}">
+      <div id="1f" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1f</span><span style="font-size:22px;font-weight:700">Herzien</span><span style="font-size:16px;color:#5C5F58">Focusmodus: geen menu, jouw antwoord naast het juiste, AI-voorstel op de knop.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <header style="height:64px;flex:none;display:flex;align-items:center;padding:0 28px;gap:28px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:#3E413B;height:40px;padding:0 12px;border-radius:10px;border:1px solid #E1DFD6;background:#fff"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>Stoppen</div>
+              <div style="flex:1;display:flex;align-items:center;gap:14px;max-width:640px;margin:0 auto">
+                <div style="flex:1;display:grid;grid-template-columns:repeat(18,1fr);gap:3px">
+                  <sc-for list="{{ ticksNow }}" as="k" hint-placeholder-count="18"><div style="height:6px;border-radius:2px;background:{{ k.c }}"></div></sc-for>
+                </div>
+                <span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums">8 / 18</span>
+              </div>
+              <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C5F58"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2F6F62" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Opgeslagen</span>
+            </header>
+            <main style="flex:1;overflow:hidden;display:flex;justify-content:center;padding-top:28px">
+              <div style="width:820px;display:flex;flex-direction:column;gap:22px">
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#5C5F58">DERMATOLOGIE · UITLEG</span><span style="font-size:13px;color:#5C5F58">⋯ Bewerken · Schorsen · Klopt niet</span></div>
+                <p style="margin:0;font-family:Newsreader,serif;font-size:38px;font-weight:500;line-height:1.2;text-wrap:pretty">Leg uit waarom psoriasisplaques schilferen.</p>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                  <div style="background:#EEEDE6;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px"><span style="font-size:11px;font-weight:700;letter-spacing:.07em;color:#5C5F58">JOUW ANTWOORD</span><span style="font-size:16px;line-height:1.55;color:#3E413B">Door de snelle celdeling bereiken keratinocyten de hoornlaag voordat ze volledig zijn uitgerijpt.</span></div>
+                  <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px"><span style="font-size:11px;font-weight:700;letter-spacing:.07em;color:#1F5248">ANTWOORD</span><span style="font-size:16px;line-height:1.55">Versnelde epidermale turnover (± 4 dagen in plaats van 28) → onvolledige verhoorning met kernresten (parakeratose) → losse, luchthoudende schilfers die zilverwit ogen.</span><span style="font-size:12px;color:#5C5F58;margin-top:4px">Bron: Huidziekten, h. 7, p. 112</span></div>
+                </div>
+                <div style="display:flex;gap:16px;padding:14px 18px;border-radius:14px;background:#E3EEEA;font-size:15px;line-height:1.5"><span style="flex:none;font-size:11px;font-weight:700;letter-spacing:.07em;color:#1F5248;padding-top:3px">AI</span><div style="display:flex;flex-direction:column;gap:4px"><span>Goed. Je noemt de versnelde deling; benoem ook de parakeratose.</span><span style="color:#3E413B"><b>Denk verder:</b> waarom zijn de schilfers bij seborroïsch eczeem juist vettig en geel?</span></div></div>
+              </div>
+            </main>
+            <footer style="flex:none;padding:16px 0 28px;display:flex;justify-content:center;border-top:1px solid #E1DFD6;background:#FBFAF7">
+              <div style="width:820px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+                <div style="height:68px;border-radius:12px;background:#fff;border:1px solid #D2D0C6;display:flex;align-items:center;gap:12px;padding:0 16px"><span style="width:24px;height:24px;border-radius:6px;border:1px solid #D2D0C6;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#5C5F58">1</span><div style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:700;color:#B3261E">Opnieuw</span><span style="font-size:13px;color:#5C5F58">&lt;10 min</span></div></div>
+                <div style="height:68px;border-radius:12px;background:#fff;border:1px solid #D2D0C6;display:flex;align-items:center;gap:12px;padding:0 16px"><span style="width:24px;height:24px;border-radius:6px;border:1px solid #D2D0C6;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#5C5F58">2</span><div style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:700;color:#9A6700">Moeilijk</span><span style="font-size:13px;color:#5C5F58">1 dag</span></div></div>
+                <div style="height:68px;border-radius:12px;background:#E3EEEA;border:2px solid #2F6F62;display:flex;align-items:center;gap:12px;padding:0 15px;position:relative"><span style="width:24px;height:24px;border-radius:6px;background:#2F6F62;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">3</span><div style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:700;color:#1F5248">Goed</span><span style="font-size:13px;color:#3E413B">3 dagen</span></div><span style="position:absolute;top:-10px;right:10px;font-size:11px;font-weight:700;background:#2F6F62;color:#fff;padding:2px 7px;border-radius:999px">AI-voorstel</span></div>
+                <div style="height:68px;border-radius:12px;background:#fff;border:1px solid #D2D0C6;display:flex;align-items:center;gap:12px;padding:0 16px"><span style="width:24px;height:24px;border-radius:6px;border:1px solid #D2D0C6;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#5C5F58">4</span><div style="display:flex;flex-direction:column"><span style="font-size:15px;font-weight:700;color:#2D5F9A">Makkelijk</span><span style="font-size:13px;color:#5C5F58">8 dagen</span></div></div>
+              </div>
+            </footer>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:none;display:flex;align-items:center;gap:12px;padding:0 16px 8px">
+              <div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3E413B" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></div>
+              <div style="flex:1;display:grid;grid-template-columns:repeat(18,1fr);gap:2px"><sc-for list="{{ ticksNow }}" as="k" hint-placeholder-count="18"><div style="height:5px;border-radius:2px;background:{{ k.c }}"></div></sc-for></div>
+              <span style="font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;padding-right:8px">8/18</span>
+            </div>
+            <div style="flex:1;overflow:hidden;padding:12px 20px 0;display:flex;flex-direction:column;gap:16px">
+              <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58">DERMATOLOGIE · UITLEG</span>
+              <p style="margin:0;font-family:Newsreader,serif;font-size:26px;font-weight:500;line-height:1.25">Leg uit waarom psoriasisplaques schilferen.</p>
+              <div style="background:#EEEDE6;border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px"><span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#5C5F58">JOUW ANTWOORD</span><span style="font-size:14px;line-height:1.5;color:#3E413B">Doordat de huid sneller groeit en de cellen dan sneller afsterven.</span></div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                <span style="font-size:16px;font-weight:700">Deels goed. Probeer het met een hint.</span>
+                <div style="display:flex;flex-direction:column;gap:4px;font-size:15px;line-height:1.5"><span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#9A6700">HINT</span>Kijk naar hoe lang een keratinocyt erover doet om van de basale laag naar het oppervlak te gaan.</div>
+                <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:15px;font-weight:700;line-height:1.4">Wat gebeurt er met de verhoorning als die tijd veel korter wordt?</span><div style="min-height:84px;border-radius:10px;border:2px solid #2F6F62;padding:10px 12px;font-size:15px;line-height:1.5">De cellen rijpen niet uit, dus er blijven kernen<span style="display:inline-block;width:1.5px;height:16px;background:#1A1C19;vertical-align:-3px;margin-left:1px"></span></div></label>
+              </div>
+            </div>
+            <div style="flex:none;padding:12px 20px 34px;display:flex;flex-direction:column;gap:6px">
+              <div style="height:56px;border-radius:12px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700">Nakijken</div>
+              <div style="height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#3E413B">Toon antwoord</div>
+            </div>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:32px">
+    <div style="display:flex;flex-direction:column;gap:6px"><h2 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:40px">Sessie-einde en stopcheck</h2><p style="margin:0;font-size:17px;color:#3E413B">Cijfers uit het logboek van deze sessie; stopcheck met punten uit de fouten.</p></div>
+    <div style="display:flex;gap:96px;align-items:flex-start">
+      <sc-if value="{{ showA }}" hint-placeholder-val="{{ true }}">
+      <div id="1g" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1g</span><span style="font-size:22px;font-weight:700">Verfijnd</span><span style="font-size:16px;color:#5C5F58">Drie cijfers en morgen bovenaan; stopcheck als genummerde lijst.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <aside style="width:240px;flex:none;background:#fff;border-right:1px solid #E1DFD6;display:flex;flex-direction:column;padding:22px 12px;gap:18px">
+              <div style="display:flex;align-items:center;gap:10px;padding:0 8px 6px"><div style="width:32px;height:32px;border-radius:9px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">PA</div><div style="display:flex;flex-direction:column;line-height:1.25"><span style="font-size:15px;font-weight:700">PA Studie</span><span style="font-size:12px;color:#5C5F58">Master PA · HU</span></div></div>
+              <nav style="display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:6px 10px">LEREN</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;border-radius:8px;font-size:14px;background:#E3EEEA;color:#1F5248;font-weight:700">Vandaag<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F6F62" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="margin-left:auto"><path d="M4 12l5 5L20 6"></path></svg></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Casussen</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Oefentoets</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:14px 10px 6px">STUDIESTOF</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Goedkeuren<span style="margin-left:auto;font-size:12px;font-weight:700;color:#5C5F58">13</span></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Thema's</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Illness scripts</div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58;padding:14px 10px 6px">INZICHT</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Overzicht</div>
+              </nav>
+              <div style="margin-top:auto;display:flex;flex-direction:column;gap:2px">
+                <div style="margin:0 4px 10px;padding:12px;border-radius:10px;background:#F5F4EF;font-size:13px;line-height:1.4"><div style="color:#5C5F58">Toets module 1</div><div style="font-weight:700">over 23 dagen · 25 okt</div></div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px">Instellingen</div>
+                <div style="display:flex;align-items:center;height:38px;padding:0 10px;font-size:14px;color:#5C5F58">Uitloggen</div>
+              </div>
+            </aside>
+            <main style="flex:1;overflow:hidden;padding:44px 0;display:flex;justify-content:center">
+              <div style="width:720px;display:flex;flex-direction:column;gap:20px">
+                <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#5C5F58">DONDERDAG 2 OKTOBER</span><h1 style="margin:0;font-family:Newsreader,serif;font-weight:500;font-size:34px;line-height:1.1">Vandaag</h1></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:26px 28px;display:flex;flex-direction:column;gap:18px">
+                  <span style="font-family:Newsreader,serif;font-size:26px;font-weight:500">Klaar voor vandaag</span>
+                  <dl style="margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+                    <div style="background:#F5F4EF;border-radius:12px;padding:14px 16px"><dt style="font-size:13px;color:#5C5F58">Kaarten</dt><dd style="margin:2px 0 0;font-size:30px;font-weight:700;font-variant-numeric:tabular-nums">18</dd></div>
+                    <div style="background:#F5F4EF;border-radius:12px;padding:14px 16px"><dt style="font-size:13px;color:#5C5F58">Minuten</dt><dd style="margin:2px 0 0;font-size:30px;font-weight:700;font-variant-numeric:tabular-nums">14</dd></div>
+                    <div style="background:#F5F4EF;border-radius:12px;padding:14px 16px"><dt style="font-size:13px;color:#5C5F58">Retentie</dt><dd style="margin:2px 0 0;font-size:30px;font-weight:700;font-variant-numeric:tabular-nums">86%</dd></div>
+                  </dl>
+                  <p style="margin:0;font-size:14px;line-height:1.5;color:#5C5F58">Retentie: aandeel herhalingen dat je niet met "Opnieuw" beoordeelde (14 herhalingen).</p>
+                  <div style="display:flex;align-items:center;gap:10px;padding-top:14px;border-top:1px solid #EEEDE6;font-size:15px"><span style="color:#5C5F58">Morgen</span><b>23 herhalingen</b><span style="color:#5C5F58">en tot</span><b>10 nieuwe kaarten</b></div>
+                </div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:24px 28px;display:flex;flex-direction:column;gap:14px">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17px;font-weight:700">Stopcheck</span><span style="font-size:13px;color:#5C5F58">uit 4 kaarten fout of moeilijk</span></div>
+                  <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px">
+                    <li style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid #E1DFD6;border-radius:12px"><span style="font-size:14px;font-weight:700;color:#2F6F62;width:16px">1</span><span style="flex:1;font-size:15px;line-height:1.45">Bij psoriasis duurt de epidermale turnover ongeveer 4 dagen in plaats van 28; daardoor ontstaat parakeratose.</span><span style="flex:none;height:40px;padding:0 14px;border-radius:10px;border:1px solid #D2D0C6;display:flex;align-items:center;font-size:14px;font-weight:500">Maak kaart</span></li>
+                    <li style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid #E1DFD6;border-radius:12px"><span style="font-size:14px;font-weight:700;color:#2F6F62;width:16px">2</span><span style="flex:1;font-size:15px;line-height:1.45">Atriumfibrilleren: onregelmatig irregulaire RR-intervallen zonder herkenbare P-toppen.</span><span style="flex:none;font-size:14px;color:#2F6F62;display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Op Goedkeuren</span></li>
+                    <li style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid #E1DFD6;border-radius:12px"><span style="font-size:14px;font-weight:700;color:#2F6F62;width:16px">3</span><span style="flex:1;font-size:15px;line-height:1.45">Rode vlaggen bij lage rugklachten: zadelanesthesie, mictiestoornissen en progressieve uitval.</span><span style="flex:none;height:40px;padding:0 14px;border-radius:10px;border:1px solid #D2D0C6;display:flex;align-items:center;font-size:14px;font-weight:500">Maak kaart</span></li>
+                  </ol>
+                </div>
+              </div>
+            </main>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:1;overflow:hidden;padding:4px 16px 16px;display:flex;flex-direction:column;gap:14px">
+              <span style="font-family:Newsreader,serif;font-size:28px;font-weight:500;padding:0 4px">Klaar voor vandaag</span>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                  <div style="background:#F5F4EF;border-radius:10px;padding:10px 12px"><div style="font-size:12px;color:#5C5F58">Kaarten</div><div style="font-size:24px;font-weight:700">18</div></div>
+                  <div style="background:#F5F4EF;border-radius:10px;padding:10px 12px"><div style="font-size:12px;color:#5C5F58">Minuten</div><div style="font-size:24px;font-weight:700">14</div></div>
+                  <div style="background:#F5F4EF;border-radius:10px;padding:10px 12px"><div style="font-size:12px;color:#5C5F58">Retentie</div><div style="font-size:24px;font-weight:700">86%</div></div>
+                </div>
+                <div style="font-size:14px;line-height:1.45"><span style="color:#5C5F58">Morgen:</span> <b>23 herhalingen</b> en tot <b>10 nieuwe kaarten</b></div>
+              </div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:16px;font-weight:700">Stopcheck</span><span style="font-size:12px;color:#5C5F58">3 punten</span></div>
+                <div style="border:1px solid #2F6F62;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px">
+                  <span style="font-size:14px;line-height:1.45"><b style="color:#2F6F62">1</b>  Bij psoriasis duurt de epidermale turnover ongeveer 4 dagen in plaats van 28; daardoor ontstaat parakeratose.</span>
+                  <label style="display:flex;flex-direction:column;gap:5px"><span style="font-size:13px;font-weight:700">Vraag (voorkant)</span><div style="min-height:56px;border-radius:10px;border:2px solid #2F6F62;padding:8px 10px;font-size:14px;line-height:1.45">Hoe lang duurt de epidermale turnover bij psoriasis?</div><span style="font-size:12px;color:#5C5F58;line-height:1.4">Zet het in je eigen woorden: een vraag die het antwoord afdwingt.</span></label>
+                  <div style="height:46px;border-radius:10px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700">Opslaan als concept</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #E1DFD6;border-radius:12px"><span style="flex:1;font-size:14px;line-height:1.4"><b style="color:#2F6F62">2</b>  Atriumfibrilleren: onregelmatig irregulaire RR-intervallen zonder P-toppen.</span><span style="font-size:13px;font-weight:500;padding:8px 10px;border:1px solid #D2D0C6;border-radius:9px">Maak kaart</span></div>
+              </div>
+            </div>
+            <nav style="flex:none;background:#fff;border-top:1px solid #E1DFD6;padding-bottom:22px">
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);height:60px">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#2F6F62;font-weight:700"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Vandaag</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v16H5zM9 9h6M9 13h6"></path></svg>Casussen</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"></path></svg>Overzicht</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:#5C5F58"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg>Meer</div>
+              </div>
+            </nav>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ showB }}" hint-placeholder-val="{{ true }}">
+      <div id="1h" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:14px"><span style="background:#1A1C19;color:#fff;font-weight:700;font-size:15px;padding:4px 10px;border-radius:8px">1h</span><span style="font-size:22px;font-weight:700">Herzien</span><span style="font-size:16px;color:#5C5F58">Sluit de focusmodus af: verdeling van je beoordelingen, fouttypes, en wat je meeneemt.</span></div>
+        <div style="display:flex;gap:40px;align-items:flex-start">
+          <sc-if value="{{ showLaptop }}" hint-placeholder-val="{{ true }}">
+          <div style="width:1280px;height:800px;background:#F5F4EF;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <header style="height:64px;flex:none;display:flex;align-items:center;padding:0 28px;gap:28px">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:30px;height:30px;border-radius:8px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">PA</div><span style="font-size:15px;font-weight:700">PA Studie</span></div>
+              <div style="flex:1;display:flex;align-items:center;gap:14px;max-width:640px;margin:0 auto">
+                <div style="flex:1;display:grid;grid-template-columns:repeat(18,1fr);gap:3px"><sc-for list="{{ ticksDone }}" as="k" hint-placeholder-count="18"><div style="height:6px;border-radius:2px;background:{{ k.c }}"></div></sc-for></div>
+                <span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums">18 / 18</span>
+              </div>
+              <span style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C5F58"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2F6F62" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Alles opgeslagen</span>
+            </header>
+            <main style="flex:1;overflow:hidden;display:flex;justify-content:center;padding-top:36px">
+              <div style="width:1080px;display:grid;grid-template-columns:1fr 440px;gap:56px">
+                <div style="display:flex;flex-direction:column;gap:28px">
+                  <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:12px;font-weight:700;letter-spacing:.08em;color:#5C5F58">DONDERDAG 2 OKTOBER · SESSIE KLAAR</span><span style="font-family:Newsreader,serif;font-size:52px;font-weight:500;line-height:1.05">18 kaarten in 14 minuten.</span></div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px"><div style="flex:2;background:#B3261E"></div><div style="flex:2;background:#9A6700"></div><div style="flex:11;background:#2F6F62"></div><div style="flex:3;background:#2D5F9A"></div></div>
+                    <div style="display:flex;gap:20px;font-size:14px;font-variant-numeric:tabular-nums"><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#B3261E"></span>Opnieuw 2</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#9A6700"></span>Moeilijk 2</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#2F6F62"></span>Goed 11</span><span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#2D5F9A"></span>Makkelijk 3</span></div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;color:#5C5F58">Retentie deze sessie</span><span style="font-size:32px;font-weight:700;font-variant-numeric:tabular-nums">86%</span><span style="font-size:13px;color:#5C5F58">12 van 14 herhalingen niet met Opnieuw</span></div>
+                    <div style="background:#fff;border:1px solid #E1DFD6;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;color:#5C5F58">Morgen klaar</span><span style="font-size:32px;font-weight:700;font-variant-numeric:tabular-nums">23</span><span style="font-size:13px;color:#5C5F58">herhalingen en tot 10 nieuwe kaarten</span></div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:10px"><span style="font-size:13px;font-weight:700;color:#3E413B">Wat ging er mis bij Opnieuw en Moeilijk</span><div style="display:flex;gap:8px;font-size:14px;font-variant-numeric:tabular-nums"><span style="padding:6px 12px;border-radius:999px;background:#fff;border:1px solid #E1DFD6">Wist ik niet · 2</span><span style="padding:6px 12px;border-radius:999px;background:#fff;border:1px solid #E1DFD6">Redenering fout · 1</span><span style="padding:6px 12px;border-radius:999px;background:#fff;border:1px solid #E1DFD6">Slordig of moe · 1</span></div></div>
+                </div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;align-self:start">
+                  <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:Newsreader,serif;font-size:26px;font-weight:500">Om te onthouden</span><span style="font-size:14px;color:#5C5F58;line-height:1.45">Uit je 4 fouten van vandaag. Schrijf zelf de vraag; de kaart komt op Goedkeuren.</span></div>
+                  <div style="display:flex;flex-direction:column">
+                    <div style="display:flex;gap:14px;padding:14px 0;border-top:1px solid #EEEDE6"><span style="font-family:Newsreader,serif;font-size:22px;color:#2F6F62;width:18px">1</span><div style="flex:1;display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;line-height:1.5">Bij psoriasis duurt de epidermale turnover ongeveer 4 dagen in plaats van 28; daardoor ontstaat parakeratose.</span><span style="font-size:14px;font-weight:700;color:#2F6F62">Maak kaart →</span></div></div>
+                    <div style="display:flex;gap:14px;padding:14px 0;border-top:1px solid #EEEDE6"><span style="font-family:Newsreader,serif;font-size:22px;color:#2F6F62;width:18px">2</span><div style="flex:1;display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;line-height:1.5">Atriumfibrilleren: onregelmatig irregulaire RR-intervallen zonder herkenbare P-toppen.</span><span style="font-size:14px;color:#2F6F62;display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"></path></svg>Conceptkaart gemaakt; staat op Goedkeuren.</span></div></div>
+                    <div style="display:flex;gap:14px;padding:14px 0;border-top:1px solid #EEEDE6"><span style="font-family:Newsreader,serif;font-size:22px;color:#2F6F62;width:18px">3</span><div style="flex:1;display:flex;flex-direction:column;gap:8px"><span style="font-size:15px;line-height:1.5">Rode vlaggen bij lage rugklachten: zadelanesthesie, mictiestoornissen en progressieve uitval.</span><span style="font-size:14px;font-weight:700;color:#2F6F62">Maak kaart →</span></div></div>
+                  </div>
+                  <div style="height:52px;border-radius:12px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">Klaar</div>
+                </div>
+              </div>
+            </main>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showPhone }}" hint-placeholder-val="{{ true }}">
+          <div style="width:390px;height:844px;background:#F5F4EF;border-radius:46px;overflow:hidden;display:flex;flex-direction:column;border:1px solid #D2D0C6;box-shadow:0 20px 50px rgba(40,40,30,.12)">
+            <div style="height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:700">9:41<span style="width:24px;height:11px;border-radius:3px;border:1.5px solid #1A1C19"></span></div>
+            <div style="flex:1;overflow:hidden;padding:16px 20px 0;display:flex;flex-direction:column;gap:20px">
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#5C5F58">SESSIE KLAAR</span><span style="font-family:Newsreader,serif;font-size:36px;font-weight:500;line-height:1.08">18 kaarten in 14 minuten.</span></div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px"><div style="flex:2;background:#B3261E"></div><div style="flex:2;background:#9A6700"></div><div style="flex:11;background:#2F6F62"></div><div style="flex:3;background:#2D5F9A"></div></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:13px;font-variant-numeric:tabular-nums"><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#B3261E"></span>Opnieuw 2</span><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#9A6700"></span>Moeilijk 2</span><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#2F6F62"></span>Goed 11</span><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#2D5F9A"></span>Makkelijk 3</span></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:12px;padding:12px 14px"><div style="font-size:12px;color:#5C5F58">Retentie</div><div style="font-size:26px;font-weight:700">86%</div><div style="font-size:12px;color:#5C5F58">14 herhalingen</div></div>
+                <div style="background:#fff;border:1px solid #E1DFD6;border-radius:12px;padding:12px 14px"><div style="font-size:12px;color:#5C5F58">Morgen</div><div style="font-size:26px;font-weight:700">23</div><div style="font-size:12px;color:#5C5F58">+ tot 10 nieuw</div></div>
+              </div>
+              <div style="background:#fff;border:1px solid #E1DFD6;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:2px">
+                <span style="font-family:Newsreader,serif;font-size:22px;font-weight:500;padding-bottom:8px">Om te onthouden</span>
+                <div style="display:flex;gap:12px;padding:10px 0;border-top:1px solid #EEEDE6"><span style="font-family:Newsreader,serif;font-size:19px;color:#2F6F62">1</span><div style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;line-height:1.45">Bij psoriasis duurt de epidermale turnover ongeveer 4 dagen in plaats van 28.</span><span style="font-size:13px;font-weight:700;color:#2F6F62">Maak kaart →</span></div></div>
+                <div style="display:flex;gap:12px;padding:10px 0;border-top:1px solid #EEEDE6"><span style="font-family:Newsreader,serif;font-size:19px;color:#2F6F62">2</span><div style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;line-height:1.45">Atriumfibrilleren: onregelmatig irregulaire RR-intervallen zonder P-toppen.</span><span style="font-size:13px;color:#2F6F62">✓ Op Goedkeuren</span></div></div>
+              </div>
+            </div>
+            <div style="flex:none;padding:12px 20px 34px"><div style="height:56px;border-radius:12px;background:#2F6F62;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700">Klaar</div></div>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;devices&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Beide&quot;,&quot;Laptop&quot;,&quot;Telefoon&quot;],&quot;default&quot;:&quot;Beide&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Weergave&quot;},&quot;options&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Beide&quot;,&quot;Verfijnd (a)&quot;,&quot;Herzien (b)&quot;],&quot;default&quot;:&quot;Herzien (b)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Weergave&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const d = this.props.devices ?? "Beide";
+    const o = this.props.options ?? "Herzien (b)";
+    const ticks = (done, current) => Array.from({ length: 18 }, (_, i) => ({ c: i < done ? "#2F6F62" : i === current ? "#9CC4B8" : "#E1DFD6" }));
+    return {
+      ticksNow: ticks(7, 7),
+      ticksDone: ticks(18, -1),
+      showLaptop: d !== "Telefoon",
+      showPhone: d !== "Laptop",
+      showA: o !== "Herzien (b)",
+      showB: o !== "Verfijnd (a)",
+    };
+  }
+}
+</script>
+</body>
+</html>

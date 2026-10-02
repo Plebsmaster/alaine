@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+/*
+ * Rustig, leesbaar; licht en donker volgen het systeem.
+ * Herontwerp oktober 2026 (variant b · Herzien). Vervangt app/globals.css.
+ * Lichte waarden zijn ontworpen. Donkere waarden zijn afgeleid van de bestaande
+ * donkere set en nog niet visueel ontworpen: controleer contrast (4,5:1 voor tekst).
+ */
+:root {
+  --bg: #f5f4ef;
+  --surface: #ffffff;
+  --surface-2: #eeede6;
+  --surface-sunk: #fbfaf7;
+  --text: #1a1c19;
+  --text-2: #3e413b;
+  --muted: #5c5f58;
+  --faint: #8a8c85;
+  --border: #e1dfd6;
+  --border-subtle: #eeede6;
+  --border-strong: #d2d0c6;
+  --border-dashed: #a9a79d;
+
+  --accent: #2f6f62;
+  --accent-strong: #1f5248;
+  --accent-soft: #e3eeea;
+  --accent-mid: #9cc4b8;
+  --accent-deep: #1f4a41;
+  --accent-text: #ffffff;
+  --on-deep: #ffffff;
+  --on-deep-2: #e4f0ec;
+  --on-deep-muted: #cfe3dc;
+  --on-deep-accent: #8fcbb9;
+  --highlight: #dcebe5;
+
+  --warn-bg: #fbf1dc;
+  --warn-text: #7a5300;
+  --warn-text-strong: #3e2c00;
+  --danger: #b3261e;
+  --danger-soft: #f4d9d6;
+
+  --again: #b3261e;
+  --hard: #9a6700;
+  --good: #2f6f62;
+  --easy: #2d5f9a;
+  --focus: #2d5f9a;
+
+  /* Datamarkering in grafieken (gevalideerd met de dataviz-validator). */
+  --chart: #1baf7a;
+  /* Fouttypes: kennis, redenering, slordig (neutraal, geen oordeel). */
+  --err-1: #3e413b;
+  --err-2: #8a8c85;
+  --err-3: #c9c7bd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121412;
+    --surface: #1b1e1b;
+    --surface-2: #232723;
+    --surface-sunk: #171a17;
+    --text: #e8e8e3;
+    --text-2: #c9cac3;
+    --muted: #a0a19a;
+    --faint: #7d7f78;
+    --border: #343833;
+    --border-subtle: #2a2e2a;
+    --border-strong: #454a44;
+    --border-dashed: #5d625b;
+
+    --accent: #6fbfab;
+    --accent-strong: #8fd3c1;
+    --accent-soft: #1e3330;
+    --accent-mid: #3f7a6c;
+    --accent-deep: #16302a;
+    --accent-text: #0d1a17;
+    --on-deep: #e8e8e3;
+    --on-deep-2: #c9dcd5;
+    --on-deep-muted: #a9cbbf;
+    --on-deep-accent: #8fcbb9;
+    --highlight: #24423b;
+
+    --warn-bg: #3a2e12;
+    --warn-text: #e3b55b;
+    --warn-text-strong: #f0d49a;
+    --danger: #f2948e;
+    --danger-soft: #3b1f1d;
+
+    --again: #f2948e;
+    --hard: #e3b55b;
+    --good: #6fbfab;
+    --easy: #8db7ea;
+    --focus: #8db7ea;
+
+    --chart: #199e70;
+    --err-1: #c9cac3;
+    --err-2: #7d7f78;
+    --err-3: #454a44;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-sunk: var(--surface-sunk);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-border-dashed: var(--border-dashed);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-mid: var(--accent-mid);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-text: var(--accent-text);
+  --color-on-deep: var(--on-deep);
+  --color-on-deep-2: var(--on-deep-2);
+  --color-on-deep-muted: var(--on-deep-muted);
+  --color-on-deep-accent: var(--on-deep-accent);
+  --color-highlight: var(--highlight);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-text: var(--warn-text);
+  --color-warn-text-strong: var(--warn-text-strong);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-again: var(--again);
+  --color-hard: var(--hard);
+  --color-good: var(--good);
+  --color-easy: var(--easy);
+  --color-chart: var(--chart);
+  --color-err-1: var(--err-1);
+  --color-err-2: var(--err-2);
+  --color-err-3: var(--err-3);
+
+  /* Variabelen komen uit next/font in app/layout.tsx. */
+  --font-sans: var(--font-atkinson), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, "Times New Roman", serif;
+}
+
+html {
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Tekst uit kaarten: regeleinden behouden. */
+.prose-card {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

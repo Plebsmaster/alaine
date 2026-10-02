@@ -30,6 +30,7 @@ export default defineConfig({
         url: `http://localhost:${PORT}/login`,
         reuseExistingServer: false,
         timeout: 300_000,
-        env: { ALLOWED_EMAIL: E2E_EMAIL },
+        // Geen echte AI in rooktests, ook niet als .env.local AI_PROVIDER=claude-code zet.
+        env: { ALLOWED_EMAIL: E2E_EMAIL, AI_PROVIDER: "off" },
       },
 });

@@ -27,7 +27,7 @@ export function AiCardsForm({
   return (
     <form action={action} className="space-y-3">
       <input type="hidden" name="topic_id" value={topicId} />
-      {!enabled ? <Notice>AI is nog niet ingesteld (ANTHROPIC_API_KEY ontbreekt).</Notice> : null}
+      {!enabled ? <Notice>AI is nog niet ingesteld (geen ANTHROPIC_API_KEY en geen AI_PROVIDER=claude-code).</Notice> : null}
       {!hasObjectives ? <Notice>Voeg eerst leerdoelen toe: de AI koppelt elke kaart aan een leerdoel.</Notice> : null}
       <Field label="Brontekst" hint="Plak een paragraaf of hoofdstukdeel. De AI gebruikt alleen deze tekst.">
         <Textarea name="source_text" rows={8} required />

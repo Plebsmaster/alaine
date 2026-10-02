@@ -23,6 +23,17 @@ Dit doe je één keer zelf. Claude Code kan het niet voor je doen, omdat het om 
 
 > **Mail-limiet.** De ingebouwde mailservice van Supabase verstuurt maar een paar mails per uur, en alleen naar adressen van je Supabase-team (dat ben jij). Inloggen gebeurt zelden, omdat je sessie blijft bestaan, dus meestal is dat genoeg. Loop je er toch tegenaan, stel dan onder **Authentication → Emails → SMTP Settings** een eigen SMTP-dienst in (bijv. Resend of Postmark).
 
+
+### AI lokaal zonder API-key (Claude Code)
+
+Draai je de app lokaal, dan kan de AI ook via je eigen Claude-account lopen in plaats van met een API-key:
+
+1. Log op deze laptop in met de Claude Code-CLI: `claude auth login` (eenmalig; controleer met `claude auth status`).
+2. Zet in `.env.local`: `AI_PROVIDER=claude-code` en laat `ANTHROPIC_API_KEY` leeg (een key gaat altijd voor).
+3. Herstart de server.
+
+De server roept dan per AI-aanroep `claude -p` aan, zonder tools, projectinstellingen of MCP, met dezelfde prompts en dezelfde controle van de uitvoer. Het gebruik telt mee in de limieten van je Claude-account en wordt net zo gelogd in `ai_usage`. Een aanroep duurt een paar seconden langer dan via de API. Online (Vercel) werkt dit niet; daar blijft `ANTHROPIC_API_KEY` nodig. Staat `claude` niet in je PATH, zet dan `CLAUDE_CODE_BIN` op het volledige pad.
+
 ## 2. Vercel
 
 1. Importeer de GitHub-repository op [vercel.com](https://vercel.com/new).

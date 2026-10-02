@@ -8,7 +8,7 @@ export function AiQuestionsForm({ topics, enabled }: { topics: { id: string; lab
   const [state, action, pending] = useActionState<FormState, FormData>(draftQuestionsAction, {});
   return (
     <form action={action} className="space-y-3">
-      {!enabled ? <Notice>AI is nog niet ingesteld (ANTHROPIC_API_KEY ontbreekt).</Notice> : null}
+      {!enabled ? <Notice>AI is nog niet ingesteld (geen ANTHROPIC_API_KEY en geen AI_PROVIDER=claude-code).</Notice> : null}
       <div className="grid gap-3 md:grid-cols-4">
         <Field label="Thema">
           <Select name="topic_id" required>

@@ -10,7 +10,7 @@ export function AiScriptForm({ topics, sources, enabled }: { topics: Option[]; s
   const [state, action, pending] = useActionState<FormState, FormData>(draftScriptAction, {});
   return (
     <form action={action} className="space-y-3">
-      {!enabled ? <Notice>AI is nog niet ingesteld (ANTHROPIC_API_KEY ontbreekt). Maak het script hierboven met de hand.</Notice> : null}
+      {!enabled ? <Notice>AI is nog niet ingesteld (geen ANTHROPIC_API_KEY en geen AI_PROVIDER=claude-code). Maak het script hierboven met de hand.</Notice> : null}
       <div className="grid gap-3 md:grid-cols-2">
         <Field label="Thema">
           <Select name="topic_id" required>

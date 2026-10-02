@@ -8,7 +8,7 @@ export function AiCasesForm({ topics, enabled }: { topics: { id: string; label: 
   const [state, action, pending] = useActionState<FormState, FormData>(draftCasesAction, {});
   return (
     <form action={action} className="space-y-3">
-      {!enabled ? <Notice>AI is nog niet ingesteld (ANTHROPIC_API_KEY ontbreekt).</Notice> : null}
+      {!enabled ? <Notice>AI is nog niet ingesteld (geen ANTHROPIC_API_KEY en geen AI_PROVIDER=claude-code).</Notice> : null}
       <div className="grid gap-3 md:grid-cols-[1fr_8rem]">
         <Field label="Thema">
           <Select name="topic_id" required>

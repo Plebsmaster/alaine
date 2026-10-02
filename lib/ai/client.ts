@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
 import type { ServerClient } from "@/lib/supabase/server";
+import { claudeCodeEnabled, ClaudeCodeError, runClaudeCode, type ClaudeCodeExec } from "./claude-code";
 
 export class AiError extends Error {}
 
@@ -20,8 +21,14 @@ export type AiFunction =
 
 const FAST_FUNCTIONS: AiFunction[] = ["explain_check", "case_hint"];
 
+/** AI staat aan met een API-key, of lokaal via Claude Code (AI_PROVIDER=claude-code). */
 export function aiConfigured(): boolean {
-  return !!process.env.ANTHROPIC_API_KEY;
+  return !!process.env.ANTHROPIC_API_KEY || claudeCodeEnabled();
+}
+
+/** Een API-key gaat voor; zonder key en met AI_PROVIDER=claude-code loopt alles via de lokale CLI. */
+function viaClaudeCode(): boolean {
+  return !process.env.ANTHROPIC_API_KEY && claudeCodeEnabled();
 }
 
 export function modelFor(fn: AiFunction): string {
@@ -36,7 +43,7 @@ export type ParseClient = Pick<Anthropic["messages"], "parse">;
 let client: Anthropic | null = null;
 function defaultClient(): ParseClient {
   if (!aiConfigured()) {
-    throw new AiError("AI is nog niet ingesteld: zet ANTHROPIC_API_KEY in .env.local of in Vercel.");
+    throw new AiError("AI is nog niet ingesteld: zet ANTHROPIC_API_KEY in .env.local of in Vercel, of lokaal AI_PROVIDER=claude-code.");
   }
   client ??= new Anthropic();
   return client.messages;
@@ -53,8 +60,11 @@ export async function runJson<S extends z.ZodType>(opts: {
   schema: S;
   supabase?: ServerClient;
   api?: ParseClient;
+  /** Alleen voor tests: de Claude Code-aanroep vervangen. */
+  cli?: ClaudeCodeExec;
   maxTokens?: number;
 }): Promise<z.infer<S>> {
+  if (opts.cli || (!opts.api && viaClaudeCode())) return runJsonViaClaudeCode(opts);
   const api = opts.api ?? defaultClient();
   const model = modelFor(opts.fn);
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: opts.user }];
@@ -98,6 +108,44 @@ export async function runJson<S extends z.ZodType>(opts: {
           .join("; ")}. Geef het volledige JSON opnieuw.`,
       },
     );
+  }
+  throw new AiError("De AI gaf twee keer geen bruikbaar antwoord. Probeer het opnieuw.");
+}
+
+/** Zelfde contract als runJson, maar via `claude -p` op deze laptop. */
+async function runJsonViaClaudeCode<S extends z.ZodType>(opts: {
+  fn: AiFunction;
+  system: string;
+  user: string;
+  schema: S;
+  supabase?: ServerClient;
+  cli?: ClaudeCodeExec;
+}): Promise<z.infer<S>> {
+  const model = modelFor(opts.fn);
+  const schema = zodOutputFormat(opts.schema).schema;
+  let prompt = opts.user;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const started = Date.now();
+    let result: Awaited<ReturnType<typeof runClaudeCode>>;
+    try {
+      result = await runClaudeCode({ system: opts.system, prompt, schema, model }, opts.cli);
+    } catch (e) {
+      await log(opts, model, 0, 0, Date.now() - started, false);
+      if (e instanceof ClaudeCodeError) throw new AiError(e.message);
+      throw e;
+    }
+    const parsed = opts.schema.safeParse(result.output);
+    await log(opts, model, result.inputTokens, result.outputTokens, Date.now() - started, parsed.success);
+    if (parsed.success) return parsed.data;
+
+    // Eén nieuwe poging met het vorige antwoord en de validatiefout erbij.
+    prompt = `${opts.user}
+
+Je vorige antwoord was:
+${JSON.stringify(result.output)}
+
+Dat voldeed niet aan het schema: ${parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ")}. Geef het volledige JSON opnieuw.`;
   }
   throw new AiError("De AI gaf twee keer geen bruikbaar antwoord. Probeer het opnieuw.");
 }

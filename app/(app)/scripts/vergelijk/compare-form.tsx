@@ -14,7 +14,7 @@ export function CompareCardForm({ ids, enabled }: { ids: string[]; enabled: bool
       <Button disabled={!enabled || pending} className="text-[13px]">
         {pending ? "AI maakt een kaart…" : "Vergelijkingskaart (AI)"}
       </Button>
-      {!enabled ? <p className="text-xs text-muted md:text-right">AI is nog niet ingesteld (ANTHROPIC_API_KEY ontbreekt).</p> : null}
+      {!enabled ? <p className="text-xs text-muted md:text-right">AI is nog niet ingesteld (geen ANTHROPIC_API_KEY en geen AI_PROVIDER=claude-code).</p> : null}
       {state.error ? <Notice tone="error">{state.error}</Notice> : null}
     </form>
   );
